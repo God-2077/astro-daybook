@@ -1,0 +1,52 @@
+---
+import type { MarkdownHeading } from 'astro';
+import { t } from '../../i18n/current';
+import Icon from '../common/Icon.astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  variant?: 'all' | 'mobile' | 'desktop';
+  /** Render the empty shell, e.g. for a locked page whose TOC is built after unlock. */
+  force?: boolean;
+}
+
+const { headings, variant = 'all', force = false } = Astro.props;
+// 定稿原型（detail-md）的目录只列出一级分节，即 h2；h3 不进入目录。
+const items = headings.filter((heading) => heading.depth === 2);
+const showMobile = variant !== 'desktop';
+const showDesktop = variant !== 'mobile';
+const visible = items.length > 0 || force;
+---
+
+{
+  visible && (
+    <>
+      {showMobile && (
+        <details class="a-toc-m" data-pagefind-ignore>
+          <summary>
+            {t('detail.toc')} <Icon name="i-chevron-down" className="a-ico a-ico-sm a-chev" />
+          </summary>
+          <ol>
+            {items.map((heading) => (
+              <li class:list={[{ 'is-sub': heading.depth === 3 }]}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+      {showDesktop && (
+        <nav class="a-toc" aria-label={t('detail.toc')} data-pagefind-ignore>
+          <p class="a-toc-title">{t('detail.toc')}</p>
+          <ol>
+            {items.map((heading) => (
+              <li class:list={[{ 'is-sub': heading.depth === 3 }]}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+    </>
+  )
+}

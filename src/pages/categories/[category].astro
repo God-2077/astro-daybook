@@ -1,0 +1,70 @@
+---
+import EmptyState from '../../components/common/EmptyState.astro';
+import PageHead from '../../components/common/PageHead.astro';
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatContentDate, formatDisplayDate } from '../../lib/content/date';
+import { collectTaxonomy, entriesForSurface, taxonomySlug } from '../../lib/content/entries';
+
+export async function getStaticPaths() {
+  const categories = await collectTaxonomy('categories');
+  return categories.map((category) => ({
+    params: { category: decodeURIComponent(category.slug) },
+    props: { name: category.name },
+  }));
+}
+
+const name = Astro.props.name as string;
+const entries = (await entriesForSurface('category', 'post')).filter(
+  (entry) => entry.collection === 'post' && entry.data.categories.includes(name),
+);
+const count = entries.length;
+---
+
+<BaseLayout
+  title={t('categories.detailTitle', { name })}
+  description={t('categories.detailDescription', { site: siteConfig.title, name })}
+  canonical={`/categories/${taxonomySlug('categories', name)}`}
+  type="website"
+  view="categories"
+>
+  <section class="a-view" data-view="categories" aria-labelledby="a-category-title">
+    <div class="a-wrap">
+      <PageHead
+        title={t('categories.detailTitle', { name })}
+        meta={t('categories.detailMeta', { entries: tCount('posts', count) })}
+        art="categories"
+        titleId="a-category-title"
+      />
+      <div class="a-detail-panel">
+        <a class="a-back" href="/categories">
+          <svg class="a-ico a-ico-sm" aria-hidden="true" focusable="false"><use href="#i-arrow-left" /></svg>
+          {t('categories.back')}
+        </a>
+        {count > 0 ? (
+          <div class="a-detail-list">
+            {entries.map((entry) => (
+              <a class="a-detail-list-row" href={entry.url}>
+                <time
+                  class="a-detail-list-date"
+                  datetime={formatContentDate(entry.data.date, siteConfig.timezone, 'yyyy-MM-dd')}
+                >
+                  {formatDisplayDate(entry.data.date, siteConfig.timezone)}
+                </time>
+                <span class="a-detail-list-title">
+                  {entry.data.title}
+                  {entry.data.password && (
+                    <svg class="a-lock-inline" aria-hidden="true" focusable="false"><use href="#i-lock" /></svg>
+                  )}
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <EmptyState title={t('categories.emptyDetailTitle')} note={t('categories.emptyDetailNote')} />
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+interface Props {
+  name: string;
+  className?: string;
+  size?: number | string;
+}
+
+const { name, className = 'a-ico', size } = Astro.props;
+---
+
+<svg
+  class={className}
+  width={size}
+  height={size}
+  aria-hidden="true"
+  focusable="false"
+><use href={`#${name}`}></use></svg>

@@ -1,0 +1,93 @@
+---
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import CommentsSection from '../components/comments/CommentsSection.astro';
+import { siteConfig } from '../config/site';
+import { t } from '../i18n/current';
+import { formatContentDate, formatDisplayDate, parseContentDate } from '../lib/content/date';
+import { readRawFrontmatter } from '../lib/content/raw';
+import BaseLayout from './BaseLayout.astro';
+
+interface PageData {
+  title: string;
+  date?: string | Date;
+  updated?: string | Date;
+  description?: string;
+  draft?: boolean;
+  hideFrom?: string[];
+  comments?: boolean;
+}
+
+interface Props extends PageData {
+  /** Markdown 页面把 frontmatter 放在 Astro.props.frontmatter 下 */
+  frontmatter?: PageData;
+}
+
+const props = Astro.props;
+const data = props.frontmatter ?? props;
+const { title, date, updated, description, draft = false, hideFrom = [], comments = true } = data;
+
+const timeZone = siteConfig.timezone;
+const relativeRoute = decodeURIComponent(Astro.url.pathname).replace(/^\/+|\/+$/g, '');
+const routeBase = relativeRoute || 'index';
+const sourceCandidates = [
+  path.resolve(process.cwd(), 'src/pages', `${routeBase}.mdx`),
+  path.resolve(process.cwd(), 'src/pages', `${routeBase}.md`),
+  path.resolve(process.cwd(), 'src/pages', routeBase, 'index.mdx'),
+  path.resolve(process.cwd(), 'src/pages', routeBase, 'index.md'),
+];
+const sourceFile = sourceCandidates.find((candidate) => existsSync(candidate));
+const raw = sourceFile ? (await readRawFrontmatter(sourceFile)).data : {};
+const rawDate = (raw.date ?? date) as string | Date | undefined;
+const rawUpdated = (raw.updated ?? updated) as string | Date | undefined;
+const file = sourceFile ? path.relative(process.cwd(), sourceFile).replace(/\\/g, '/') : `src/pages/${routeBase}.md`;
+const parsedDate = rawDate ? parseContentDate(rawDate, timeZone, file, 'date') : undefined;
+const parsedUpdated = rawUpdated ? parseContentDate(rawUpdated, timeZone, file, 'updated') : undefined;
+const indexable = !draft && !hideFrom.includes('search');
+const noindex = Boolean(draft) || hideFrom.includes('sitemap');
+const dateLabel = parsedDate ? formatDisplayDate(parsedDate, timeZone) : undefined;
+---
+
+<BaseLayout
+  title={title}
+  description={description || siteConfig.description}
+  canonical={Astro.url.pathname}
+  noindex={noindex}
+  type="article"
+  published={parsedDate?.toISOString()}
+  modified={parsedUpdated?.toISOString()}
+  view="page"
+>
+  <section class="a-view" data-view="page" aria-labelledby="a-page-title">
+    <div class="a-wrap a-page-wrap">
+      <article class="a-article">
+        <div
+          data-pagefind-body={indexable ? '' : undefined}
+          data-pagefind-meta={`type:page`}
+          data-pagefind-filter="type:page"
+        >
+          {parsedDate && (
+            <span
+              class="a-sr"
+              data-pagefind-meta={`date:${formatContentDate(parsedDate, timeZone, 'yyyy-MM-dd')}`}
+            />
+          )}
+          <header>
+            <span class="a-meta">
+              {parsedDate && dateLabel && (
+                <time class="a-meta-date" datetime={formatContentDate(parsedDate, timeZone, 'yyyy-MM-dd')}>{dateLabel}</time>
+              )}
+              <span>{t('content.page')}</span>
+              {draft && <span class="a-draft">{t('common.draft')}</span>}
+            </span>
+            <h1 id="a-page-title" data-pagefind-meta="title">{title}</h1>
+          </header>
+          <div class="a-prose">
+            <slot />
+          </div>
+        </div>
+      </article>
+      <CommentsSection comments={comments} titleId="a-page-comments-title" className="a-comments-page" />
+    </div>
+  </section>
+</BaseLayout>

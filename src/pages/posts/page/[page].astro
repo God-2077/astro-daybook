@@ -1,0 +1,43 @@
+---
+import PostIndex from '../../../components/views/PostIndex.astro';
+import { siteConfig } from '../../../config/site';
+import { t } from '../../../i18n/current';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { entriesForSurface } from '../../../lib/content/entries';
+import { slicePage, totalPagesFor } from '../../../lib/pagination';
+import type { PostEntry } from '../../../types/content';
+
+export async function getStaticPaths() {
+  const all = (await entriesForSurface('posts', 'post')) as PostEntry[];
+  const totalPages = totalPagesFor(all.length, siteConfig.pagination.post);
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+    props: { page: index + 2 },
+  }));
+}
+
+const requested = Number(Astro.params.page);
+const all = (await entriesForSurface('posts', 'post')) as PostEntry[];
+const slice = slicePage(all, requested, siteConfig.pagination.post);
+if (!slice) return Astro.redirect('/404');
+const pinnedCount = all.filter((entry) => entry.data.pin).length;
+---
+
+<BaseLayout
+  title={`${t('posts.title')} · ${t('pager.pageTitle', { page: requested })}`}
+  description={siteConfig.description}
+  canonical={`/posts/page/${requested}`}
+  type="website"
+  view="posts"
+  prev={requested === 2 ? '/posts' : `/posts/page/${requested - 1}`}
+  next={requested < slice.totalPages ? `/posts/page/${requested + 1}` : undefined}
+>
+  <PostIndex
+    entries={slice.items}
+    page={slice.page}
+    totalPages={slice.totalPages}
+    totalItems={slice.totalItems}
+    pinnedCount={pinnedCount}
+    perPage={siteConfig.pagination.post}
+  />
+</BaseLayout>

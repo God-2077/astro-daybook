@@ -1,0 +1,116 @@
+---
+type Art = 'articles' | 'categories' | 'tags' | 'archive' | 'friends';
+
+interface Props {
+  title: string;
+  meta?: string;
+  art?: Art;
+  titleId?: string;
+  wide?: boolean;
+}
+
+const { title, meta, art, titleId, wide = false } = Astro.props;
+---
+
+{
+  wide ? (
+    <div class="a-pagehead a-pagehead-wide">
+      <h1 id={titleId}>{title}</h1>
+      {meta && <p class="a-pagehead-meta">{meta}</p>}
+      {art === 'articles' && (
+        <svg
+          class="a-pagehead-doodle"
+          viewBox="0 0 84 60"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M16 10h30l14 14v26H16z" />
+          <path d="M46 10v14h14" opacity=".5" />
+          <path d="M25 30h20M25 37h15M25 44h10" />
+          <path class="a-ill-accent" d="M57 47l13-13 6 6-13 13-8 2z" />
+        </svg>
+      )}
+    </div>
+  ) : (
+    <div class="a-viewhead">
+      <h1 id={titleId}>{title}</h1>
+      {meta && <p class="a-viewhead-sub">{meta}</p>}
+      {art === 'categories' && (
+        <svg
+          class="a-head-doodle"
+          viewBox="0 0 84 60"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M10 19h23l15 15-15 15H10z" />
+          <circle cx="20" cy="30" r="2.2" />
+          <path d="M48 15l18 18-11 11" />
+          <path class="a-ill-accent" d="M62 44l8 8" />
+        </svg>
+      )}
+      {art === 'tags' && (
+        <svg
+          class="a-head-doodle"
+          viewBox="0 0 84 60"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M12 22h22l13 13-13 13H12z" />
+          <circle cx="21" cy="32" r="2.2" />
+          <path d="M46 14l16 16-9 9" />
+          <path class="a-ill-accent" d="M64 20l1.6 4.4L70 26l-4.4 1.6L64 32l-1.6-4.4L58 26l4.4-1.6z" />
+        </svg>
+      )}
+      {art === 'archive' && (
+        <svg
+          class="a-head-doodle"
+          viewBox="0 0 84 60"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <rect x="12" y="14" width="42" height="38" rx="2" />
+          <path d="M12 24h42M22 9v8M32 9v8M42 9v8" />
+          <path d="M21 33h6M32 33h6M43 33h6M21 42h6M32 42h6M43 42h6" opacity=".65" />
+          <path class="a-ill-accent" d="M62 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
+        </svg>
+      )}
+      {art === 'friends' && (
+        <svg
+          class="a-head-doodle"
+          viewBox="0 0 84 60"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M18 30l52-18-18 44-12-14z" />
+          <path d="M18 30l22 12 12-14" />
+          <path class="a-ill-accent" d="M62 22l5 5" opacity=".7" />
+        </svg>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,49 @@
+---
+import FeedHead from '../components/content/FeedHead.astro';
+import HomeFeed from '../components/views/HomeFeed.astro';
+import { siteConfig } from '../config/site';
+import { t, tCount } from '../i18n/current';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { entriesForSurface } from '../lib/content/entries';
+import { slicePage } from '../lib/pagination';
+import type { DailyEntry } from '../types/content';
+
+const all = (await entriesForSurface('home', 'daily')) as DailyEntry[];
+const slice = slicePage(all, 1, siteConfig.pagination.daily);
+if (!slice) throw new Error('首页分页状态异常');
+
+const pinned = all.filter((entry) => entry.data.pin).length;
+const meta = all.length
+  ? [
+      t('home.metaTotal', { entries: tCount('entries', all.length) }),
+      pinned ? t('home.metaPinned', { pinned: tCount('pinned', pinned) }) : '',
+      t('home.metaSorted'),
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  : t('home.emptyTitle', { diary: siteConfig.labels.diary });
+---
+
+<BaseLayout
+  title={siteConfig.labels.diary}
+  description={siteConfig.description}
+  canonical="/"
+  type="website"
+  view="home"
+>
+  <section class="a-view" data-view="home" aria-labelledby="a-home-title">
+    <div class="a-wrap">
+      <FeedHead
+        title={siteConfig.home.title}
+        subtitle={siteConfig.home.subtitle || siteConfig.subtitle || siteConfig.description}
+        meta={meta}
+      />
+      <HomeFeed
+        entries={slice.items}
+        page={slice.page}
+        totalPages={slice.totalPages}
+        totalItems={slice.totalItems}
+      />
+    </div>
+  </section>
+</BaseLayout>

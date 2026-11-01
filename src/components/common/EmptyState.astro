@@ -1,0 +1,48 @@
+---
+import Icon from '../common/Icon.astro';
+
+interface Props {
+  title: string;
+  note: string;
+  actionHref?: string;
+  actionLabel?: string;
+}
+
+const { title, note, actionHref, actionLabel } = Astro.props;
+---
+
+<div class="a-empty">
+  <div class="a-empty-inner">
+    <div class="a-empty-rail" aria-hidden="true">
+      <svg class="a-star" width="12" height="12"><use href="#i-star" /></svg>
+    </div>
+    <div class="a-empty-main">
+      <svg
+        class="a-empty-art"
+        viewBox="0 0 140 96"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M20 18h62l18 18v50H20z" />
+        <path d="M82 18v18h18" opacity=".5" />
+        <path d="M36 42h46M36 52h38M36 62h30M36 72h18" />
+        <path class="a-ill-accent" d="M98 62l17-17 7 7-17 17-9 3z" />
+        <path class="a-ill-accent" d="M30 6l1.7 4.6 4.6 1.7-4.6 1.7L30 18.6l-1.7-4.6-4.6-1.7 4.6-1.7z" />
+      </svg>
+      <p class="a-empty-title">{title}</p>
+      <p class="a-empty-note">{note}</p>
+      {
+        actionHref && actionLabel && (
+          <a class="a-btn a-btn-primary" href={actionHref}>
+            {actionLabel} <Icon name="i-arrow-right" className="a-ico a-ico-sm" />
+          </a>
+        )
+      }
+    </div>
+  </div>
+</div>

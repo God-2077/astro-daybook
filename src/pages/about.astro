@@ -1,0 +1,88 @@
+---
+import { getEntry, render } from 'astro:content';
+import CommentsSection from '../components/comments/CommentsSection.astro';
+import { siteConfig } from '../config/site';
+import { t } from '../i18n/current';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ContentError } from '../lib/errors';
+
+const aboutEntry = await getEntry('specCollection', 'about');
+if (!aboutEntry) {
+  throw new ContentError('src/content/spec/about.mdx', '找不到关于页正文，请新建该文件（Markdown/MDX，无需 frontmatter）。');
+}
+const { Content } = await render(aboutEntry);
+---
+
+<BaseLayout
+  title={t('about.title')}
+  description={siteConfig.description || t('about.description', { site: siteConfig.title })}
+  canonical="/about"
+  type="website"
+  view="about"
+>
+  <section class="a-view" data-view="about" aria-labelledby="a-about-name">
+    <div class="a-wrap">
+      <div class="a-about">
+        <aside class="a-about-rail">
+          <div class="a-stamp">
+            {siteConfig.avatar ? (
+              <img
+                class="a-stamp-avatar"
+                src={siteConfig.avatar}
+                alt={t('about.avatarAlt', { author: siteConfig.author })}
+                width="92"
+                height="92"
+                decoding="async"
+              />
+            ) : (
+              <svg viewBox="0 0 120 120" role="img" aria-label={t('about.stampAria', { author: siteConfig.author })}>
+                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M61 7.4c28.1-1 52.4 22.3 52.1 51.9-.3 29.7-23.2 52.9-52.6 52.4C31.1 111.2 7.4 88.4 7.6 59.4 7.8 30.3 31.6 8.4 61 7.4Z"
+                    stroke-width="1.7"></path>
+                  <path
+                    d="M60.5 15.6c24.6-.6 44.3 19.5 44.2 44.2-.1 24.8-19.9 44.6-44.7 44.4-24.6-.2-44.4-19.9-44.3-44.3.1-24.6 20.2-43.8 44.8-44.3Z"
+                    stroke-width="1"
+                    opacity=".45"></path>
+                  <path d="M47.8 39.2c-.8 12.5-.2 25.2.1 37.9" stroke-width="3.4"></path>
+                  <path d="M66.4 40.4C61.3 46.8 55.9 53 50.8 59.2c5.5 6.4 10.7 12.8 15.9 19.2" stroke-width="3.4"></path>
+                  <path class="a-stamp-mark" d="M44.2 86.8c6.8-2.1 13.4-2 20.1.6" stroke-width="1.8"></path>
+                </g>
+                <path
+                  class="a-stamp-star"
+                  d="M87.6 26.2c.55 4.6 3.65 7.7 8.25 8.25-4.6.55-7.7 3.65-8.25 8.25-.55-4.6-3.65-7.7-8.25-8.25 4.6-.55 7.7-3.65 8.25-8.25Z"></path>
+              </svg>
+            )}
+          </div>
+          <p class="a-stamp-caption">{siteConfig.author}<br />est. {siteConfig.since}</p>
+        </aside>
+
+        <div class="a-about-main">
+          <h1 id="a-about-name">{siteConfig.author}</h1>
+          <p class="a-about-line">{siteConfig.subtitle || siteConfig.description}</p>
+          <div class="a-about-rule"></div>
+          <svg
+            class="a-head-doodle a-head-doodle--about"
+            viewBox="0 0 84 60"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M18 22h30v16a10 10 0 0 1-10 10H28a10 10 0 0 1-10-10z"></path>
+            <path d="M48 27h6a6 6 0 0 1 0 12h-6"></path>
+            <path d="M16 52h34"></path>
+            <path class="a-ill-accent" d="M27 9c-2 3-2 6 0 9M36 6c-2 3-2 6 0 9"></path>
+          </svg>
+
+          <div class="a-about-body a-prose"><Content /></div>
+        </div>
+      </div>
+
+      <CommentsSection titleId="a-about-comments-title" className="a-comments-page" />
+    </div>
+  </section>
+</BaseLayout>

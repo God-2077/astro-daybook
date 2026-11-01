@@ -1,0 +1,741 @@
+/* ==========================================================================
+   T2 · 搜索区域重设计（顶部展开的纸面面板 / Daybook）
+   --------------------------------------------------------------------------
+   结构：.a-search-root（占位，JS 量顶部偏移）> .a-search-sheet（纸面卡片）
+         > .a-search-head（输入条 + 范围纸签）> .a-search-body（结果区，内部滚动）
+   宽度：卡片跟随正文列，max-width = --feed + 80px（820px），在页头 .a-wrap 内居中；
+         ≤767 全出血。绝不做横贯整屏的通栏。
+   高度：卡片 = 100dvh − 页头实测高度 − 顶部留白 − 底部留白，结果区内部滚动；
+         打开时不隐藏正文里的「大片空白」，因为底部页脚/刊头规则同时收起。
+   视觉：hsl(var(--*)) 令牌、1px 细线、rose 强调、muted/accent 纸面底、--radius、
+         240ms --ease 入场；不引入新色相、新字体。
+   注：旧搜索样式仍在 app.css / daybook.css 中（Lead 后续清理）。本文件在其后加载，
+       且沿用同名类时写全属性，保证旧规则不会漏进来。
+   ========================================================================== */
+
+/* ---------- 打开搜索时的页面状态 ---------- */
+
+body.a-search-open {
+  /* 滚动条被面板替换：补回页头/页脚的横向宽度，避免整页左右跳 15px */
+  padding-right: var(--a-search-sbw, 0px);
+  padding-bottom: 0;
+}
+
+body.a-search-open main#main,
+body.a-search-open .a-footer,
+body.a-search-open .a-mast-rule,
+body.a-search-open .a-bottomnav {
+  display: none !important;
+}
+
+/* ---------- 占位与纸面卡片 ---------- */
+
+.a-search-root {
+  /* 卡片宽度：正文列（--feed 740）再放 80 纸边，桌面 820px；随视口收窄 */
+  --a-search-max: calc(var(--feed) + 80px);
+  /* 卡片左右留白：与 .a-wrap 同节奏（40 / 32 / 0） */
+  --a-search-pad: 40px;
+  /* 卡片顶部留白、底部留白（底部 = 首屏剩余的呼吸） */
+  --a-search-inset: 18px;
+  --a-search-gap: 28px;
+  /* JS 写入：卡片顶部到文档顶部的实测距离（隐藏页头细线后 ≈ 99px） */
+  --a-search-top: 120px;
+
+  position: relative;
+  display: block;
+  /* 用 padding 而不是卡片 margin：避免 margin 穿透 .a-search-root 造成高度重复扣减 */
+  padding: var(--a-search-inset) var(--a-search-pad) 0;
+}
+
+.a-search-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--a-search-max);
+  height: calc(100vh - var(--a-search-top) - var(--a-search-inset) - var(--a-search-gap));
+  height: calc(100dvh - var(--a-search-top) - var(--a-search-inset) - var(--a-search-gap));
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--card));
+  box-shadow: var(--shadow-card);
+  animation: a-search-sheet-in 240ms var(--ease) both;
+}
+
+@keyframes a-search-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 输入条 ---------- */
+
+.a-search-head {
+  flex: none;
+  padding: 2px 24px 0;
+}
+
+.a-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  border-bottom: 1px solid hsl(var(--border));
+  transition: border-color 160ms var(--ease);
+}
+
+.a-search-field:focus-within {
+  border-bottom-color: hsl(var(--foreground) / 0.42);
+}
+
+.a-search-ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: hsl(var(--muted-foreground));
+}
+
+.a-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  caret-color: hsl(var(--rose));
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.a-search-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.78);
+  opacity: 1;
+}
+
+.a-search-input:focus,
+.a-search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.a-search-input::-webkit-search-cancel-button,
+.a-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 计数：始终占位，避免结果出现时输入条抖动 */
+.a-search-count {
+  flex: none;
+  min-width: 42px;
+  margin-left: 2px;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.a-search-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background-color 160ms var(--ease), color 160ms var(--ease);
+}
+
+.a-search-clear:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.a-search-clear .a-ico {
+  width: 13px;
+  height: 13px;
+}
+
+/* 关闭：桌面是「键帽」，移动端退化为图标按钮 */
+.a-search-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 44px;
+  min-height: 30px;
+  margin-left: 4px;
+  padding: 0 9px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  background: hsl(var(--background));
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease);
+}
+
+.a-search-close:hover {
+  border-color: hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.a-search-close-x {
+  display: none;
+  width: 14px;
+  height: 14px;
+}
+
+/* 移动端没有 ESC 键，用「取消」文字代替，避免和清空用的 × 混淆 */
+.a-search-close-cancel {
+  display: none;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- 范围纸签（tab） ---------- */
+
+.a-search-scopes {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.a-search-scope {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 46px;
+  margin: 0;
+  padding: 0 13px;
+  border: 0;
+  background: none;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: color 160ms var(--ease);
+}
+
+.a-search-scope:first-child {
+  padding-left: 0;
+}
+
+.a-search-scope:hover {
+  color: hsl(var(--foreground));
+}
+
+.a-search-scope.is-active {
+  color: hsl(var(--card-foreground));
+}
+
+.a-search-scope.is-active::after {
+  content: '';
+  position: absolute;
+  right: 13px;
+  bottom: -1px;
+  left: 13px;
+  height: 2px;
+  background: hsl(var(--rose));
+}
+
+.a-search-scope:first-child.is-active::after {
+  left: 0;
+}
+
+.a-search-scope-label {
+  line-height: 1;
+}
+
+.a-search-scope-count {
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-search-scope.is-active .a-search-scope-count {
+  color: hsl(var(--rose) / 0.85);
+}
+
+/* ---------- 结果区（内部滚动） ---------- */
+
+.a-search-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+  /* 预留滚动条槽，结果从「空态」切换到「列表」时内容不横跳 */
+  scrollbar-gutter: stable;
+}
+
+.a-search-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.a-search-body::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: hsl(var(--border));
+  background-clip: content-box;
+}
+
+.a-search-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- 结果列表 ---------- */
+
+.a-search-results {
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.a-search-result-item {
+  display: block;
+}
+
+.a-search-result-item + .a-search-result-item {
+  border-top: 1px solid hsl(var(--border) / 0.6);
+}
+
+.a-search-result {
+  display: block;
+  padding: 14px 24px 16px 22px;
+  border-left: 2px solid transparent;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 160ms var(--ease), border-color 160ms var(--ease);
+}
+
+.a-search-result:hover,
+.a-search-result:focus-visible {
+  border-left-color: hsl(var(--rose));
+  background-color: hsl(var(--muted) / 0.6);
+}
+
+.a-search-result-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 0 0 5px;
+  color: hsl(var(--muted-foreground));
+  font-size: 10.5px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+}
+
+.a-search-result-kind {
+  color: hsl(var(--rose));
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.a-search-result-date {
+  color: hsl(var(--muted-foreground));
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-search-result-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.a-search-result-title {
+  display: block;
+  color: hsl(var(--card-foreground));
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.a-search-result-arrow {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 6px;
+  color: hsl(var(--rose));
+  opacity: 0;
+  transform: translateX(-2px);
+  transition: opacity 160ms var(--ease), transform 160ms var(--ease);
+}
+
+.a-search-result:hover .a-search-result-arrow,
+.a-search-result:focus-visible .a-search-result-arrow {
+  opacity: 1;
+  transform: none;
+}
+
+.a-search-result-excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 5px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12.5px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.a-search-result-excerpt mark,
+.a-search-result mark {
+  border-radius: 2px;
+  background: hsl(var(--accent));
+  color: inherit;
+  padding: 0 2px;
+}
+
+/* ---------- 空闲 / 无结果（§6.11 线稿） ---------- */
+
+.a-search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px 24px 32px;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+}
+
+.a-search-state-art {
+  display: block;
+  width: 112px;
+  height: 75px;
+  margin-bottom: 16px;
+  color: hsl(var(--muted-foreground) / 0.85);
+}
+
+.a-search-state-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 13.5px;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+.a-search-state-hint {
+  margin: 7px 0 0;
+  color: hsl(var(--muted-foreground) / 0.85);
+  font-size: 11.5px;
+  line-height: 1.8;
+  letter-spacing: 0.06em;
+}
+
+.a-search-state-counts {
+  margin: 10px 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 11.5px;
+  line-height: 1.8;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.a-search-empty-reset {
+  margin: 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: hsl(var(--rose));
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--rose) / 0.35);
+  text-underline-offset: 0.24em;
+  cursor: pointer;
+}
+
+.a-search-empty-reset:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---------- 加载骨架（只在 180ms debounce 后短暂出现） ---------- */
+
+.a-search-skeleton {
+  padding: 6px 24px 20px;
+}
+
+.a-search-skeleton-row {
+  padding: 16px 0 18px;
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+}
+
+.a-search-skeleton-row:last-child {
+  border-bottom: 0;
+}
+
+.a-search-skeleton-meta,
+.a-search-skeleton-title,
+.a-search-skeleton-line {
+  display: block;
+  border-radius: 2px;
+  background: hsl(var(--muted));
+  animation: a-search-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.a-search-skeleton-meta {
+  width: 62px;
+  height: 9px;
+  opacity: 0.8;
+}
+
+.a-search-skeleton-title {
+  width: min(46%, 300px);
+  height: 13px;
+  margin-top: 11px;
+  animation-delay: 80ms;
+}
+
+.a-search-skeleton-line {
+  width: 100%;
+  height: 9px;
+  margin-top: 11px;
+  opacity: 0.85;
+  animation-delay: 120ms;
+}
+
+.a-search-skeleton-line--short {
+  width: 62%;
+  margin-top: 7px;
+  animation-delay: 180ms;
+}
+
+@keyframes a-search-pulse {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 0.85;
+  }
+}
+
+/* ---------- 错误提示（开发模式 / 索引缺失） ---------- */
+
+.a-search-error {
+  box-sizing: border-box;
+  width: calc(100% - 48px);
+  max-width: 520px;
+  margin: 44px auto 0;
+  padding: 18px 20px;
+  border: 1px dashed hsl(var(--border));
+  background: hsl(var(--muted) / 0.4);
+}
+
+.a-search-error-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: hsl(var(--rose));
+  font-size: 10.5px;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+}
+
+.a-search-error-text {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 12.5px;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1023px) {
+  .a-search-root {
+    --a-search-pad: 32px;
+    --a-search-inset: 14px;
+    --a-search-gap: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* 全出血铺满：移动端浏览器滚动条是覆盖式的，不做宽度补偿，避免右侧留一条纸缝 */
+  body.a-search-open {
+    padding-right: 0;
+  }
+
+  .a-search-root {
+    /* 移动端：面板贴着页头、铺满整屏剩余高度，全出血 */
+    --a-search-pad: 0px;
+    --a-search-inset: 8px;
+    --a-search-gap: 0px;
+  }
+
+  .a-search-sheet {
+    max-width: none;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .a-search-head {
+    padding: 0 18px;
+  }
+
+  .a-search-field {
+    gap: 8px;
+    min-height: 58px;
+  }
+
+  .a-search-input {
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .a-search-count {
+    min-width: 36px;
+    font-size: 10.5px;
+  }
+
+  .a-search-close {
+    min-width: 0;
+    min-height: 40px;
+    margin-left: 0;
+    padding: 0 4px;
+    border-color: transparent;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .a-search-close-key {
+    display: none;
+  }
+
+  .a-search-close-x {
+    display: none;
+  }
+
+  .a-search-close-cancel {
+    display: inline;
+  }
+
+  .a-search-scope {
+    min-height: 46px;
+    padding: 0 11px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .a-search-scope.is-active::after {
+    right: 11px;
+    left: 11px;
+  }
+
+  .a-search-scope:first-child.is-active::after {
+    left: 0;
+  }
+
+  .a-search-result {
+    padding: 13px 18px 15px 16px;
+  }
+
+  .a-search-result-title {
+    font-size: 15.5px;
+  }
+
+  .a-search-result-excerpt {
+    font-size: 12px;
+  }
+
+  .a-search-state {
+    min-height: 100%;
+    padding: 20px 20px 28px;
+  }
+
+  .a-search-state-art {
+    width: 96px;
+    height: 64px;
+  }
+
+  .a-search-skeleton {
+    padding: 4px 18px 16px;
+  }
+
+  .a-search-error {
+    width: calc(100% - 36px);
+    margin-top: 28px;
+  }
+
+  .a-search-body {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ---------- 动效降级 ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .a-search-sheet {
+    animation: none;
+  }
+
+  .a-search-skeleton-meta,
+  .a-search-skeleton-title,
+  .a-search-skeleton-line {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .a-search-field,
+  .a-search-clear,
+  .a-search-close,
+  .a-search-scope,
+  .a-search-result,
+  .a-search-result-arrow {
+    transition: none;
+  }
+
+  .a-search-result-arrow {
+    opacity: 1;
+    transform: none;
+  }
+}

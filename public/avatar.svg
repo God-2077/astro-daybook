@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"
+     role="img" aria-label="kissablecho 的手绘字母印章"
+     style="color: hsl(350 77% 70%);
+            transform: rotate(-4deg);
+            transform-origin: center;
+            opacity: .9;
+            transform-box: fill-box;">
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M61 7.4c28.1-1 52.4 22.3 52.1 51.9-.3 29.7-23.2 52.9-52.6 52.4C31.1 111.2 7.4 88.4 7.6 59.4 7.8 30.3 31.6 8.4 61 7.4Z"
+      stroke-width="1.7"></path>
+    <path
+      d="M60.5 15.6c24.6-.6 44.3 19.5 44.2 44.2-.1 24.8-19.9 44.6-44.7 44.4-24.6-.2-44.4-19.9-44.3-44.3.1-24.6 20.2-43.8 44.8-44.3Z"
+      stroke-width="1" opacity=".45"></path>
+    <path d="M47.8 39.2c-.8 12.5-.2 25.2.1 37.9" stroke-width="3.4"></path>
+    <path d="M66.4 40.4C61.3 46.8 55.9 53 50.8 59.2c5.5 6.4 10.7 12.8 15.9 19.2" stroke-width="3.4"></path>
+    <path class="a-stamp-mark" d="M44.2 86.8c6.8-2.1 13.4-2 20.1.6" stroke-width="1.8"></path>
+  </g>
+  <path class="a-stamp-star"
+  fill="currentColor"
+    d="M87.6 26.2c.55 4.6 3.65 7.7 8.25 8.25-4.6.55-7.7 3.65-8.25 8.25-.55-4.6-3.65-7.7-8.25-8.25 4.6-.55 7.7-3.65 8.25-8.25Z">
+  </path>
+</svg>

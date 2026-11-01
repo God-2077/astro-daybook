@@ -1,0 +1,174 @@
+---
+import { t } from '../../i18n/current';
+import { type MusicTrack, normalizePlaylist } from '../../lib/music';
+import Icon from '../common/Icon.astro';
+
+/**
+ * 可放进 MDX 的歌单播放器。
+ *
+ * 用法：
+ * <MusicPlayer
+ *   playlist={[{ name: '曲名', url: '/music/song.mp3', artist: '艺人' }]}
+ *   autoPlayNext
+ *   playlistExpand
+ * />
+ *
+ * 样式在 src/styles/daybook.css 的「音乐播放器」段；脚本由 src/scripts/client.ts
+ * 在页面出现 [data-music] 时按需加载，ClientRouter 换页后也能重新初始化。
+ *
+ * 单曲（playlist 只有一首）时列表区在样式层隐藏，但曲目 DOM 仍保留：
+ * 交互脚本依赖 [data-music-track] 初始化播放器，删掉会让整张卡片无法播放。
+ */
+
+interface Props {
+  playlist: readonly MusicTrack[];
+  /** 播完当前曲目后是否自动播放下一首，默认 false。 */
+  autoPlayNext?: boolean;
+  /** 是否默认展开播放列表，默认 false。 */
+  playlistExpand?: boolean;
+}
+
+const { playlist, autoPlayNext = false, playlistExpand = false } = Astro.props;
+
+const tracks = normalizePlaylist(playlist);
+const [first] = tracks;
+if (!first) throw new Error('[daybook:music] playlist is empty');
+
+const panelId = `music-list-${crypto.randomUUID()}`;
+const playlistLabel = t('music.playlistCount', { count: tracks.length });
+const unknownArtist = t('music.unknownArtist');
+---
+
+<section
+  class="a-music"
+  aria-label={t('music.player')}
+  data-music
+  data-playing="false"
+  data-open={playlistExpand ? 'true' : 'false'}
+  data-auto-next={autoPlayNext ? 'true' : 'false'}
+  data-single={tracks.length === 1 ? 'true' : 'false'}
+  data-label-play={t('music.play')}
+  data-label-pause={t('music.pause')}
+  data-label-error={t('music.error')}
+  data-label-unknown-artist={unknownArtist}
+>
+  <audio data-music-audio preload="metadata" src={first.url} hidden></audio>
+
+  <div class="a-music-main">
+    <div class="a-music-cover">
+      <img
+        class="a-music-cover-img"
+        src={first.cover}
+        alt=""
+        width="120"
+        height="120"
+        decoding="async"
+        hidden={!first.cover}
+      />
+      <span class="a-music-cover-fallback" hidden={Boolean(first.cover)} aria-hidden="true">
+        <Icon name="i-music" className="a-ico a-music-cover-ico" />
+      </span>
+    </div>
+
+    <div class="a-music-info">
+      <div class="a-music-titles">
+        <div class="a-music-heading">
+          <span class="a-music-title" data-music-title>{first.name}</span>
+          <span class="a-music-sep" aria-hidden="true">-</span>
+          <span class="a-music-artist" data-music-artist>{first.artist || unknownArtist}</span>
+        </div>
+
+        <div class="a-music-lyric" data-music-lyric data-empty="true">
+          <span class="a-music-lyric-track" data-music-lyric-track>
+            <span class="a-music-lyric-line" data-music-lyric-line></span>
+            <span class="a-music-lyric-line" data-music-lyric-line aria-hidden="true"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="a-music-progress-block">
+        <div
+          class="a-music-progress"
+          data-music-progress
+          role="slider"
+          tabindex="0"
+          aria-label={t('music.progress')}
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          aria-valuetext="00:00 / --:--"
+        >
+          <span class="a-music-progress-rail">
+            <span class="a-music-progress-fill" data-music-fill></span>
+          </span>
+        </div>
+
+        <div class="a-music-times">
+          <span data-music-current>00:00</span>
+          <span data-music-duration>--:--</span>
+        </div>
+
+        <p class="a-music-status" data-music-status role="status" aria-live="polite" hidden></p>
+      </div>
+    </div>
+
+    <div class="a-music-controls">
+      <button class="a-music-btn" type="button" data-music-prev aria-label={t('music.previous')}>
+        <Icon name="i-prev" />
+      </button>
+      <button class="a-music-play" type="button" data-music-play aria-label={t('music.play')}>
+        <Icon name="i-play" className="a-ico a-music-ico-play" />
+        <Icon name="i-pause" className="a-ico a-music-ico-pause" />
+      </button>
+      <button class="a-music-btn" type="button" data-music-next aria-label={t('music.next')}>
+        <Icon name="i-next" />
+      </button>
+    </div>
+  </div>
+
+  <div class="a-music-list">
+    <button
+      class="a-music-toggle"
+      type="button"
+      data-music-toggle
+      aria-expanded={playlistExpand}
+      aria-controls={panelId}
+    >
+      <span class="a-music-toggle-label">
+        <Icon name="i-music" className="a-ico a-music-toggle-ico" />
+        {playlistLabel}
+      </span>
+      <Icon name="i-chevron-down" className="a-ico a-music-chev" />
+    </button>
+
+    <div class="a-music-panel" data-music-panel id={panelId} inert={!playlistExpand}>
+      <div class="a-music-panel-inner">
+        <ol class="a-music-tracks">
+          {tracks.map((track, index) => (
+            <li>
+              <button
+                class:list={['a-music-track', { 'is-current': index === 0 }]}
+                type="button"
+                data-music-track
+                data-url={track.url}
+                data-cover={track.cover}
+                data-lrc={track.lrc}
+                aria-current={index === 0 ? 'true' : undefined}
+              >
+                <span class="a-music-track-index" aria-hidden="true">
+                  <span class="a-music-track-num">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="a-music-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+                </span>
+                <span class="a-music-track-text">
+                  <span class="a-music-track-name">{track.name}</span>
+                  <span class="a-music-track-artist">{track.artist || unknownArtist}</span>
+                </span>
+                <span class="a-music-track-time" data-music-track-time>--:--</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>

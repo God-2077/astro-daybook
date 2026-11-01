@@ -1,0 +1,188 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import BottomNav from '../components/layout/BottomNav.astro';
+import Drawer from '../components/layout/Drawer.astro';
+import Footer from '../components/layout/Footer.astro';
+import Header from '../components/layout/Header.astro';
+import Sprite from '../components/layout/Sprite.astro';
+import { siteConfig } from '../config/site';
+import { getClientMessages } from '../i18n/client';
+import { localeMeta, t } from '../i18n/current';
+import { absoluteUrl, canonicalPath, pageTitle } from '../lib/site';
+import '../styles/daybook.css';
+import '../styles/app.css';
+import '../styles/search.css';
+import 'katex/dist/katex.min.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  canonical?: string;
+  prev?: string;
+  next?: string;
+  type?: 'website' | 'article';
+  published?: string;
+  modified?: string;
+  keywords?: string[];
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  view?: string;
+}
+
+const {
+  title,
+  description = siteConfig.description,
+  image = siteConfig.seo.ogImage,
+  noindex = false,
+  canonical,
+  prev,
+  next,
+  type = 'website',
+  published,
+  modified,
+  keywords = [],
+  jsonLd,
+  view,
+} = Astro.props;
+
+const pageName = pageTitle(title);
+const descriptionText = description || siteConfig.subtitle || siteConfig.title;
+const canonicalUrl = new URL(canonicalPath(canonical ?? Astro.url.pathname), `${siteConfig.url}/`).href;
+const imageUrl = absoluteUrl(image);
+const allKeywords = [...new Set([...siteConfig.keywords, ...keywords])];
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteConfig.title,
+  url: siteConfig.url,
+  description: siteConfig.description || siteConfig.subtitle,
+  inLanguage: localeMeta.htmlLang,
+};
+const structuredData = [websiteLd, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [])];
+const structuredJson = JSON.stringify(structuredData).replace(/</g, '\\u003c');
+const rss = siteConfig.rss;
+const clientI18n = getClientMessages(siteConfig.lang);
+---
+
+<!doctype html>
+<html lang={localeMeta.htmlLang} data-view={view} data-theme-mode={siteConfig.theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fdfbfb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1d1a27" media="(prefers-color-scheme: dark)" />
+
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const lightColor = '#fdfbfb';
+        const darkColor = '#1d1a27';
+        const syncThemeColor = (isDark) => {
+          document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+            meta.setAttribute('content', isDark ? darkColor : lightColor);
+          });
+        };
+        try {
+          const stored = localStorage.getItem('daybook-theme');
+          const mode = root.dataset.themeMode;
+          const preference =
+            stored === 'light' || stored === 'dark' || stored === 'system'
+              ? stored
+              : mode === 'light' || mode === 'dark'
+                ? mode
+                : 'system';
+          const isDark =
+            preference === 'dark' ||
+            (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          root.classList.toggle('dark', isDark);
+          root.dataset.theme = isDark ? 'dark' : 'light';
+          syncThemeColor(isDark);
+        } catch {
+          root.dataset.theme = 'light';
+        }
+      })();
+    </script>
+
+    <title>{pageName}</title>
+    <meta name="description" content={descriptionText} />
+    {allKeywords.length > 0 && <meta name="keywords" content={allKeywords.join(',')} />}
+    <meta name="author" content={siteConfig.author} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow" />}
+    {prev && <link rel="prev" href={absoluteUrl(prev)} />}
+    {next && <link rel="next" href={absoluteUrl(next)} />}
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:title" content={title ?? siteConfig.title} />
+    <meta property="og:description" content={descriptionText} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:locale" content={siteConfig.seo.locale} />
+    {published && <meta property="article:published_time" content={published} />}
+    {modified && <meta property="article:modified_time" content={modified} />}
+    <meta name="twitter:card" content={siteConfig.seo.twitterCard} />
+    <meta name="twitter:title" content={title ?? siteConfig.title} />
+    <meta name="twitter:description" content={descriptionText} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    {rss.enabled && rss.default.enabled && (
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title={t('feed.linkAll', { site: siteConfig.title })}
+        href="/feed.xml"
+      />
+    )}
+    {rss.enabled && rss.diary.enabled && (
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title={t('feed.linkDiary', { site: siteConfig.title, diary: siteConfig.labels.diary })}
+        href="/feed-diary.xml"
+      />
+    )}
+    {rss.enabled && rss.posts.enabled && (
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title={t('feed.linkPosts', { site: siteConfig.title })}
+        href="/feed-posts.xml"
+      />
+    )}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/fonts/ChillRoundFRegular/result.css" />
+    <link rel="stylesheet" href="/fonts/ChillRoundFBold/result.css" />
+
+    <ClientRouter />
+    <script type="application/ld+json" set:html={structuredJson}></script>
+    <slot name="head" />
+    {siteConfig.inject.headEnd && <Fragment set:html={siteConfig.inject.headEnd} />}
+  </head>
+  <body>
+    <script is:inline define:vars={{ daybookI18n: clientI18n }}>
+      window.__DAYBOOK_I18N__ = daybookI18n;
+    </script>
+    <script>
+      import '../scripts/client';
+    </script>
+    <Sprite />
+    <a class="a-skip" href="#main">{t('common.skipToContent')}</a>
+    <p class="a-sr" role="status" aria-live="polite" id="a-status"></p>
+    <div class="a-loadbar" id="a-loadbar" aria-hidden="true"><span></span></div>
+
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <Drawer />
+    <BottomNav />
+    <slot name="bodyEnd" />
+    {siteConfig.inject.bodyEnd && <Fragment set:html={siteConfig.inject.bodyEnd} />}
+  </body>
+</html>

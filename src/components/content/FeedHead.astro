@@ -1,0 +1,56 @@
+---
+interface Props {
+  title: string;
+  subtitle: string;
+  meta: string;
+}
+
+const { title, subtitle, meta } = Astro.props;
+---
+
+<div class="a-feedhead">
+  <div class="a-feedhead-main">
+    <h1 id="a-home-title">
+      {title}<svg class="a-ink" viewBox="0 0 120 16" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+        <path
+          d="M3.6 9.8C18.4 5.4 34 10.6 49.6 7.4 65.2 4.2 79.4 9 95 6.6c7.6-1.2 15.2-.4 21.4 1.8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.8"
+          stroke-linecap="round"></path>
+        <path
+          d="M6.4 12.6C21.8 8.8 37.6 13.4 53 10.6c15.4-2.8 29.4 1.6 45-1 4.6-.8 9.2-.6 13.8.4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-opacity=".55"
+          stroke-linecap="round"></path>
+      </svg>
+    </h1>
+    <p class="a-feedhead-sub">{subtitle}</p>
+    <p class="a-feedhead-meta">{meta}</p>
+  </div>
+  <div class="a-feedhead-art" aria-hidden="true">
+    <svg viewBox="0 0 240 156" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+      <g transform="translate(2 2) scale(2)" stroke-width="0.8">
+        <path pathLength="1" d="M17.5 19H9a7 7 0 1 1 6.7-9h.8a4.5 4.5 0 1 1 0 9Z"></path>
+      </g>
+      <path
+        pathLength="1"
+        class="a-ill-accent"
+        d="M176 43c-1.3-1-7.5-5.4-7.5-10.2a4.2 4.2 0 0 1 7.5-2.6 4.2 4.2 0 0 1 7.5 2.6c0 4.8-6.2 9.2-7.5 10.2Z"></path>
+      <path pathLength="1" d="M62 84v49h96V84"></path>
+      <path pathLength="1" d="M52 86c-2.4-1.6-2.8-4.4-.6-5.9L104 45c2.6-1.8 5.8-1.8 8.4 0l52.6 35.1c2.2 1.5 1.8 4.3-.6 5.9"></path>
+      <path pathLength="1" d="M146 61v-16h13v14"></path>
+      <rect pathLength="1" x="80" y="94" width="23" height="21" rx="4"></rect>
+      <path pathLength="1" d="M91.5 94v21M80 104.5h23"></path>
+      <path pathLength="1" d="M122 133v-24c0-6.6 5.4-12 12-12s12 5.4 12 12v24"></path>
+      <circle pathLength="1" cx="140" cy="119" r="1.4" fill="currentColor" stroke="none"></circle>
+      <path
+        pathLength="1"
+        d="M16 139c22-2.4 40 1.4 62-1 26-2.8 44 1.6 70-1 22-2.2 48 1.4 76-1.6"
+        stroke-width="1.2"
+        stroke-opacity=".55"></path>
+    </svg>
+  </div>
+</div>

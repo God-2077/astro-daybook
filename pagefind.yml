@@ -1,0 +1,11 @@
+site: dist
+output_path: dist/pagefind
+exclude_selectors:
+  - "span.katex"
+  - "span.katex-display"
+  - "[data-pagefind-ignore]"
+  - ".a-search"
+  - ".a-toc"
+  - ".a-toc-m"
+  - ".a-comments"
+  - ".a-pager"

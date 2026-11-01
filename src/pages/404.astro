@@ -1,0 +1,30 @@
+---
+import EmptyState from '../components/common/EmptyState.astro';
+import { siteConfig } from '../config/site';
+import { t } from '../i18n/current';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title={t('notFound.title')}
+  description={t('notFound.description', { site: siteConfig.title })}
+  canonical="/404"
+  noindex
+  type="website"
+  view="notfound"
+>
+  <section class="a-view" data-view="notfound" aria-labelledby="a-404-title">
+    <div class="a-wrap">
+      <div class="a-viewhead">
+        <h1 id="a-404-title">404</h1>
+        <p class="a-viewhead-sub">{t('notFound.sub')}</p>
+      </div>
+      <EmptyState
+        title={t('notFound.emptyTitle')}
+        note={t('notFound.emptyNote', { diary: siteConfig.labels.diary })}
+        actionHref="/"
+        actionLabel={t('notFound.action')}
+      />
+    </div>
+  </section>
+</BaseLayout>
