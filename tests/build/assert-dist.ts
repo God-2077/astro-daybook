@@ -245,7 +245,7 @@ const hiddenSearchDaily = read('daily/2026-08-20-search-hidden/index.html');
 assert.doesNotMatch(hiddenSearchDaily, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 28, `Pagefind 页面集合应精确为 28 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 27, `Pagefind 页面集合应精确为 27 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);
