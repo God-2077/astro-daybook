@@ -919,7 +919,7 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   transition: color .16s var(--ease), border-color .16s var(--ease), background-color .16s var(--ease);
 }
 .a-pager-num { min-width: 40px; padding: 0 4px; }
-.a-pager-num.a-pager-last { min-width: 0; padding: 0 10px; letter-spacing: .08em; }
+.a-pager-btn { min-width: 40px; padding: 0; font-size: 15px; letter-spacing: 0; }
 .a-pager-btn:hover,
 .a-pager-num:hover { background: hsl(var(--muted)); }
 .a-pager-num[aria-current="page"] {

@@ -9,19 +9,20 @@ test('pagerItems shows every page without ellipsis when total pages <= 4', () =>
   assert.deepEqual(pagerItems(4, 4), [1, 2, 3, 4]);
 });
 
-test('pagerItems on the first page: current, next, gap, last', () => {
-  assert.deepEqual(pagerItems(1, 7), [1, 2, 'gap', 'last']);
-  assert.deepEqual(pagerItems(1, 5), [1, 2, 'gap', 'last']);
+test('pagerItems on the first page: current, next, gap, total pages', () => {
+  assert.deepEqual(pagerItems(1, 7), [1, 2, 'gap', 7]);
+  assert.deepEqual(pagerItems(1, 5), [1, 2, 'gap', 5]);
+  assert.deepEqual(pagerItems(1, 14), [1, 2, 'gap', 14]);
 });
 
-test('pagerItems in the middle: previous, current, next, gap, last', () => {
-  assert.deepEqual(pagerItems(3, 7), [2, 3, 4, 'gap', 'last']);
-  assert.deepEqual(pagerItems(5, 8), [4, 5, 6, 'gap', 'last']);
+test('pagerItems in the middle: previous, current, next, gap, total pages', () => {
+  assert.deepEqual(pagerItems(3, 7), [2, 3, 4, 'gap', 7]);
+  assert.deepEqual(pagerItems(5, 8), [4, 5, 6, 'gap', 8]);
 });
 
-test('pagerItems on the second-to-last page: first, gap, previous, current, last', () => {
-  assert.deepEqual(pagerItems(6, 7), [1, 'gap', 5, 6, 'last']);
-  assert.deepEqual(pagerItems(4, 5), [1, 'gap', 3, 4, 'last']);
+test('pagerItems on the second-to-last page: first, gap, previous, current, total pages', () => {
+  assert.deepEqual(pagerItems(6, 7), [1, 'gap', 5, 6, 7]);
+  assert.deepEqual(pagerItems(4, 5), [1, 'gap', 3, 4, 5]);
 });
 
 test('pagerItems on the last page: first, gap, previous, current', () => {
@@ -30,7 +31,7 @@ test('pagerItems on the last page: first, gap, previous, current', () => {
 });
 
 test('pagerItems clamps out-of-range pages', () => {
-  assert.deepEqual(pagerItems(0, 7), [1, 2, 'gap', 'last']);
+  assert.deepEqual(pagerItems(0, 7), [1, 2, 'gap', 7]);
   assert.deepEqual(pagerItems(9, 7), [1, 'gap', 6, 7]);
 });
 
