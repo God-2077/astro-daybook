@@ -678,6 +678,10 @@ ul, ol { padding: 0; }
   overflow-wrap: break-word;
 }
 .a-entry-text p + p { margin-top: .85em; }
+/* 列表块与相邻段落之间留出与段落相同的行距；嵌套层级不再额外加空隙，
+   与详情页 .a-prose > * + * 的结构保持一致。 */
+.a-entry-text > * + :is(ul, ol),
+.a-entry-text > :is(ul, ol) + p { margin-top: .85em; }
 
 /* 折叠到 8 行；高度由脚本按整行切齐 */
 .a-foldable.is-collapsed { overflow: hidden; }
@@ -1785,9 +1789,10 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   line-height: 1.6;
   color: hsl(var(--card-foreground));
 }
-.a-prose ul, .a-prose ol { padding-left: 1.4em; }
-.a-prose li { margin: .45em 0; padding-left: .15em; }
-.a-prose li::marker { color: hsl(var(--muted-foreground)); }
+:is(.a-prose, .a-entry-text) ul,
+:is(.a-prose, .a-entry-text) ol { padding-left: 1.4em; }
+:is(.a-prose, .a-entry-text) li { margin: .45em 0; padding-left: .15em; }
+:is(.a-prose, .a-entry-text) li::marker { color: hsl(var(--muted-foreground)); }
 :is(.a-prose, .a-entry-text) a {
   color: hsl(var(--rose));
   text-decoration: underline;
@@ -3386,9 +3391,9 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
 }
 .a-prose .a-table-wrap table { margin: 0; }
 .a-prose hr { border: 0; border-top: 1px dashed hsl(var(--border)); background: none; height: 0; margin: 2.4em 0; }
-.a-prose .a-task-list { list-style: none; padding-left: .1em; }
-.a-prose .a-task-list li { display: flex; align-items: flex-start; gap: 10px; }
-.a-prose .a-task-list input[type="checkbox"] {
+:is(.a-prose, .a-entry-text) .a-task-list { list-style: none; padding-left: .1em; }
+:is(.a-prose, .a-entry-text) .a-task-list li { display: flex; align-items: flex-start; gap: 10px; }
+:is(.a-prose, .a-entry-text) .a-task-list input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   flex: none;
@@ -3400,7 +3405,7 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
   background: transparent;
   position: relative;
 }
-.a-prose .a-task-list input[type="checkbox"]:checked::after {
+:is(.a-prose, .a-entry-text) .a-task-list input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
   left: 4px;
