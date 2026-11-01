@@ -1,0 +1,61 @@
+---
+import FeedHead from '../../components/content/FeedHead.astro';
+import HomeFeed from '../../components/views/HomeFeed.astro';
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { entriesForSurface } from '../../lib/content/entries';
+import { slicePage, totalPagesFor } from '../../lib/pagination';
+import type { DailyEntry } from '../../types/content';
+
+export async function getStaticPaths() {
+  const all = (await entriesForSurface('home', 'daily')) as DailyEntry[];
+  const totalPages = totalPagesFor(all.length, siteConfig.pagination.daily);
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+    props: { page: index + 2 },
+  }));
+}
+
+const requested = Number(Astro.params.page);
+const all = (await entriesForSurface('home', 'daily')) as DailyEntry[];
+const slice = slicePage(all, requested, siteConfig.pagination.daily);
+if (!slice) return Astro.redirect('/404');
+
+const pinned = all.filter((entry) => entry.data.pin).length;
+const meta = all.length
+  ? [
+      t('home.metaTotal', { entries: tCount('entries', all.length) }),
+      pinned ? t('home.metaPinned', { pinned: tCount('pinned', pinned) }) : '',
+      t('home.metaSorted'),
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  : t('home.emptyTitle', { diary: siteConfig.labels.diary });
+---
+
+<BaseLayout
+  title={`${siteConfig.labels.diary} · ${t('pager.pageTitle', { page: requested })}`}
+  description={siteConfig.description}
+  canonical={`/page/${requested}`}
+  type="website"
+  view="home"
+  prev={requested > 1 ? (requested === 2 ? '/' : `/page/${requested - 1}`) : undefined}
+  next={requested < slice.totalPages ? `/page/${requested + 1}` : undefined}
+>
+  <section class="a-view" data-view="home" aria-labelledby="a-home-title">
+    <div class="a-wrap">
+      <FeedHead
+        title={siteConfig.home.title}
+        subtitle={siteConfig.home.subtitle || siteConfig.subtitle || siteConfig.description}
+        meta={meta}
+      />
+      <HomeFeed
+        entries={slice.items}
+        page={slice.page}
+        totalPages={slice.totalPages}
+        totalItems={slice.totalItems}
+      />
+    </div>
+  </section>
+</BaseLayout>

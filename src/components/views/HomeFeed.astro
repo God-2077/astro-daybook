@@ -1,0 +1,165 @@
+---
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import { monthLabel, weekdayLabel, zonedParts } from '../../lib/content/date';
+import type { RenderedEntry } from '../../lib/content/render';
+import { renderEntry } from '../../lib/content/render';
+import type { DailyEntry } from '../../types/content';
+import EmptyState from '../common/EmptyState.astro';
+import Pager from '../common/Pager.astro';
+import DiaryEntry from '../content/DiaryEntry.astro';
+
+interface Props {
+  entries: DailyEntry[];
+  page: number;
+  totalPages: number;
+  totalItems: number;
+}
+
+interface FeedItem {
+  entry: DailyEntry;
+  rendered: RenderedEntry;
+}
+
+interface DayGroup {
+  key: string;
+  /** 两位日号；所有月份的日期排版保持一致。 */
+  day: string;
+  weekday: string;
+  /** 置顶区跨月时，在该月第一天上方补一条月份小标题。 */
+  monthHeading?: string;
+  items: FeedItem[];
+}
+
+interface FeedSection {
+  key: string;
+  label: string;
+  count: number;
+  days: DayGroup[];
+}
+
+const { entries, page, totalPages, totalItems } = Astro.props;
+
+const rendered = await Promise.all(
+  entries.map(async (entry) => ({
+    entry,
+    rendered: await renderEntry(entry),
+  })),
+);
+
+const pad = (value: number) => String(value).padStart(2, '0');
+
+/** 把条目归入所属那一天；同一天的条目落在同一个日期分组里。 */
+const dayOf = (days: DayGroup[], item: FeedItem, parts: ReturnType<typeof zonedParts>): DayGroup => {
+  const key = `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
+  let day = days.find((candidate) => candidate.key === key);
+  if (!day) {
+    day = {
+      key,
+      day: pad(parts.day),
+      weekday: weekdayLabel(parts.weekday),
+      items: [],
+    };
+    days.push(day);
+  }
+  day.items.push(item);
+  return day;
+};
+
+// 置顶条目单独成节：否则它先建出的月份分组会钉在首位，把整个月都顶到最新月份之前。
+// 置顶条目可能跨月，所以节内再按月份补小标题，避免只看到日号分不清是哪个月。
+const pinnedDays: DayGroup[] = [];
+let pinnedMonth = '';
+const months: FeedSection[] = [];
+for (const item of rendered) {
+  const parts = zonedParts(item.entry.data.date, siteConfig.timezone);
+  const label = monthLabel(item.entry.data.date, siteConfig.timezone);
+
+  if (item.entry.data.pin) {
+    const day = dayOf(pinnedDays, item, parts);
+    if (pinnedMonth !== label) {
+      pinnedMonth = label;
+      day.monthHeading = label;
+    }
+    continue;
+  }
+
+  const monthKey = `${parts.year}-${pad(parts.month)}`;
+  let month = months.find((candidate) => candidate.key === monthKey);
+  if (!month) {
+    month = {
+      key: monthKey,
+      label,
+      count: 0,
+      days: [],
+    };
+    months.push(month);
+  }
+
+  month.count += 1;
+  dayOf(month.days, item, parts);
+}
+
+const pinnedCount = pinnedDays.reduce((total, day) => total + day.items.length, 0);
+const sections: FeedSection[] = pinnedCount
+  ? [{ key: 'pinned', label: t('home.pinnedGroup'), count: pinnedCount, days: pinnedDays }, ...months]
+  : months;
+---
+
+<div class="a-feed" id="a-feed">
+  {
+    sections.map((section) => (
+      <section
+        class:list={['a-month-group', { 'a-month-group--pinned': section.key === 'pinned' }]}
+      >
+        <div class="a-month">
+          <h2 class="a-month-label">{section.label}</h2>
+          <div class="a-month-count">{tCount('entries', section.count)}</div>
+        </div>
+        {section.days.map((day) => (
+          <>
+            {day.monthHeading && (
+              <div class="a-month a-month-sub">
+                <h2 class="a-month-label">{day.monthHeading}</h2>
+              </div>
+            )}
+            <section class="a-day-group">
+              <h3 class="a-day-head">
+                <time class="a-day-date" datetime={day.key}>
+                  <span class="a-day-num">{day.day}</span>
+                  <span class="a-day-wd">{day.weekday}</span>
+                </time>
+              </h3>
+              <div class="a-day-entries">
+                {day.items.map((item) => (
+                  <DiaryEntry entry={item.entry} rendered={item.rendered} />
+                ))}
+              </div>
+            </section>
+          </>
+        ))}
+      </section>
+    ))
+  }
+  {
+    totalItems === 0 && (
+      <EmptyState
+        title={t('home.emptyTitle', { diary: siteConfig.labels.diary })}
+        note={t('home.emptyNote')}
+      />
+    )
+  }
+</div>
+
+{
+  totalPages > 1 && (
+    <Pager
+      page={page}
+      totalPages={totalPages}
+      totalItems={totalItems}
+      base="/"
+      label={t('home.pagination', { diary: siteConfig.labels.diary })}
+      className="a-pager--feed"
+    />
+  )
+}

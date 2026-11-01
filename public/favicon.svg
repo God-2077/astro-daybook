@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="纸页、日期栏与星">
+  <title>一页 · 日期栏</title>
+  <rect width="64" height="64" rx="12" fill="#FDFBFB"/>
+  <rect x=".75" y=".75" width="62.5" height="62.5" rx="11.25" fill="none" stroke="#EAE1E4" stroke-width="1.5"/>
+  <path d="M16 15v34" fill="none" stroke="#BE4154" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M25 19h21M25 27h21M25 35h13" fill="none" stroke="#33292C" stroke-width="3" stroke-linecap="round" stroke-opacity=".55"/>
+  <g transform="translate(29.2 36.2) scale(.98)" fill="#BE4154">
+    <path d="M12 2.5c.7 5.2 4.3 8.8 9.5 9.5-5.2.7-8.8 4.3-9.5 9.5-.7-5.2-4.3-8.8-9.5-9.5 5.2-.7 8.8-4.3 9.5-9.5Z"/>
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+---
+title: 歌单
+layout: ../layouts/PageLayout.astro
+date: 2026-10-01 20:00:00
+description: 写东西的时候在听什么。
+comments: true
+---
+
+import { MusicPlayer } from '@ui';
+
+这里放一些写东西时循环的歌。没有固定的风格，也没有按心情分类，想到哪首写哪首。
+
+## 最近在听
+
+<MusicPlayer
+  playlist={[
+    {
+      name: '光るなら',
+      artist: 'Goose house',
+      url: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.mp3',
+      cover: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.jpg',
+      lrc: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.lrc',
+    },
+    {
+      name: 'トリカゴ',
+      artist: 'XX:me',
+      url: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/darling.mp3',
+      cover: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/darling.jpg',
+      lrc: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/darling.lrc',
+    },
+    {
+      name: '前前前世',
+      artist: 'RADWIMPS',
+      url: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/yourname.mp3',
+      cover: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/yourname.jpg',
+      lrc: 'https://k-pan.edgeone.ksable.top/public/astro-daybook/music/yourname.lrc',
+    },
+  ]}
+  autoPlayNext={true}
+  playlistExpand={true}
+/>
+
+## 说明
+
+歌单只是个人记录，不提供下载。列表会随着季节慢慢换。

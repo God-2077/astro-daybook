@@ -1,0 +1,91 @@
+---
+import { siteConfig } from '../../config/site';
+import { t } from '../../i18n/current';
+import { formatContentDate, zonedParts } from '../../lib/content/date';
+import { getDescription, stripMarkdown } from '../../lib/content/description';
+import { stripMdx } from '../../lib/content/format';
+import type { RenderedEntry } from '../../lib/content/render';
+import type { DailyEntry } from '../../types/content';
+import Icon from '../common/Icon.astro';
+import RenderedBody from './RenderedBody.astro';
+
+interface Props {
+  entry: DailyEntry;
+  rendered: RenderedEntry;
+}
+
+const { entry, rendered } = Astro.props;
+const parts = zonedParts(entry.data.date, siteConfig.timezone);
+const plain =
+  rendered.format === 'md'
+    ? rendered.html
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    : stripMarkdown(stripMdx(entry.body));
+const foldable = plain.length > 300;
+const locked = Boolean(entry.data.password);
+const draft = entry.data.draft && import.meta.env.DEV;
+const pinLabel = locked
+  ? t('content.lockedDaily', { diary: siteConfig.labels.diary })
+  : entry.data.pin
+    ? t('content.pinnedDaily', { diary: siteConfig.labels.diary })
+    : '';
+const showTitle = siteConfig.home.showTitles && !entry.data.hideHomeTitle && entry.data.title.trim().length > 0;
+const hasTime = parts.hour !== 0 || parts.minute !== 0;
+const time = formatContentDate(entry.data.date, siteConfig.timezone, 'HH:mm');
+---
+
+<article class:list={['a-entry', { 'a-entry--pinned': entry.data.pin, 'a-entry--locked': locked }]} data-entry>
+  {
+    (pinLabel || draft) && (
+      <p class="a-entry-pin">
+        {pinLabel && <Icon name={entry.data.pin ? 'i-pin' : 'i-lock'} className="a-ico" />}
+        {pinLabel}
+        {draft && <span class="a-draft">{t('common.draft')}</span>}
+      </p>
+    )
+  }
+  {
+    hasTime && (
+      <p class="a-entry-time">
+        <time datetime={entry.data.date.toISOString()}>{time}</time>
+      </p>
+    )
+  }
+  {
+    showTitle && (
+      <h4 class="a-entry-title">
+        <a href={entry.url}>{entry.data.title}</a>
+      </h4>
+    )
+  }
+  <div
+    class:list={['a-entry-text', { 'a-foldable': foldable, 'is-collapsed': foldable }]}
+    data-diary-body
+    data-pagefind-ignore
+  >
+    {locked ? <p>{getDescription(entry, siteConfig.labels.diary)}</p> : <RenderedBody rendered={rendered} />}
+  </div>
+  <div class="a-entry-foot">
+    {
+      entry.data.category && (
+        <>
+          <span class="a-entry-cat">{entry.data.category}</span>
+          <span class="a-entry-dot" aria-hidden="true">·</span>
+        </>
+      )
+    }
+    <a class="a-entry-more" href={entry.url}>
+      {locked ? t('content.unlock') : t('content.view')} <span class="a-entry-arrow" aria-hidden="true">↗</span>
+    </a>
+    {
+      foldable && (
+        <button type="button" class="a-btn-quiet a-fold-toggle" aria-expanded="false">
+          <Icon name="i-chevron-down" className="a-ico a-ico-sm a-chev" />
+          <span class="a-fold-text">{t('common.expand')}</span>
+        </button>
+      )
+    }
+  </div>
+</article>

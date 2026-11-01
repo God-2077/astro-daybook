@@ -1,0 +1,25 @@
+---
+import PostIndex from '../../components/views/PostIndex.astro';
+import { siteConfig } from '../../config/site';
+import { t } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { entriesForSurface } from '../../lib/content/entries';
+import { slicePage } from '../../lib/pagination';
+import type { PostEntry } from '../../types/content';
+
+const all = (await entriesForSurface('posts', 'post')) as PostEntry[];
+const slice = slicePage(all, 1, siteConfig.pagination.post);
+if (!slice) throw new Error('文章分页状态异常');
+const pinnedCount = all.filter((entry) => entry.data.pin).length;
+---
+
+<BaseLayout title={t('posts.title')} description={siteConfig.description} canonical="/posts" type="website" view="posts">
+  <PostIndex
+    entries={slice.items}
+    page={slice.page}
+    totalPages={slice.totalPages}
+    totalItems={slice.totalItems}
+    pinnedCount={pinnedCount}
+    perPage={siteConfig.pagination.post}
+  />
+</BaseLayout>

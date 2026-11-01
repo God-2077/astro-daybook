@@ -1,0 +1,51 @@
+---
+import { t, tCount } from '../../i18n/current';
+import type { PostEntry } from '../../types/content';
+import EmptyState from '../common/EmptyState.astro';
+import PageHead from '../common/PageHead.astro';
+import Pager from '../common/Pager.astro';
+import PostRow from '../content/PostRow.astro';
+
+interface Props {
+  entries: PostEntry[];
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  pinnedCount: number;
+  perPage: number;
+}
+
+const { entries, page, totalPages, totalItems, pinnedCount, perPage } = Astro.props;
+const meta = [
+  t('posts.metaSorted'),
+  t('posts.metaTotal', { entries: tCount('entries', totalItems) }),
+  pinnedCount ? t('posts.metaPinned', { pinned: tCount('pinned', pinnedCount) }) : '',
+]
+  .filter(Boolean)
+  .join(' · ');
+const offset = (page - 1) * perPage;
+---
+
+<section class="a-view" data-view="articles" aria-labelledby="a-articles-title">
+  <div class="a-wrap">
+    <PageHead title={t('posts.title')} meta={meta} art="articles" titleId="a-articles-title" wide />
+    <div class="a-index">
+      <div class="a-index-head" aria-hidden="true">
+        <span>{t('posts.headIndex')}</span><span>{t('posts.headTitle')}</span><span>{t('posts.headDate')}</span>
+      </div>
+      {entries.map((entry, index) => <PostRow entry={entry} index={offset + index + 1} />)}
+      {totalItems === 0 && <EmptyState title={t('posts.emptyTitle')} note={t('posts.emptyNote')} />}
+    </div>
+    {
+      totalPages > 1 && (
+        <Pager
+          page={page}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          base="/posts"
+          label={t('posts.pagination')}
+        />
+      )
+    }
+  </div>
+</section>

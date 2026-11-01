@@ -1,0 +1,38 @@
+---
+import { siteConfig } from '../../config/site';
+import { t } from '../../i18n/current';
+import { formatDisplayDate } from '../../lib/content/date';
+import { estimateReadingTime, getDescription } from '../../lib/content/description';
+import type { PostEntry } from '../../types/content';
+import Icon from '../common/Icon.astro';
+
+interface Props {
+  entry: PostEntry;
+  index: number;
+}
+
+const { entry, index } = Astro.props;
+const locked = Boolean(entry.data.password);
+const draft = entry.data.draft && import.meta.env.DEV;
+const minutes = estimateReadingTime(entry.body, entry.format);
+---
+
+<a class:list={['a-row', { 'is-pinned': entry.data.pin }]} href={entry.url}>
+  <span class="a-row-num">{String(index).padStart(2, '0')}</span>
+  <span class="a-row-main">
+    {
+      (entry.data.pin || locked || draft) && (
+        <span class="a-pin">
+          <Icon name={locked ? 'i-lock' : entry.data.pin ? 'i-pin' : 'i-file'} className="a-ico" />
+          {locked ? t('content.lockedPost') : entry.data.pin ? t('content.pinnedPost') : t('common.draft')}
+        </span>
+      )
+    }
+    <span class="a-row-title">{entry.data.title}</span>
+    <span class="a-row-sum">{getDescription(entry, siteConfig.labels.diary)}</span>
+  </span>
+  <span class="a-row-meta">
+    <span class="a-row-date">{formatDisplayDate(entry.data.date, siteConfig.timezone)}</span>
+    <span class="a-row-time">{t('posts.readingTime', { minutes })}</span>
+  </span>
+</a>

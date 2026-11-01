@@ -1,0 +1,116 @@
+---
+import { siteConfig } from '../../config/site';
+import { t } from '../../i18n/current';
+import { getSearchMessages } from '../../i18n/react';
+import { isNavLinkActive } from '../../lib/nav';
+import Icon from '../common/Icon.astro';
+import SearchPanel from '../search/SearchPanel';
+
+const path = Astro.url.pathname || '/';
+
+function isActive(link: string): boolean {
+  return isNavLinkActive(link, path);
+}
+
+function isGroupActive(items: { link: string }[]): boolean {
+  return items.some((item) => isActive(item.link));
+}
+
+const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
+const searchMessages = getSearchMessages(siteConfig.lang, siteConfig.labels.diary);
+---
+
+<header class="a-mast">
+  <div class="a-wrap">
+    <div class="a-mast-top">
+      <div class="a-brand-row">
+        <a class="a-brand" href="/">
+          <span class="a-brand-name">{siteConfig.title}</span>
+          {siteConfig.subtitle && <span class="a-brand-sub">{siteConfig.subtitle}</span>}
+        </a>
+        <div class="a-mobile-actions">
+          <button type="button" class="a-iconbtn" data-search-toggle aria-label={t('nav.search')} aria-expanded="false" aria-controls="a-search">
+            <Icon name="i-search" />
+          </button>
+          <button type="button" class="a-iconbtn" data-theme-btn aria-label={t('theme.toggleDark')}>
+            <Icon name="i-sun" className="a-ico a-ico-sun" />
+            <Icon name="i-moon" className="a-ico a-ico-moon" />
+          </button>
+          <button
+            type="button"
+            class="a-iconbtn a-burger"
+            id="a-drawer-toggle"
+            aria-label={t('nav.openMenu')}
+            aria-expanded="false"
+            aria-controls="a-drawer"
+          >
+            <Icon name="i-menu" />
+          </button>
+        </div>
+      </div>
+
+      <div class="a-navrow">
+        <nav class="a-tabs" aria-label={t('nav.main')}>
+          {siteConfig.nav.map((item, index) => (
+            'items' in item ? (
+              <div class="a-navmenu" data-menu>
+                <button
+                  type="button"
+                  class="a-tab a-navmenu-btn"
+                  data-menu-btn
+                  aria-expanded="false"
+                  aria-controls={`a-menu-${index}`}
+                  aria-current={isGroupActive(item.items) ? 'true' : undefined}
+                >
+                  {item.title}<Icon name="i-chevron-down" className="a-chev" />
+                </button>
+                <div class="a-subnav" id={`a-menu-${index}`} hidden>
+                  {item.items.map((link) => (
+                    <a
+                      class="a-subnav-link"
+                      href={link.link}
+                      target={/^https?:\/\//i.test(link.link) ? '_blank' : undefined}
+                      rel={/^https?:\/\//i.test(link.link) ? 'noopener' : undefined}
+                      aria-current={isActive(link.link) ? 'page' : undefined}
+                    >
+                      {link.title}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <a
+                class="a-tab"
+                href={item.link}
+                target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined}
+                rel={/^https?:\/\//i.test(item.link) ? 'noopener' : undefined}
+                aria-current={isActive(item.link) ? 'page' : undefined}
+              >
+                {item.title}
+              </a>
+            )
+          ))}
+        </nav>
+
+        <div class="a-tools">
+          <button type="button" class="a-iconbtn" data-search-toggle aria-label={t('nav.search')} aria-expanded="false" aria-controls="a-search">
+            <Icon name="i-search" />
+          </button>
+          <button type="button" class="a-iconbtn" data-theme-btn aria-label={t('theme.toggleDark')}>
+            <Icon name="i-sun" className="a-ico a-ico-sun" />
+            <Icon name="i-moon" className="a-ico a-ico-moon" />
+          </button>
+          {rssEnabled && (
+            <a class="a-iconbtn" href="/feed.xml" aria-label={t('nav.rss')}>
+              <Icon name="i-rss" />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <SearchPanel client:load messages={searchMessages} />
+
+  <div class="a-wrap"><div class="a-mast-rule"></div></div>
+</header>

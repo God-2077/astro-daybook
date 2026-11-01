@@ -1,0 +1,41 @@
+---
+import EmptyState from '../../components/common/EmptyState.astro';
+import PageHead from '../../components/common/PageHead.astro';
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { collectTaxonomy } from '../../lib/content/entries';
+
+const tags = await collectTaxonomy('tags');
+---
+
+<BaseLayout
+  title={t('tags.title')}
+  description={t('tags.description', { site: siteConfig.title })}
+  canonical="/tags"
+  type="website"
+  view="tags"
+>
+  <section class="a-view" data-view="tags" aria-labelledby="a-tags-title">
+    <div class="a-wrap">
+      <PageHead
+        title={t('tags.title')}
+        meta={t('tags.meta', { tags: tCount('tags', tags.length) })}
+        art="tags"
+        titleId="a-tags-title"
+      />
+      {tags.length > 0 ? (
+        <div class="a-tags" id="a-tag-cloud" role="group" aria-label={t('tags.allAria')}>
+          {tags.map((tag) => (
+            <a class="a-tag" href={tag.href} data-count={Math.min(tag.count, 4)}>
+              {tag.name}<sup class="a-tag-count">{tag.count}</sup>
+            </a>
+          ))}
+          <p class="a-tag-hint">{t('tags.hint')}</p>
+        </div>
+      ) : (
+        <EmptyState title={t('tags.emptyTitle')} note={t('tags.emptyNote')} />
+      )}
+    </div>
+  </section>
+</BaseLayout>

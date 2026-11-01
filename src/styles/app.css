@@ -1,0 +1,383 @@
+/* Daybook 运行时补充样式：原型 CSS 之外的少量状态、搜索与解密界面。 */
+
+.a-pagehead-doodle,
+.a-head-doodle {
+  pointer-events: none;
+}
+
+.a-pager a,
+.a-pager span {
+  text-decoration: none;
+}
+
+.a-pager [aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.a-entry-text[hidden] {
+  display: none;
+}
+
+.a-entry-text.is-collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  overflow: hidden;
+}
+
+.a-entry-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  border: 0;
+  background: none;
+  color: hsl(var(--rose));
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+/* ---------- 锁定页 ---------- */
+
+.a-lock-msg {
+  min-height: 20px;
+  margin: 8px 0 0;
+  color: hsl(var(--rose));
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
+.a-locked-card.is-shake {
+  animation: a-shake 0.4s var(--ease);
+}
+
+@keyframes a-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+.a-locked-body[hidden] {
+  display: none;
+}
+
+.a-locked-body {
+  margin-top: 36px;
+}
+
+.a-locked-foot {
+  margin-top: 32px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+
+/* ---------- Markdown / Shiki / KaTeX ---------- */
+
+/*
+ * 代码块：定稿原型里是「纸面卡」——与正文同色系的 --muted 底、1px 边框、
+ * 4px 圆角、18px 20px 内边距。Shiki 会把浅色主题背景写进 <pre> 的内联
+ * style（github-light 的 #fff），所以这里必须用 !important 拉回主题色。
+ */
+.a-prose .astro-code {
+  margin: 1.6em 0;
+  padding: 18px 20px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  background-color: hsl(var(--muted)) !important;
+  overflow-x: auto;
+}
+
+/* 深色模式下 Shiki 的 token 颜色来自 --shiki-dark，底色仍统一用纸面色。 */
+html.dark .a-prose .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: transparent !important;
+}
+
+html.dark .a-prose .astro-code {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.a-prose .astro-code code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* 行内公式：原型为 1.06em，且不参与正文的 1.15em 段落间距节奏。 */
+.a-prose .katex {
+  font-size: 1.06em;
+}
+
+/* 块级公式：上下各 1px 细线 + 22px 10px 内边距，仿原型的手写公式区。 */
+.a-prose .katex-display {
+  display: block;
+  margin: 1.7em 0;
+  padding: 22px 10px;
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 21px;
+  color: hsl(var(--card-foreground));
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+.a-prose .katex-display .katex {
+  font-size: 1em;
+}
+
+.a-prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 正文图片可点开放大：只给指针提示，放大层本身用 lightGallery 原生样式 */
+:is(.a-prose, .a-entry-text) img.a-img:not(a img) {
+  cursor: zoom-in;
+}
+
+/* ---------- 图片放大层（lightGallery） ----------
+ * 遮罩跟随库内置的固定深黑，这里只把控件换成站点令牌：
+ * 浅色模式下控件用纸白（--background），深色模式改用 --foreground。
+ * `.lg-container` 前缀同时用于盖过运行时注入的库样式。 */
+
+.lg-container {
+  --a-lg-fg: var(--background);
+}
+
+.dark .lg-container {
+  --a-lg-fg: var(--foreground);
+}
+
+html .lg-container {
+  font-family: var(--font-sans);
+}
+
+.lg-container .lg-toolbar .lg-icon {
+  color: hsl(var(--a-lg-fg) / 0.62);
+  font-size: 20px;
+}
+
+.lg-container .lg-toolbar .lg-icon:hover {
+  color: hsl(var(--a-lg-fg));
+}
+
+.lg-container .lg-toolbar .lg-icon:focus-visible {
+  border-radius: 0;
+  outline: 1px dashed hsl(var(--a-lg-fg) / 0.8);
+  outline-offset: -5px;
+}
+
+.lg-container .lg-counter {
+  color: hsl(var(--a-lg-fg) / 0.55);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.lg-container .lg-sub-html {
+  color: hsl(var(--a-lg-fg) / 0.78);
+  font-size: 14px;
+}
+
+.lg-container .lg-prev,
+.lg-container .lg-next {
+  border-radius: 0;
+  background-color: hsl(var(--background) / 0.14);
+  color: hsl(var(--a-lg-fg) / 0.62);
+}
+
+.lg-container .lg-prev:hover,
+.lg-container .lg-next:hover {
+  color: hsl(var(--a-lg-fg));
+}
+
+.lg-container .lg-outer .lg-thumb-outer {
+  background-color: transparent;
+}
+
+.lg-container .lg-outer .lg-thumb-item {
+  border: 1px solid hsl(var(--a-lg-fg) / 0.22);
+  border-radius: 0;
+}
+
+.lg-container .lg-outer .lg-thumb-item.active,
+.lg-container .lg-outer .lg-thumb-item:hover {
+  border-color: hsl(var(--rose));
+}
+
+/* 自建的缩略图开关：收起时压暗，语义用 aria-pressed 表达。 */
+.lg-container .lg-toggle-thumbs[aria-pressed='false'] {
+  color: hsl(var(--a-lg-fg) / 0.35);
+}
+
+.lg-container .lg-outer.lg-thumbs-hidden .lg-thumb-outer {
+  display: none;
+}
+
+.lg-container .lg-progress-bar {
+  background-color: hsl(var(--a-lg-fg) / 0.18);
+}
+
+.lg-container .lg-progress-bar .lg-progress {
+  background-color: hsl(var(--rose));
+}
+
+/* ---------- 抽屉 / 过渡 ---------- */
+
+.a-drawer-open {
+  overflow: hidden;
+}
+
+.a-drawer[hidden] {
+  display: none;
+}
+
+.a-navmenu .a-subnav[hidden],
+.a-drawer-subgroup[hidden] {
+  display: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+/* ---------- 站内导航进度条 ---------- */
+
+.a-loadbar {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 2px;
+  z-index: 400;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.a-loadbar span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, hsl(var(--pink-decor)), hsl(var(--primary)));
+  box-shadow: 0 0 10px hsl(var(--pink-decor) / 0.45);
+  transition: width 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html[data-nav-loading] .a-loadbar {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a-locked-card.is-shake {
+    animation: none;
+  }
+  .a-loadbar span {
+    transition: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* 原型只给组件内链写了样式；补齐全局链接重置，避免浏览器默认蓝链 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 列表/归档中的空状态 */
+.a-empty {
+  max-width: 620px;
+  margin: 48px auto;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+}
+
+.a-empty h2 {
+  color: hsl(var(--card-foreground));
+  font-size: 22px;
+}
+
+.a-empty p {
+  font-size: 14px;
+}
+
+.a-empty .a-btn {
+  margin-top: 16px;
+}
+
+/* ---------- 详情页细节修正 ---------- */
+
+.a-meta-type {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--border));
+  text-underline-offset: 3px;
+}
+
+.a-meta-type:hover,
+.a-meta-type:focus-visible {
+  color: hsl(var(--rose));
+  text-decoration-color: currentColor;
+}
+
+.a-locked-desc {
+  max-width: 34em;
+  margin-top: 14px;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: hsl(var(--muted-foreground));
+}
+
+.a-detail.is-unlocked .a-locked-desc,
+.a-detail.is-unlocked .a-locked-type {
+  display: none;
+}
+
+/* 加密页在解锁前只露出空壳；解锁后再由脚本填充目录并显示。 */
+.a-detail.is-locked:not(.is-unlocked) .a-toc,
+.a-detail.is-locked:not(.is-unlocked) .a-toc-m {
+  display: none;
+}
+
+.a-locked-body .a-endmark {
+  margin-top: 48px;
+}
+
+/* 分类/标签明细的锁图标（原型只给了归档/首页的行内锁样式） */
+.a-detail-list-title .a-lock-inline {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin: 0 0 0 5px;
+  vertical-align: -1px;
+  color: hsl(var(--rose));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

@@ -1,0 +1,43 @@
+---
+import EmptyState from '../../components/common/EmptyState.astro';
+import PageHead from '../../components/common/PageHead.astro';
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { collectTaxonomy, entriesForSurface } from '../../lib/content/entries';
+
+const categories = await collectTaxonomy('categories');
+const posts = await entriesForSurface('category', 'post');
+const meta = t('categories.meta', { entries: tCount('posts', posts.length) });
+---
+
+<BaseLayout
+  title={t('categories.title')}
+  description={t('categories.description', { site: siteConfig.title })}
+  canonical="/categories"
+  type="website"
+  view="categories"
+>
+  <section class="a-view" data-view="categories" aria-labelledby="a-categories-title">
+    <div class="a-wrap">
+      <PageHead title={t('categories.title')} meta={meta} art="categories" titleId="a-categories-title" />
+      {categories.length > 0 ? (
+        <div class="a-index-mode" id="a-cat-index">
+          {categories.map((category) => (
+            <a class="a-cat-row" href={category.href}>
+              <span class="a-cat-star" aria-hidden="true">
+                <svg class="a-star" width="12" height="12"><use href="#i-star" /></svg>
+              </span>
+              <span class="a-cat-name">{category.name}</span>
+              <span class="a-cat-dots" aria-hidden="true" />
+              <span class="a-cat-count">{tCount('entries', category.count)}</span>
+            </a>
+          ))}
+          <p class="a-mode-hint">{t('categories.hint')}</p>
+        </div>
+      ) : (
+        <EmptyState title={t('categories.emptyTitle')} note={t('categories.emptyNote')} />
+      )}
+    </div>
+  </section>
+</BaseLayout>

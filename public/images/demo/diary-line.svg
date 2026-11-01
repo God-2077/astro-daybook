@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 220" fill="none">
+  <rect width="640" height="220" rx="14" fill="#FDFBFB" stroke="#E7E0E2"/>
+  <path d="M0 196h640" stroke="#E7E0E2" stroke-width="1"/>
+  <path d="M72 168c8-20 22-30 42-30s34 10 42 30" stroke="#BE4154" stroke-width="2" stroke-linecap="round"/>
+  <path d="M84 168v-34h60v34M84 144h60M114 134v34" stroke="#BE4154" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M437 118l2.4 7.2 7.2 2.4-7.2 2.4-2.4 7.2-2.4-7.2-7.2-2.4 7.2-2.4z" fill="#ED6EA0"/>
+  <text x="72" y="86" fill="#2A2426" font-family="Georgia, 'Times New Roman', serif" font-size="54" letter-spacing="2">Daybook</text>
+  <text x="74" y="116" fill="#6A6065" font-family="Georgia, 'Times New Roman', serif" font-size="16" letter-spacing="4">DIARY &amp; NOTES</text>
+  <text x="568" y="176" fill="#BE4154" font-family="Georgia, 'Times New Roman', serif" font-size="14" text-anchor="end">est. 2024</text>
+</svg>

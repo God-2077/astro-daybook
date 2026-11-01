@@ -1,0 +1,106 @@
+---
+import CommentsSection from '../components/comments/CommentsSection.astro';
+import PageHead from '../components/common/PageHead.astro';
+import { linksConfig } from '../config/links';
+import { siteConfig } from '../config/site';
+import { t, tCount } from '../i18n/current';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { commentOptions } from '../lib/comments';
+
+const groups = linksConfig.groups.filter((group) => group.links.length > 0);
+const total = groups.reduce((sum, group) => sum + group.links.length, 0);
+const emptyText = t('friends.empty');
+const [emptyBefore = emptyText, emptyAfter = ''] = emptyText.split('src/config/links.ts');
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+function monogram(name: string): string {
+  return Array.from(name.trim())[0]?.toUpperCase() ?? '·';
+}
+---
+
+<BaseLayout
+  title={t('friends.title')}
+  description={t('friends.description', { site: siteConfig.title })}
+  canonical="/friends"
+  type="website"
+  view="friends"
+>
+  <section class="a-view" data-view="friends" aria-labelledby="a-friends-title">
+    <div class="a-wrap">
+      <PageHead
+        title={t('friends.title')}
+        meta={t('friends.meta', { friends: tCount('friends', total) })}
+        art="friends"
+        titleId="a-friends-title"
+      />
+
+      {groups.length > 0 ? (
+        <div class="a-friends-groups">
+          {groups.map((group, groupIndex) => (
+            <section class="a-friends-group" aria-labelledby={`a-friends-g${groupIndex + 1}`}>
+              <div class="a-friends-ghead">
+                <span class="a-friends-gstar" aria-hidden="true">
+                  <svg class="a-star" width="11" height="11"><use href="#i-star" /></svg>
+                </span>
+                <h2 class="a-friends-gname" id={`a-friends-g${groupIndex + 1}`}>{group.name}</h2>
+                <span class="a-friends-gline" aria-hidden="true"></span>
+                <span class="a-friends-gcount">{group.links.length}</span>
+              </div>
+              {group.description && <p class="a-friends-gdesc">{group.description}</p>}
+              <div class="a-friends-cards">
+                {group.links.map((link) => (
+                  <a class="a-friend" href={link.url} target="_blank" rel="noopener">
+                    {link.avatar ? (
+                      <img class="a-friend-avatar" src={link.avatar} alt="" width="44" height="44" loading="lazy" decoding="async" />
+                    ) : (
+                      <svg class="a-friend-mono" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+                        <circle cx="22" cy="22" r="20" stroke-width="1.5"></circle>
+                        <circle cx="22" cy="22" r="17.2" stroke-width=".8" opacity=".5"></circle>
+                        <text class="a-mono-letter" x="22" y="23" text-anchor="middle" dominant-baseline="central">
+                          {monogram(link.name)}
+                        </text>
+                      </svg>
+                    )}
+                    <span class="a-friend-body">
+                      <span class="a-friend-name">{link.name}</span>
+                      <span class="a-friend-site">
+                        {hostOf(link.url)}
+                        <svg class="a-ico" aria-hidden="true" focusable="false"><use href="#i-external" /></svg>
+                      </span>
+                      {link.description && <span class="a-friend-desc">{link.description}</span>}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <p class="a-friends-note">{emptyBefore}<code>src/config/links.ts</code>{emptyAfter}</p>
+      )}
+
+      {commentOptions().enabled ? (
+        <p class="a-friends-note">
+          {t('friends.exchangeCommentsPrefix')}<a href="#a-friends-comments-title">{t('friends.exchangeCommentsLink')}</a>{t(
+            'friends.exchangeCommentsSuffix',
+          )}
+        </p>
+      ) : (
+        <p class="a-friends-note">
+          {t('friends.exchangeAboutPrefix')}<a href="/about">{t('friends.exchangeAboutLink')}</a>{t(
+            'friends.exchangeAboutSuffix',
+          )}
+        </p>
+      )}
+
+      <CommentsSection titleId="a-friends-comments-title" className="a-comments-page" />
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,71 @@
+---
+import EmptyState from '../../components/common/EmptyState.astro';
+import PageHead from '../../components/common/PageHead.astro';
+import { siteConfig } from '../../config/site';
+import { t, tCount } from '../../i18n/current';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatContentDate, formatDisplayDate } from '../../lib/content/date';
+import { collectTaxonomy, entriesForSurface, taxonomySlug } from '../../lib/content/entries';
+
+export async function getStaticPaths() {
+  const tags = await collectTaxonomy('tags');
+  return tags.map((tag) => ({
+    params: { tag: decodeURIComponent(tag.slug) },
+    props: { name: tag.name },
+  }));
+}
+
+const name = Astro.props.name as string;
+const entries = (await entriesForSurface('tag', 'post')).filter(
+  (entry) => entry.collection === 'post' && entry.data.tags.includes(name),
+);
+const count = entries.length;
+---
+
+<BaseLayout
+  title={t('tags.detailTitle', { name })}
+  description={t('tags.detailDescription', { site: siteConfig.title, name })}
+  canonical={`/tags/${taxonomySlug('tags', name)}`}
+  type="website"
+  view="tags"
+>
+  <section class="a-view" data-view="tags" aria-labelledby="a-tag-title">
+    <div class="a-wrap">
+      <PageHead
+        title={`#${name}`}
+        meta={t('tags.detailMeta', { entries: tCount('posts', count) })}
+        art="tags"
+        titleId="a-tag-title"
+      />
+      <div class="a-detail-panel">
+        <a class="a-back" href="/tags">
+          <svg class="a-ico a-ico-sm" aria-hidden="true" focusable="false"><use href="#i-arrow-left" /></svg>
+          {t('tags.back')}
+        </a>
+        {count > 0 ? (
+          <div class="a-detail-list">
+            {entries.map((entry) => (
+              <a class="a-detail-list-row" href={entry.url}>
+                <time
+                  class="a-detail-list-date"
+                  datetime={formatContentDate(entry.data.date, siteConfig.timezone, 'yyyy-MM-dd')}
+                >
+                  {formatDisplayDate(entry.data.date, siteConfig.timezone)}
+                </time>
+                <span class="a-detail-list-title">
+                  {entry.data.title}
+                  {entry.data.password && (
+                    <svg class="a-lock-inline" aria-hidden="true" focusable="false"><use href="#i-lock" /></svg>
+                  )}
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <EmptyState title={t('tags.emptyDetailTitle')} note={t('tags.emptyDetailNote')} />
+        )}
+      </div>
+      <p class="a-tag-note">{t('tags.note')}</p>
+    </div>
+  </section>
+</BaseLayout>

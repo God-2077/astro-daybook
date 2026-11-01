@@ -1,0 +1,74 @@
+---
+import { t, tCount } from '../../i18n/current';
+import { pageHref, pagerItems } from '../../lib/pagination';
+
+interface Props {
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  base: string;
+  label: string;
+  className?: string;
+}
+
+const { page, totalPages, totalItems, base, label, className = '' } = Astro.props;
+
+const items = pagerItems(page, totalPages);
+const prevLabel = t('pager.prev');
+const nextLabel = t('pager.next');
+const prevAria = t('pager.prevAria');
+const nextAria = t('pager.nextAria');
+---
+
+<nav class:list={['a-pager', className]} aria-label={label}>
+  <p class="a-pager-info">{t('pager.info', { page, totalPages, entries: tCount('entries', totalItems) })}</p>
+  <div class="a-pager-controls">
+    {
+      page > 1 ? (
+        <a class="a-pager-btn" href={pageHref(base, page - 1)} aria-label={prevAria}>
+          {prevLabel}
+        </a>
+      ) : (
+        <span class="a-pager-btn" aria-disabled="true" aria-label={prevAria}>
+          {prevLabel}
+        </span>
+      )
+    }
+    {
+      items.map((item) =>
+        item === 'gap' ? (
+          <span class="a-pager-num" aria-hidden="true">
+            …
+          </span>
+        ) : item === 'last' ? (
+          <a
+            class="a-pager-num a-pager-last"
+            href={pageHref(base, totalPages)}
+            aria-label={t('pager.lastAria', { page: totalPages })}
+          >
+            {t('pager.last')}
+          </a>
+        ) : item === page ? (
+          <span class="a-pager-num" aria-current="page" aria-disabled="true">
+            {item}
+          </span>
+        ) : (
+          <a class="a-pager-num" href={pageHref(base, item)} aria-label={t('pager.pageAria', { page: item })}>
+            {item}
+          </a>
+        ),
+      )
+    }
+    {
+      page < totalPages ? (
+        <a class="a-pager-btn" href={pageHref(base, page + 1)} aria-label={nextAria}>
+          {nextLabel}
+        </a>
+      ) : (
+        <span class="a-pager-btn" aria-disabled="true" aria-label={nextAria}>
+          {nextLabel}
+        </span>
+      )
+    }
+  </div>
+</nav>

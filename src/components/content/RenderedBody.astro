@@ -1,0 +1,13 @@
+---
+import type { RenderedEntry } from '../../lib/content/render';
+
+interface Props {
+  rendered: RenderedEntry;
+}
+
+const { rendered } = Astro.props;
+const Content = rendered.format === 'mdx' ? rendered.Content : undefined;
+const html = rendered.format === 'md' ? rendered.html : '';
+---
+
+{Content ? <Content /> : <Fragment set:html={html} />}

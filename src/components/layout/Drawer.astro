@@ -1,0 +1,84 @@
+---
+import { siteConfig } from '../../config/site';
+import { t } from '../../i18n/current';
+import { isNavLinkActive } from '../../lib/nav';
+import Icon from '../common/Icon.astro';
+
+const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
+const path = Astro.url.pathname || '/';
+
+function isActive(link: string): boolean {
+  return isNavLinkActive(link, path);
+}
+
+function isGroupActive(items: { link: string }[]): boolean {
+  return items.some((item) => isActive(item.link));
+}
+---
+
+<div class="a-drawer" id="a-drawer" role="dialog" aria-modal="true" aria-label={t('nav.label')} hidden>
+  <div class="a-drawer-head">
+    <span class="a-drawer-brand">{siteConfig.title}</span>
+    <button type="button" class="a-iconbtn" id="a-drawer-close" aria-label={t('nav.closeMenu')}>
+      <Icon name="i-x" />
+    </button>
+  </div>
+  <div class="a-mast-rule a-drawer-rule"></div>
+  <nav class="a-drawer-nav" aria-label={t('nav.mobile')}>
+    {siteConfig.nav.map((item, index) =>
+      'items' in item ? (
+        <Fragment>
+          {/* fix: 移除移动端顶部导航栏的 button 的 aria-current 属性 */}
+          <button
+            type="button"
+            class="a-drawer-link a-drawer-toggle ttt"
+            data-drawer-group
+            aria-expanded="false"
+            aria-controls={`a-drawer-group-${index}`}
+            // aria-current={isGroupActive(item.items) ? 'page' : undefined}
+          >
+            {item.title}<Icon name="i-chevron-down" className="a-chev" />
+          </button>
+          <div class="a-drawer-subgroup" id={`a-drawer-group-${index}`} hidden>
+            {item.items.map((link) => (
+              <a
+                class="a-drawer-link a-drawer-sub"
+                href={link.link}
+                target={/^https?:\/\//i.test(link.link) ? '_blank' : undefined}
+                rel={/^https?:\/\//i.test(link.link) ? 'noopener' : undefined}
+                aria-current={isActive(link.link) ? 'page' : undefined}
+              >
+                {link.title}
+              </a>
+            ))}
+          </div>
+        </Fragment>
+      ) : (
+        <a
+          class="a-drawer-link"
+          href={item.link}
+          target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined}
+          rel={/^https?:\/\//i.test(item.link) ? 'noopener' : undefined}
+          aria-current={isActive(item.link) ? 'page' : undefined}
+        >
+          {item.title}
+        </a>
+      )
+    )}
+  </nav>
+  <div class="a-drawer-foot">
+    <div class="a-drawer-theme" role="group" aria-label={t('theme.group')}>
+      <span class="a-drawer-label">{t('theme.label')}</span>
+      <button type="button" class="a-theme-opt" data-theme-set="light" aria-pressed="true">{t('theme.light')}</button>
+      <button type="button" class="a-theme-opt" data-theme-set="dark" aria-pressed="false">{t('theme.dark')}</button>
+      <button
+        type="button"
+        class="a-theme-opt"
+        data-theme-set="system"
+        aria-pressed="false"
+        aria-label={t('theme.systemAria')}
+      >{t('theme.auto')}</button>
+    </div>
+    {rssEnabled && <a class="a-drawer-rss" href="/feed.xml">{t('nav.rss')}</a>}
+  </div>
+</div>

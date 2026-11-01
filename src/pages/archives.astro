@@ -1,0 +1,227 @@
+---
+import PageHead from '../components/common/PageHead.astro';
+import { siteConfig } from '../config/site';
+import { t, tCount } from '../i18n/current';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatContentDate, formatMonthDay, zonedParts } from '../lib/content/date';
+import { entriesForSurface } from '../lib/content/entries';
+import { getEntryTitle } from '../lib/content/title';
+import type { AnyEntry } from '../types/content';
+
+interface ArcItem {
+  entry: AnyEntry;
+  year: number;
+  monthKey: string;
+  month: number;
+  datetime: string;
+  monthDay: string;
+  category: string;
+  locked: boolean;
+}
+
+const articles = await entriesForSurface('archive', 'post');
+const diaries = await entriesForSurface('archive', 'daily');
+const all = [...articles, ...diaries];
+const timeZone = siteConfig.timezone;
+const diaryLabel = siteConfig.labels.diary;
+const now = zonedParts(new Date(), timeZone);
+
+function toItems(entries: AnyEntry[]): ArcItem[] {
+  return entries
+    .slice()
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .map((entry) => {
+      const parts = zonedParts(entry.data.date, timeZone);
+      return {
+        entry,
+        year: parts.year,
+        month: parts.month,
+        monthKey: `${parts.year}-${String(parts.month).padStart(2, '0')}`,
+        datetime: formatContentDate(entry.data.date, timeZone, 'yyyy-MM-dd'),
+        monthDay: formatMonthDay(entry.data.date, timeZone),
+        category:
+          entry.collection === 'post'
+            ? (entry.data.categories[0] ?? t('archive.articles'))
+            : (entry.data.category ?? diaryLabel),
+        locked: Boolean(entry.data.password),
+      };
+    });
+}
+
+const articleItems = toItems(articles);
+const diaryItems = toItems(diaries);
+
+const contentYears = all.map((entry) => zonedParts(entry.data.date, timeZone).year);
+const minYear = Math.min(siteConfig.since, now.year, ...contentYears);
+const maxYear = Math.max(now.year, ...contentYears);
+const years = Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index);
+const yearRange = minYear === maxYear ? `${minYear}` : `${minYear}–${maxYear}`;
+
+function heatFor(items: ArcItem[]): Record<string, number[]> {
+  const counts: Record<string, number[]> = {};
+  for (const year of years) counts[String(year)] = Array.from({ length: 12 }, () => 0);
+  for (const item of items) {
+    const row = counts[String(item.year)];
+    if (row) row[item.month - 1] = (row[item.month - 1] ?? 0) + 1;
+  }
+  return counts;
+}
+
+const heat = {
+  years,
+  current: { year: now.year, month: now.month },
+  counts: {
+    articles: heatFor(articleItems),
+    diary: heatFor(diaryItems),
+  },
+};
+
+function yearGroups(items: ArcItem[]): { year: number; items: ArcItem[] }[] {
+  const map = new Map<number, ArcItem[]>();
+  for (const item of items) {
+    const list = map.get(item.year);
+    if (list) list.push(item);
+    else map.set(item.year, [item]);
+  }
+  return [...map.entries()].sort((a, b) => b[0] - a[0]).map(([year, list]) => ({ year, items: list }));
+}
+
+const articleGroups = yearGroups(articleItems);
+const diaryGroups = yearGroups(diaryItems);
+
+const firstArticleMonth = new Map<string, ArcItem>();
+for (const item of articleItems) {
+  if (!firstArticleMonth.has(item.monthKey)) firstArticleMonth.set(item.monthKey, item);
+}
+---
+
+<BaseLayout
+  title={t('archive.title')}
+  description={t('archive.description', { site: siteConfig.title, diary: diaryLabel })}
+  canonical="/archives"
+  type="website"
+  view="archive"
+>
+  <section class="a-view" data-view="archive" aria-labelledby="a-archive-title">
+    <div class="a-wrap">
+      <PageHead
+        title={t('archive.title')}
+        meta={t('archive.meta', { diary: diaryLabel })}
+        art="archive"
+        titleId="a-archive-title"
+      />
+
+      <div class="a-arc-top">
+        <p class="a-arc-meta">
+          <strong id="a-arc-total">{articleItems.length}</strong><span id="a-arc-unit">{t('archive.statUnit')}</span><span
+            id="a-arc-noun">{t('archive.statNounPosts')}</span> · <span id="a-arc-range">{yearRange}</span><span
+            id="a-arc-year-unit">{t('archive.yearUnit')}</span>
+        </p>
+        <div class="a-arc-switch" data-mode="articles" role="group" aria-label={t('archive.typeAria')}>
+          <span class="a-arc-thumb" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="a-arc-opt"
+            data-arc-mode="articles"
+            data-arc-total={articleItems.length}
+            data-arc-unit={t('archive.statUnit')}
+            data-arc-noun={t('archive.statNounPosts')}
+            data-arc-range={yearRange}
+            aria-pressed="true">{t('archive.articles')}</button>
+          <button
+            type="button"
+            class="a-arc-opt"
+            data-arc-mode="diary"
+            data-arc-total={diaryItems.length}
+            data-arc-unit={t('archive.statUnit')}
+            data-arc-noun={t('archive.statNounDiary', { diary: diaryLabel })}
+            data-arc-range={yearRange}
+            aria-pressed="false">{diaryLabel}</button>
+        </div>
+      </div>
+
+      <div class="a-heat">
+        <div class="a-heat-head">
+          <h2 class="a-heat-title">{t('archive.heatTitle')}</h2>
+          <div class="a-heat-legend" aria-hidden="true">
+            <span>{t('archive.heatLow')}</span>
+            <span class="a-heat-swatch" data-tier="0"></span>
+            <span class="a-heat-swatch" data-tier="1"></span>
+            <span class="a-heat-swatch" data-tier="2"></span>
+            <span class="a-heat-swatch" data-tier="3"></span>
+            <span class="a-heat-swatch" data-tier="4"></span>
+            <span>{t('archive.heatHigh')}</span>
+          </div>
+        </div>
+        <div class="a-heat-grid" id="a-heat-grid" data-heat={JSON.stringify(heat)}></div>
+        <noscript>
+          <p class="a-mode-hint">{t('archive.heatNoJs')}</p>
+        </noscript>
+      </div>
+
+      <div class="a-arc-years" id="a-arc-articles">
+        {articleGroups.map((group) => (
+          <section class="a-arc-year" data-arc-year={group.year} id={`year-${group.year}`}>
+            <a class="a-arc-year-head" href={`#year-${group.year}`}>
+              <h2 class="a-arc-year-num">
+                <svg class="a-star" aria-hidden="true"><use href="#i-star" /></svg>{group.year}
+              </h2>
+              <span class="a-arc-year-rule" aria-hidden="true"></span>
+              <span class="a-arc-year-count">{tCount('posts', group.items.length)}</span>
+            </a>
+            {group.items.map((item) => (
+              <a
+                class="a-arc-entry"
+                href={item.entry.url}
+                data-arc-month={item.monthKey}
+                id={firstArticleMonth.get(item.monthKey) === item ? `month-${item.monthKey}` : undefined}
+              >
+                <time class="a-arc-date" datetime={item.datetime}>{item.monthDay}</time>
+                <span class="a-arc-entry-title">
+                  {getEntryTitle(item.entry)}
+                  {item.locked && (
+                    <svg class="a-lock-inline a-lock-trail" aria-hidden="true" focusable="false">
+                      <use href="#i-lock" />
+                    </svg>
+                  )}
+                </span>
+                <span class="a-arc-entry-cat">{item.category}</span>
+              </a>
+            ))}
+          </section>
+        ))}
+      </div>
+
+      <div class="a-arc-years" id="a-arc-diary" hidden>
+        {diaryGroups.map((group) => (
+          <section class="a-arc-year" data-arc-year={group.year}>
+            <a class="a-arc-year-head" href={`#year-${group.year}`}>
+              <h2 class="a-arc-year-num">
+                <svg class="a-star" aria-hidden="true"><use href="#i-star" /></svg>{group.year}
+              </h2>
+              <span class="a-arc-year-rule" aria-hidden="true"></span>
+              <span class="a-arc-year-count">{t('archive.diaryYear', {
+                  entries: tCount('entries', group.items.length),
+                  diary: diaryLabel,
+                })}</span>
+            </a>
+            {group.items.map((item) => (
+              <a class="a-arc-entry" href={item.entry.url} data-arc-month={item.monthKey}>
+                <time class="a-arc-date" datetime={item.datetime}>{item.monthDay}</time>
+                <span class="a-arc-entry-title">
+                  {getEntryTitle(item.entry)}
+                  {item.locked && (
+                    <svg class="a-lock-inline a-lock-trail" aria-hidden="true" focusable="false">
+                      <use href="#i-lock" />
+                    </svg>
+                  )}
+                </span>
+                <span class="a-arc-entry-cat">{item.category}</span>
+              </a>
+            ))}
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

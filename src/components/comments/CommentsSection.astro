@@ -1,0 +1,26 @@
+---
+import { t } from '../../i18n/current';
+import { commentOptions } from '../../lib/comments';
+import Comments from '../comments/Comments';
+
+interface Props {
+  comments?: boolean;
+  titleId?: string;
+  /** 额外类名：独立页面传 `a-comments-page`，让留言区在阅读栏内居中。 */
+  className?: string;
+}
+
+const { comments = true, titleId = 'a-comments-title', className = '' } = Astro.props;
+const options = commentOptions(comments);
+---
+
+{
+  options.enabled && (
+    <section class:list={['a-comments', className]} aria-labelledby={titleId}>
+      <h2 id={titleId}>
+        <svg class="a-h2-star" aria-hidden="true"><use href="#i-star" /></svg>{t('common.comments')}
+      </h2>
+      <Comments client:visible options={options} />
+    </section>
+  )
+}
