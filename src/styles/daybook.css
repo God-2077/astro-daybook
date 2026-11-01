@@ -1788,7 +1788,7 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
 .a-prose ul, .a-prose ol { padding-left: 1.4em; }
 .a-prose li { margin: .45em 0; padding-left: .15em; }
 .a-prose li::marker { color: hsl(var(--muted-foreground)); }
-.a-prose a {
+:is(.a-prose, .a-entry-text) a {
   color: hsl(var(--rose));
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -1796,8 +1796,12 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   text-underline-offset: .2em;
   transition: text-decoration-color .16s var(--ease);
 }
-.a-prose a:hover { text-decoration-color: currentColor; }
-.a-prose strong { font-family: var(--font-bold); font-weight: 700; color: hsl(var(--card-foreground)); }
+:is(.a-prose, .a-entry-text) a:hover { text-decoration-color: currentColor; }
+:is(.a-prose, .a-entry-text) strong {
+  font-family: var(--font-bold);
+  font-weight: 700;
+  color: hsl(var(--card-foreground));
+}
 .a-prose blockquote {
   margin: 1.6em 0;
   padding: 2px 0 2px 20px;
@@ -1813,7 +1817,8 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   margin: 2.4em 0;
 }
 
-.a-prose code {
+.a-prose code,
+.a-entry-text :not(pre) > code {
   font-family: var(--font-mono);
   font-size: .84em;
   padding: .08em .34em;
@@ -3343,9 +3348,10 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
   letter-spacing: .04em;
   color: hsl(var(--muted-foreground));
 }
-.a-prose mark { background: hsl(var(--pink-decor) / .22); color: inherit; padding: 0 .12em; }
-.a-prose u { text-decoration-color: hsl(var(--rose) / .55); text-underline-offset: .18em; }
-.a-prose sub, .a-prose sup { font-size: .72em; line-height: 0; }
+:is(.a-prose, .a-entry-text) mark { background: hsl(var(--pink-decor) / .22); color: inherit; padding: 0 .12em; }
+:is(.a-prose, .a-entry-text) u { text-decoration-color: hsl(var(--rose) / .55); text-underline-offset: .18em; }
+:is(.a-prose, .a-entry-text) sub,
+:is(.a-prose, .a-entry-text) sup { font-size: .72em; line-height: 0; }
 .a-prose table {
   width: 100%;
   margin: 1.6em 0;
