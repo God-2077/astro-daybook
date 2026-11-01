@@ -115,6 +115,12 @@ comments: true
 - 加载前容器显示灰色占位块（固定 1.6:1 比例、无动画）；加载完成后直接替换为图片；加载失败时在占位块内显示 `alt` 文案。
 - 本地图片建议放在 `public/images/`，正文用 `/images/...` 引用；远程图片与普通 Markdown 图片语法一致。
 
+## 正文链接
+
+- `http://` / `https://` 开头且 host 与 `siteConfig.url` 不同的链接，自动补 `target="_blank" rel="noopener"`，在新标签页打开。
+- 同 host 的绝对地址（`http` / `https` 互换也算同站）、`/` 开头的站内路径、`#` 锚点与 `mailto:` / `tel:` 链接保持原样。
+- 首页日记流、详情页、独立页面与 RSS 全文共用同一套规则；MDX 组件里用 Markdown 语法写的链接同样生效。
+
 ## MDX
 
 `dailyCollection` / `postsCollection` 的 loader 同时匹配 `**/*.md` 与 `**/*.mdx`；`src/pages/` 下的独立页面也支持 `.mdx`。

@@ -177,6 +177,16 @@ assert.match(markdownSyntax, /decoding="async"/, '正文图片应异步解码');
 assert.match(markdownSyntax, /<p>这一段紧跟着一张图片<\/p>\n<figure class="a-figure">/, '紧跟文字的独占行图片也应转 figure');
 assert.match(markdownSyntax, /<div class="a-figure-row">\n?<figure class="a-figure">/, '同一行多图应渲染为 a-figure-row');
 assert.equal((markdownSyntax.match(/<div class="a-figure-row">/g) ?? []).length, 2, '演示应包含两处并排图片');
+assert.match(
+  markdownSyntax,
+  /<a href="https:\/\/example\.com" target="_blank" rel="noopener">普通链接<\/a>/,
+  '正文外链应在新标签页打开',
+);
+assert.match(
+  markdownSyntax,
+  /<a href="https:\/\/example\.com" target="_blank" rel="noopener">https:\/\/example\.com<\/a>/,
+  '裸链接也应在新标签页打开',
+);
 
 const mdxSyntax = read('post/mdx-syntax/index.html');
 assert.match(mdxSyntax, /<ol class="a-mdx-timeline">/, 'MDX 时间线应渲染为有序列表');

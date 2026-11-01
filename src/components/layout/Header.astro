@@ -3,6 +3,7 @@ import { siteConfig } from '../../config/site';
 import { t } from '../../i18n/current';
 import { getSearchMessages } from '../../i18n/react';
 import { isNavLinkActive } from '../../lib/nav';
+import { isExternalUrl } from '../../lib/site';
 import Icon from '../common/Icon.astro';
 import SearchPanel from '../search/SearchPanel';
 
@@ -69,8 +70,8 @@ const searchMessages = getSearchMessages(siteConfig.lang, siteConfig.labels.diar
                     <a
                       class="a-subnav-link"
                       href={link.link}
-                      target={/^https?:\/\//i.test(link.link) ? '_blank' : undefined}
-                      rel={/^https?:\/\//i.test(link.link) ? 'noopener' : undefined}
+                      target={isExternalUrl(link.link) ? '_blank' : undefined}
+                      rel={isExternalUrl(link.link) ? 'noopener' : undefined}
                       aria-current={isActive(link.link) ? 'page' : undefined}
                     >
                       {link.title}
@@ -82,8 +83,8 @@ const searchMessages = getSearchMessages(siteConfig.lang, siteConfig.labels.diar
               <a
                 class="a-tab"
                 href={item.link}
-                target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined}
-                rel={/^https?:\/\//i.test(item.link) ? 'noopener' : undefined}
+                target={isExternalUrl(item.link) ? '_blank' : undefined}
+                rel={isExternalUrl(item.link) ? 'noopener' : undefined}
                 aria-current={isActive(item.link) ? 'page' : undefined}
               >
                 {item.title}
