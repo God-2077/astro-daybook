@@ -14,8 +14,6 @@ interface Props {
 const { page, totalPages, totalItems, base, label, className = '' } = Astro.props;
 
 const items = pagerItems(page, totalPages);
-const prevLabel = t('pager.prev');
-const nextLabel = t('pager.next');
 const prevAria = t('pager.prevAria');
 const nextAria = t('pager.nextAria');
 ---
@@ -26,11 +24,11 @@ const nextAria = t('pager.nextAria');
     {
       page > 1 ? (
         <a class="a-pager-btn" href={pageHref(base, page - 1)} aria-label={prevAria}>
-          {prevLabel}
+          <span aria-hidden="true">‹</span>
         </a>
       ) : (
         <span class="a-pager-btn" aria-disabled="true" aria-label={prevAria}>
-          {prevLabel}
+          <span aria-hidden="true">‹</span>
         </span>
       )
     }
@@ -40,14 +38,6 @@ const nextAria = t('pager.nextAria');
           <span class="a-pager-num" aria-hidden="true">
             …
           </span>
-        ) : item === 'last' ? (
-          <a
-            class="a-pager-num a-pager-last"
-            href={pageHref(base, totalPages)}
-            aria-label={t('pager.lastAria', { page: totalPages })}
-          >
-            {t('pager.last')}
-          </a>
         ) : item === page ? (
           <span class="a-pager-num" aria-current="page" aria-disabled="true">
             {item}
@@ -62,11 +52,11 @@ const nextAria = t('pager.nextAria');
     {
       page < totalPages ? (
         <a class="a-pager-btn" href={pageHref(base, page + 1)} aria-label={nextAria}>
-          {nextLabel}
+          <span aria-hidden="true">›</span>
         </a>
       ) : (
         <span class="a-pager-btn" aria-disabled="true" aria-label={nextAria}>
-          {nextLabel}
+          <span aria-hidden="true">›</span>
         </span>
       )
     }

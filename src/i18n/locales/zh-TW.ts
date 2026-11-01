@@ -85,10 +85,6 @@ const messages = {
   'posts.readingTime': '{minutes} min',
 
   'pager.info': '第 {page} / {totalPages} 頁 · 共 {entries}',
-  'pager.prev': '‹ 上一頁',
-  'pager.next': '下一頁 ›',
-  'pager.last': '最後一頁',
-  'pager.lastAria': '最後一頁，第 {page} 頁',
   'pager.pageAria': '第 {page} 頁',
   'pager.prevAria': '上一頁',
   'pager.nextAria': '下一頁',

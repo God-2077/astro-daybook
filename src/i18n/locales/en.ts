@@ -98,10 +98,6 @@ const messages = {
   'posts.readingTime': '{minutes} min',
 
   'pager.info': 'Page {page} / {totalPages} · {entries}',
-  'pager.prev': '‹ Previous',
-  'pager.next': 'Next ›',
-  'pager.last': 'Last',
-  'pager.lastAria': 'Last page, page {page}',
   'pager.pageAria': 'Page {page}',
   'pager.prevAria': 'Previous',
   'pager.nextAria': 'Next',
