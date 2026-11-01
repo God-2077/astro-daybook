@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '../../config/site';
 import { t } from '../../i18n/current';
+import { isExternalUrl } from '../../lib/site';
 import { currentYearInTimeZone } from '../../lib/time';
 import Icon from '../common/Icon.astro';
 
@@ -19,8 +20,8 @@ const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
         {siteConfig.footerNav.map((item) => (
           <a
             href={item.link}
-            target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined}
-            rel={/^https?:\/\//i.test(item.link) ? 'noopener' : undefined}
+            target={isExternalUrl(item.link) ? '_blank' : undefined}
+            rel={isExternalUrl(item.link) ? 'noopener' : undefined}
           >
             {item.title}
           </a>
@@ -43,7 +44,11 @@ const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
               <Fragment>
                 {index > 0 && ' · '}
                 {item.link ? (
-                  <a href={item.link} target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined} rel="noopener">{item.text}</a>
+                  <a
+                    href={item.link}
+                    target={isExternalUrl(item.link) ? '_blank' : undefined}
+                    rel={isExternalUrl(item.link) ? 'noopener' : undefined}
+                  >{item.text}</a>
                 ) : (
                   <span>{item.text}</span>
                 )}

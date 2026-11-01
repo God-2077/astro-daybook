@@ -5,6 +5,8 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import remarkMath from 'remark-math';
 
+import { isExternalUrl } from './site';
+
 /**
  * Markdown / MDX 共用的正文管线。
  *
@@ -253,9 +255,40 @@ function transformChildren(parent: HastNode): void {
   parent.children = next;
 }
 
+/**
+ * 外链的 `rel`：保留作者已有的值，只补充 `noopener`（与站点配置里的外链一致）。
+ */
+function mergeRel(value: unknown): string[] {
+  const list = Array.isArray(value) ? value.map(String) : typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
+  if (!list.includes('noopener')) list.push('noopener');
+  return list;
+}
+
+/** 站外 http(s) 链接在新标签页打开；站内绝对地址、锚点与 mailto/tel 保持原样。 */
+function markExternalLinks(node: HastNode): void {
+  if (isElement(node) && node.tagName === 'a') {
+    const href = node.properties?.href;
+    if (typeof href === 'string' && isExternalUrl(href)) {
+      const properties = node.properties ?? {};
+      node.properties = {
+        ...properties,
+        target: typeof properties.target === 'string' ? properties.target : '_blank',
+        rel: mergeRel(properties.rel),
+      };
+    }
+  }
+  for (const child of node.children ?? []) markExternalLinks(child);
+}
+
 export function rehypeArticleProse() {
   return (tree: HastNode): void => {
     transformChildren(tree);
+  };
+}
+
+export function rehypeExternalLinks() {
+  return (tree: HastNode): void => {
+    markExternalLinks(tree);
   };
 }
 
@@ -280,6 +313,7 @@ export const rehypePlugins: RehypePlugins = [
     },
   ],
   rehypeArticleProse,
+  rehypeExternalLinks,
 ];
 
 export const SHIKI_CONFIG = {

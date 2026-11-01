@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { siteConfig } from '../../src/config/site';
 import { renderMarkdown } from '../../src/lib/markdown';
 
 test('h2 gets the decorative star before its text', async () => {
@@ -84,4 +85,21 @@ test('text, row and text keep their order', async () => {
 test('text-only paragraphs are left untouched', async () => {
   const { html } = await renderMarkdown('第一行\n第二行');
   assert.equal(html, '<p>第一行\n第二行</p>');
+});
+
+test('external links open in a new tab with noopener', async () => {
+  const { html } = await renderMarkdown('[外链](https://example.com/post "悬停标题")');
+  assert.match(html, /<a href="https:\/\/example\.com\/post" title="悬停标题" target="_blank" rel="noopener">外链<\/a>/);
+});
+
+test('same-host absolute links stay in the current tab', async () => {
+  const href = `${siteConfig.url}/post/hello`;
+  const { html } = await renderMarkdown(`[站内绝对地址](${href})`);
+  assert.ok(html.includes(`href="${href}"`), '同 host 绝对地址应保留原 href');
+  assert.doesNotMatch(html, /target=|rel=/);
+});
+
+test('internal paths, anchors and mailto links are left untouched', async () => {
+  const { html } = await renderMarkdown('[站内](/posts) [锚点](#h-小节) [邮件](mailto:hi@example.com)');
+  assert.doesNotMatch(html, /target=|noopener/);
 });

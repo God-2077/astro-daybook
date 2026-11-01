@@ -2,6 +2,7 @@
 import { siteConfig } from '../../config/site';
 import { t } from '../../i18n/current';
 import { isNavLinkActive } from '../../lib/nav';
+import { isExternalUrl } from '../../lib/site';
 import Icon from '../common/Icon.astro';
 
 const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
@@ -44,8 +45,8 @@ function isGroupActive(items: { link: string }[]): boolean {
               <a
                 class="a-drawer-link a-drawer-sub"
                 href={link.link}
-                target={/^https?:\/\//i.test(link.link) ? '_blank' : undefined}
-                rel={/^https?:\/\//i.test(link.link) ? 'noopener' : undefined}
+                target={isExternalUrl(link.link) ? '_blank' : undefined}
+                rel={isExternalUrl(link.link) ? 'noopener' : undefined}
                 aria-current={isActive(link.link) ? 'page' : undefined}
               >
                 {link.title}
@@ -57,8 +58,8 @@ function isGroupActive(items: { link: string }[]): boolean {
         <a
           class="a-drawer-link"
           href={item.link}
-          target={/^https?:\/\//i.test(item.link) ? '_blank' : undefined}
-          rel={/^https?:\/\//i.test(item.link) ? 'noopener' : undefined}
+          target={isExternalUrl(item.link) ? '_blank' : undefined}
+          rel={isExternalUrl(item.link) ? 'noopener' : undefined}
           aria-current={isActive(item.link) ? 'page' : undefined}
         >
           {item.title}

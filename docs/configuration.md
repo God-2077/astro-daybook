@@ -76,7 +76,7 @@ type NavItem =
 ```
 
 - `items` 只能一层二级。
-- 外链必须以 `http://` 或 `https://` 开头，自动带 `target="_blank" rel="noopener"`。
+- 外链必须以 `http://` 或 `https://` 开头；host 与 `siteConfig.url` 不同的链接自动带 `target="_blank" rel="noopener"`，同 host 的绝对地址按站内链接处理。
 - 内部链接必须以 `/` 开头；是否命中真实路由需要自行保证（配置层只校验格式，不做路由存在性检查）。
 - 二级菜单在移动端抽屉中折叠展示。
 - 当前项按路径前缀高亮；移动端抽屉会在当前项后显示 `✦`。
@@ -277,7 +277,7 @@ pnpm build      # 输出 dist/
 
 - 密码保护是**静态分发下的轻量遮挡**，不是服务端鉴权。密文随 HTML 公开，拥有足够动机的人可以离线暴力尝试；真正敏感的内容应使用服务端鉴权。
 - 错误密码只提示「密码错误」，不会泄露明文片段。
-- 配置中的外链会加 `rel="noopener"`；Markdown 默认按 Astro 的安全策略处理原始 HTML。
+- 配置与正文中的站外链接会加 `target="_blank" rel="noopener"`；Markdown 默认按 Astro 的安全策略处理原始 HTML。
 - `inject.headEnd` / `inject.bodyEnd` 按原样写入页面，不做转义或清洗；只用于站点所有者自己维护的可信 HTML。
 - Pagefind 只对密码页的标题与 `description` 建索引；被锁定的内容、`hideFrom` 含 `sitemap` 的条目、草稿与 404 页输出 `noindex`，密码页默认不进 sitemap。
 - 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前请替换成自己的资源。
