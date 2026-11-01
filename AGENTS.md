@@ -113,7 +113,40 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`
 - 内容 frontmatter 是 strict schema：日记没有 `categories` / `tags` / `keywords`，写了会构建失败。
 - 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前替换成自己的资源。
 
-## 7. 提交前验证
+## 7. Git 提交规范
+
+- 仅在用户明确要求时创建提交；不要修改或 rebase 已推送的历史。
+- 每次提交只包含一个逻辑变更，不混入无关格式化、重构或依赖升级。
+- 提交信息遵循 Conventional Commits：
+
+  `<type>(<scope>): <description>`
+
+  - `type` 必填且小写：`feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`chore`、`ci`
+  - `scope` 可选，小写，表示影响范围，如 `auth`、`parser`、`api`
+  - `description` 使用英文祈使句，小写开头，不加句号，尽量不超过 50 字符
+- 正文与描述之间空一行，重点说明“为什么改”及必要背景，不重复描述“改了什么”。
+- 关联 Issue 使用脚注，如 `Closes #123`。
+- 破坏性变更必须在 type/scope 后加 `!`，或在脚注中写 `BREAKING CHANGE: <说明>`。
+- 禁止使用 `update`、`fix bug`、`changes` 等模糊提交信息。
+- 若 commitlint / Husky 校验失败，修正提交信息，不要使用 `--no-verify` 绕过。
+
+示例：
+
+```text
+feat(auth): add JWT-based login
+
+Replace session-based login to support distributed deployments.
+
+Closes #123
+```
+
+```text
+refactor(api)!: remove deprecated endpoint
+
+BREAKING CHANGE: `/v1/users` has been removed; use `/v2/users`.
+```
+
+## 8. 提交前验证
 
 ```bash
 pnpm check      # 类型、模板与内容 schema
