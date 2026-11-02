@@ -8,11 +8,25 @@
 
 ---
 
-![デスクトップ · ライト](./docs/images/preview-desktop-light.png)
-
-![デスクトップ · ダーク](./docs/images/preview-desktop-dark.png)
-
-<img src="./docs/images/preview-mobile.png" width="320" alt="モバイル" />
+<table width="100%" align="center">
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/preview-desktop-light.png" alt="デスクトップ · ライト">
+      <br>デスクトップ · ライト
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./docs/images/preview-desktop-dark.png" alt="デスクトップ · ダーク"><br>デスクトップ · ダーク</td>
+    <td align="center"><img src="./docs/images/preview-mobile-light.png" alt="モバイル · ライト"><br>モバイル · ライト</td>
+    <td align="center"><img src="./docs/images/preview-mobile-dark.png" alt="モバイル · ダーク"><br>モバイル · ダーク</td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/lighthouse.png" alt="Lighthouse パフォーマンスレポート">
+      <br>Lighthouse
+    </td>
+  </tr>
+</table>
 
 ---
 

@@ -8,11 +8,25 @@ A diary site made for slow reading — a static blog theme built on Astro. Write
 
 ---
 
-![Desktop · Light](./docs/images/preview-desktop-light.png)
-
-![Desktop · Dark](./docs/images/preview-desktop-dark.png)
-
-<img src="./docs/images/preview-mobile.png" width="320" alt="Mobile" />
+<table width="100%" align="center">
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/preview-desktop-light.png" alt="Desktop · Light">
+      <br>Desktop · Light
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./docs/images/preview-desktop-dark.png" alt="Desktop · Dark"><br>Desktop · Dark</td>
+    <td align="center"><img src="./docs/images/preview-mobile-light.png" alt="Mobile · Light"><br>Mobile · Light</td>
+    <td align="center"><img src="./docs/images/preview-mobile-dark.png" alt="Mobile · Dark"><br>Mobile · Dark</td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/lighthouse.png" alt="Lighthouse performance report">
+      <br>Lighthouse
+    </td>
+  </tr>
+</table>
 
 ---
 

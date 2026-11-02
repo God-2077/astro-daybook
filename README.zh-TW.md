@@ -8,11 +8,25 @@
 
 ---
 
-![桌面端 · 淺色](./docs/images/preview-desktop-light.png)
-
-![桌面端 · 深色](./docs/images/preview-desktop-dark.png)
-
-<img src="./docs/images/preview-mobile.png" width="320" alt="行動版" />
+<table width="100%" align="center">
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/preview-desktop-light.png" alt="桌面端 · 淺色">
+      <br>桌面端 · 淺色
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./docs/images/preview-desktop-dark.png" alt="桌面端 · 深色"><br>桌面端 · 深色</td>
+    <td align="center"><img src="./docs/images/preview-mobile-light.png" alt="行動端 · 淺色"><br>行動端 · 淺色</td>
+    <td align="center"><img src="./docs/images/preview-mobile-dark.png" alt="行動端 · 深色"><br>行動端 · 深色</td>
+  </tr>
+  <tr>
+    <td colspan="3" align="center">
+      <img src="./docs/images/lighthouse.png" alt="Lighthouse 效能報告">
+      <br>Lighthouse
+    </td>
+  </tr>
+</table>
 
 ---
 
