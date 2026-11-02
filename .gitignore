@@ -159,3 +159,4 @@ design
 .vscode
 .tmp-verify
 .trae
+.dsh*
