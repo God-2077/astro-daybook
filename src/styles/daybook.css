@@ -3391,15 +3391,15 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
 }
 .a-prose .a-table-wrap table { margin: 0; }
 .a-prose hr { border: 0; border-top: 1px dashed hsl(var(--border)); background: none; height: 0; margin: 2.4em 0; }
-:is(.a-prose, .a-entry-text) .a-task-list { list-style: none; padding-left: .1em; }
-:is(.a-prose, .a-entry-text) .a-task-list li { display: flex; align-items: flex-start; gap: 10px; }
+/* 任务列表：复选框悬挂在左侧，文字对齐无序列表的内容边；嵌套层沿用 ul 的 1.4em 缩进。 */
+:is(.a-prose, .a-entry-text) .a-task-list { list-style: none; }
 :is(.a-prose, .a-entry-text) .a-task-list input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
-  flex: none;
   width: 16px;
   height: 16px;
-  margin-top: .46em;
+  margin: 0 .15em 0 -1.35em;
+  vertical-align: -.1em;
   border: 1px solid hsl(var(--muted-foreground));
   border-radius: 0;
   background: transparent;
