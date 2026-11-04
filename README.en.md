@@ -67,6 +67,13 @@ Once it's running:
 
 Hosting platforms such as Vercel, Cloudflare Pages and Netlify can import the repository directly: set the build command to `pnpm build` and the output directory to `dist`. For the full walkthrough, see [Deployment](./docs/configuration.md#部署).
 
+## Faster Diary Writing (Optional)
+
+Tired of launching an IDE just to write a diary, manually creating files, and typing git commands step by step to commit your work?
+Give [Astro Blog Studio](https://github.com/God-2077/astro-blog-studio) a try. It connects directly to your repository right in the browser, lets you write entries in the same directory, preview changes in real time, and commit & push with one click.
+
+It will not alter your repository structure or build configuration. It simply moves the entire workflow — creating, editing, and committing — into your browser, making it incredibly convenient to jot down a few lines every day.
+
 ## Frontmatter examples
 
 Diaries live in `src/content/daily/`, and only `date` is required:

@@ -67,6 +67,13 @@ pnpm dev        # 打开 http://localhost:4321
 
 托管平台（Vercel、Cloudflare Pages、Netlify 等）可以直接导入仓库：构建命令填 `pnpm build`，输出目录填 `dist`。详细步骤见[部署说明](./docs/configuration.md#部署)。
 
+## 更快捷地写日记（可选）
+
+嫌开 IDE 写日记太麻烦？还要手动建文件、敲 git 命令一步步提交？
+试试 [Astro Blog Studio](https://github.com/God-2077/astro-blog-studio)，在浏览器里直接关联你的仓库，同目录下写日记，实时预览效果，一键提交推送。
+
+它不会改动你的仓库结构和构建配置，只是把新建、编辑、提交这几步全搬到浏览器里完成，每天随手写几笔特别方便。
+
 ## Frontmatter 示例
 
 日记放在 `src/content/daily/`，只有 `date` 必填：

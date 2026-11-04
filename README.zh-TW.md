@@ -67,6 +67,13 @@ pnpm dev        # 開啟 http://localhost:4321
 
 託管平台（Vercel、Cloudflare Pages、Netlify 等）可以直接匯入儲存庫：建置指令填 `pnpm build`，輸出目錄填 `dist`。詳細步驟見[部署說明](./docs/configuration.md#部署)。
 
+## 更快速地寫日記（選用）
+
+覺得打開 IDE 寫日記很麻煩？還要手動建立檔案、輸入 git 指令一步步提交？
+試試 [Astro Blog Studio](https://github.com/God-2077/astro-blog-studio)，在瀏覽器裡直接連結你的倉庫，在同一目錄下撰寫日記，即時預覽效果，一鍵提交推送。
+
+它不會變更你的倉庫結構與建置設定，只是把新建、編輯、提交這些步驟全搬到瀏覽器裡完成，每天隨手寫幾段特別方便。
+
 ## Frontmatter 範例
 
 日記放在 `src/content/daily/`，只有 `date` 為必填：
