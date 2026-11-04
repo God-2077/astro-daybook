@@ -45,7 +45,7 @@ function text(value: unknown): string {
 
 assert.ok(exists('index.html'), '首页应生成');
 assert.ok(exists('404.html'), '404 应生成');
-assert.ok(exists('music/index.html'), '自定义页面 /music 应生成');
+assert.ok(exists('music/index.html'), '独立页面 /music 应生成');
 assert.ok(exists('sitemap.xml') && exists('robots.txt'), 'SEO 端点应生成');
 assert.ok(exists('feed.xml') && exists('feed-diary.xml') && exists('feed-posts.xml'), 'RSS 应生成');
 assert.ok(exists('pagefind/pagefind.js'), 'Pagefind 索引应生成');
@@ -57,7 +57,7 @@ assert.equal(exists('posts/page/1/index.html'), false, '第一页不应生成 /p
 assert.ok(exists('daily/2026-09-28-locked/index.html'), '密码日记应生成详情页');
 
 const sitemap = locs(read('sitemap.xml'));
-assert.ok(sitemap.includes(`${siteUrl}/music`), '自定义页面应进 sitemap');
+assert.ok(sitemap.includes(`${siteUrl}/music`), '独立页面应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/post/astro-blog-studio`), '公开文章应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/post/mdx-syntax`), 'MDX 文章应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/categories/文章`), '分类页应进 sitemap');
@@ -174,7 +174,7 @@ assert.match(markdownSyntax, /<figure class="a-figure"><div class="a-frame">/, '
 assert.match(markdownSyntax, /class="a-img"/, '正文图片应带 a-img');
 assert.match(markdownSyntax, /loading="lazy"/, '正文图片应懒加载');
 assert.match(markdownSyntax, /decoding="async"/, '正文图片应异步解码');
-assert.match(markdownSyntax, /<p>这一段紧跟着一张图片<\/p>\n<figure class="a-figure">/, '紧跟文字的独占行图片也应转 figure');
+assert.match(markdownSyntax, /<p>这一段紧跟着一张图片\r?<\/p>\n<figure class="a-figure">/, '紧跟文字的独占行图片也应转 figure');
 assert.match(markdownSyntax, /<div class="a-figure-row">\n?<figure class="a-figure">/, '同一行多图应渲染为 a-figure-row');
 assert.equal((markdownSyntax.match(/<div class="a-figure-row">/g) ?? []).length, 2, '演示应包含两处并排图片');
 assert.match(
@@ -204,7 +204,8 @@ assert.match(mdxSyntax, /class="a-img"[^>]*loading="lazy"/, 'MDX 图片应懒加
 assert.doesNotMatch(mdxSyntax, /<p>import /, 'MDX import 不应泄漏到正文');
 
 const music = read('music/index.html');
-assert.match(music, /<h2[^>]*><svg class="a-h2-star"/, 'MDX 自定义页应走共享正文管线');
+assert.match(music, /<section class="a-view" data-view="page"/, '独立页面应使用 PageLayout');
+assert.match(music, /<h2[^>]*><svg class="a-h2-star"/, 'MDX 独立页面应走共享正文管线');
 assert.match(music, /<section class="a-music"/, '歌单页应渲染 MusicPlayer 卡片');
 assert.match(music, /data-music-audio/, '播放器应带音频节点');
 assert.match(music, /data-music-track/, '播放器应渲染曲目按钮');

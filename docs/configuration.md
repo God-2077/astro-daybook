@@ -280,7 +280,7 @@ pnpm build      # 输出 dist/
 - 配置与正文中的站外链接会加 `target="_blank" rel="noopener"`；Markdown 默认按 Astro 的安全策略处理原始 HTML。
 - `inject.headEnd` / `inject.bodyEnd` 按原样写入页面，不做转义或清洗；只用于站点所有者自己维护的可信 HTML。
 - Pagefind 只对密码页的标题与 `description` 建索引；被锁定的内容、`hideFrom` 含 `sitemap` 的条目、草稿与 404 页输出 `noindex`，密码页默认不进 sitemap。
-- 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前请替换成自己的资源。
+- 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/content/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前请替换成自己的资源。
 
 ## 校验失败
 

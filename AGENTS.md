@@ -36,7 +36,7 @@ Node >= 22.23.4，pnpm >= 7.1.0。
 ```text
 src/
 ├─ pages/        路由，见下方「路由」
-├─ layouts/      BaseLayout（html / head / 主题脚本 / 外壳）、PageLayout（独立 Markdown 页）
+├─ layouts/      BaseLayout（html / head / 主题脚本 / 外壳）、PageLayout（content/pages 独立页面外壳）
 ├─ components/
 │  ├─ layout/    Header / Footer / Drawer / BottomNav / Sprite
 │  ├─ common/    PageHead / Icon / EmptyState / Pager
@@ -49,9 +49,8 @@ src/
 ├─ config/       site.ts（站点配置）、links.ts、defaults.ts、schema.ts、index.ts
 ├─ i18n/         构建时语言包（zh-CN / zh-TW / ja / en）与日期、复数格式化
 ├─ lib/          构建期逻辑：content/、markdown / markdown-pipeline、feed / feed-build、pagination、nav、comments、music、time
-├─ integrations/ daybook.ts（构建钩子：自定义页面校验、草稿页清理）
 ├─ types/        公共类型
-└─ content/      daily/（日记）、post/（文章）、spec/（独立页面正文，如 about.mdx）
+└─ content/      daily/（日记）、post/（文章）、pages/（独立页面，如 music.mdx）、spec/（关于页正文，如 about.mdx）
 
 public/          favicon、头像、寒蝉全圆体分片、音乐、og 图
 docs/            配置、内容、音乐、部署与安全边界等文档
@@ -60,7 +59,7 @@ tests/           单元断言与构建产物断言
 astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`
 ```
 
-路由（`src/pages`）：`/`、`/page/[page]`、`/posts`、`/posts/page/[page]`、`/[...slug]`（内容详情）、`/about`、`/friends`、`/archives`、`/categories`(+`/[category]`)、`/tags`(+`/[tag]`)、`/music`、`/404`，以及 `feed.xml` / `feed-diary.xml` / `feed-posts.xml`、`sitemap.xml`、`robots.txt`。
+路由（`src/pages`）：`/`、`/page/[page]`、`/posts`、`/posts/page/[page]`、`/[...slug]`（日记/文章详情）、`/[...page]`（`content/pages` 独立页面，如 `/music`）、`/about`、`/friends`、`/archives`、`/categories`(+`/[category]`)、`/tags`(+`/[tag]`)、`/404`，以及 `feed.xml` / `feed-diary.xml` / `feed-posts.xml`、`sitemap.xml`、`robots.txt`。
 
 数据流：`src/content/` 的 frontmatter 经 Zod 校验 → `src/lib/content/` 解析、排序、筛选 → `src/pages/` 在构建期取数并渲染 Astro 模板 → 静态 HTML + 少量交互岛；`postbuild` 再对 `dist/` 建立 Pagefind 索引。
 
@@ -111,7 +110,7 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`
 - **样式硬禁令**：新增颜色 / 渐变 / 字体 / 图标包；给纸面元素加卡片描边、圆角、投影；用 `--pink-decor` 写可读小字；emoji 与位图装饰；在组件里写 `<style>` 或内联 `style`；弹跳、视差、自动播放等强动效。
 - **改依赖、升级框架、改 Astro 配置**要单独提交，动手前先说明影响范围；样式任务里不要顺带升级依赖。
 - 内容 frontmatter 是 strict schema：日记没有 `categories` / `tags` / `keywords`，写了会构建失败。
-- 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前替换成自己的资源。
+- 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/content/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前替换成自己的资源。
 
 ## 7. Git 提交规范
 

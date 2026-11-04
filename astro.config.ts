@@ -6,7 +6,6 @@ import type { AstroUserConfig } from 'astro';
 import { defineConfig, envField } from 'astro/config';
 
 import { siteConfig } from './src/config/site';
-import daybook from './src/integrations/daybook';
 import { rehypePlugins, remarkPlugins, SHIKI_CONFIG } from './src/lib/markdown-pipeline';
 
 const src = fileURLToPath(new URL('./src', import.meta.url));
@@ -41,7 +40,7 @@ export default defineConfig({
     format: 'directory',
   },
   markdown,
-  integrations: [react(), mdx(), daybook()],
+  integrations: [react(), mdx()],
   vite: {
     resolve: {
       alias: {

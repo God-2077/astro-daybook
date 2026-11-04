@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { dailySchema, postSchema } from '../../src/lib/content/schema';
+import { dailySchema, pageSchema, postSchema } from '../../src/lib/content/schema';
 
 const base = {
   date: '2026-10-21 10:00:00',
@@ -30,4 +30,26 @@ test('daily hideHomeTitle defaults to false and can be enabled per entry', () =>
 test('post frontmatter still requires a non-empty title', () => {
   assert.equal(postSchema.safeParse(base).success, false);
   assert.equal(postSchema.safeParse({ ...base, title: '   ' }).success, false);
+});
+
+test('page frontmatter defaults to a public, commentable standalone page', () => {
+  const parsed = pageSchema.parse({ title: '歌单' });
+  assert.equal(parsed.title, '歌单');
+  assert.equal(parsed.date, undefined);
+  assert.equal(parsed.draft, false);
+  assert.deepEqual(parsed.hideFrom, []);
+  assert.equal(parsed.comments, true);
+});
+
+test('page frontmatter requires a title and rejects layout-era fields', () => {
+  assert.equal(pageSchema.safeParse({}).success, false);
+  assert.equal(pageSchema.safeParse({ title: '   ' }).success, false);
+  assert.equal(pageSchema.safeParse({ title: '歌单', layout: '../layouts/PageLayout.astro' }).success, false);
+  assert.equal(pageSchema.safeParse({ title: '歌单', password: 'x' }).success, false);
+  assert.equal(pageSchema.safeParse({ title: '歌单', slug: 'music' }).success, false);
+});
+
+test('page frontmatter keeps the original date string and validates hideFrom', () => {
+  assert.equal(pageSchema.parse({ title: '歌单', date: '2026-10-01 20:00:00' }).date, '2026-10-01 20:00:00');
+  assert.equal(pageSchema.safeParse({ title: '歌单', hideFrom: ['unknown'] }).success, false);
 });

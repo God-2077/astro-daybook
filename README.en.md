@@ -118,7 +118,7 @@ Everything is configured in TypeScript files — refresh the dev server and the 
 | Title, subtitle, author, domain, language, navigation, pagination, comments, SEO | `src/config/site.ts` |
 | Friend groups | `src/config/links.ts` |
 | Body of the About page | `src/content/spec/about.mdx` |
-| Playlist on the music page | `src/pages/music.mdx` |
+| Playlist on the music page | `src/content/pages/music.mdx` |
 
 - Every config field, comment setup, deployment and security boundary: [`docs/configuration.md`](./docs/configuration.md)
 - Content folders, frontmatter and visibility: [`docs/content.md`](./docs/content.md)

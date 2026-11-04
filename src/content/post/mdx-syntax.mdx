@@ -35,7 +35,7 @@ MDX 表达式会在构建期求值，例如今天是 {new Date('2026-10-28T00:00
 
 ## 使用方式
 
-在 `src/content/post/` 或 `src/content/daily/` 下新建 `.mdx` 文件即可；独立页面放在 `src/pages/` 并声明 `layout: ../layouts/PageLayout.astro`。
+在 `src/content/post/` 或 `src/content/daily/` 下新建 `.mdx` 文件即可；独立页面放在 `src/content/pages/`，由 `src/pages/[...page].astro` 自动套 `PageLayout`，不需要写 `layout`。
 
 ```mdx
 import { Timeline, TimelineItem } from '@ui';

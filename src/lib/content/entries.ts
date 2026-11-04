@@ -6,8 +6,8 @@ import { parseContentDate } from './date';
 import { contentFormat } from './format';
 import { readRawFrontmatter } from './raw';
 
-const RESERVED_PREFIXES = ['/page/', '/posts/page/', '/categories/', '/tags/'];
-const FIXED_ROUTES = new Set([
+export const RESERVED_PREFIXES = ['/page/', '/posts/page/', '/categories/', '/tags/'];
+export const FIXED_ROUTES = new Set([
   '/',
   '/posts',
   '/categories',

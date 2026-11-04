@@ -52,7 +52,7 @@ formatInTimeZone(date, timezone, 'yyyy-MM')
 
 - 动态 `import(`${import.meta.env.BASE_URL}pagefind/pagefind.js`)`
 - `pagefind.options({ excerptLength: ... })`
-- `data-pagefind-body` 只放在需要索引的详情/自定义页。
+- `data-pagefind-body` 只放在需要索引的详情/独立页面。
 - 排除 KaTeX、搜索面板、TOC、评论区、分页。
 
 本项目改为自定义 React 搜索面板（全部/日记/文章/页面 tabs），不引入 Pagefind 默认 UI。

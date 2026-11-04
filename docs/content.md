@@ -5,11 +5,11 @@
 ```text
 src/content/daily/   日记
 src/content/post/    文章
-src/content/spec/    独立页面正文（目前是 about.mdx）
-src/pages/*.{md,mdx} 自定义独立页面（.md 或 .mdx）
+src/content/pages/   独立页面（.md / .mdx，路由为 /<相对路径>）
+src/content/spec/    关于页正文（about.mdx）
 ```
 
-三个集合定义在 `src/content.config.ts`：`dailyCollection`、`postsCollection`、`specCollection`，schema 在 `src/lib/content/schema.ts`。
+四个集合定义在 `src/content.config.ts`：`dailyCollection`、`postsCollection`、`pagesCollection`、`specCollection`，schema 在 `src/lib/content/schema.ts`。
 
 `spec/` 只放不进入索引与 RSS 的正文，由页面自己按 id 读取（`getEntry('specCollection', 'about')`）。它没有 frontmatter（`specSchema` 是空对象），小节用 `##` 写，构建时自动补 ✦ 与锚点；文件缺失会直接让构建失败并在错误里指出 `src/content/spec/about.mdx`。
 
@@ -123,7 +123,7 @@ comments: true
 
 ## MDX
 
-`dailyCollection` / `postsCollection` 的 loader 同时匹配 `**/*.md` 与 `**/*.mdx`；`src/pages/` 下的独立页面也支持 `.mdx`。
+`dailyCollection` / `postsCollection` / `pagesCollection` 的 loader 同时匹配 `**/*.md` 与 `**/*.mdx`；独立页面放进 `src/content/pages/`，由 `src/pages/[...page].astro` 渲染。
 
 ```mdx
 ---
@@ -198,23 +198,26 @@ import { Timeline, TimelineItem } from '@ui';
 
 > 威胁模型：密文随静态 HTML 公开分发，只能防「随手查看」，不能防有决心的离线攻击。真正敏感的内容应使用服务端鉴权。
 
-## 自定义页面
+## 独立页面
 
-在 `src/pages/` 下新建 `.md` 或 `.mdx`，例如 `src/pages/music.mdx`：
+在 `src/content/pages/` 下新建 `.md` 或 `.mdx`，例如 `src/content/pages/music.mdx`：
 
 ```yaml
 ---
-title: 歌单
-layout: ../layouts/PageLayout.astro
-date: 2026-10-01 20:00:00
-description: 最近在听什么。
-# updated:
+title: 歌单 # 必填
+date: 2026-10-01 20:00:00 # 可选
+description: 最近在听什么。 # 可选
+# updated: 2026-10-02 09:00:00
 # draft: true
 # hideFrom: [search, sitemap]
+# comments: false
 ---
 ```
 
-- `title`、`layout` 必填；`layout` 必须指向存在的 `PageLayout.astro`，否则构建报错。
-- 路由由文件路径决定：`music.mdx` → `/music`，`notes/a.mdx` → `/notes/a`；`.md` 与 `.mdx` 规则相同。
-- 默认进 sitemap 与 Pagefind；`draft` 生产构建后在 `astro:build:done` 删除产物；`hideFrom` 规则与日记/文章一致。
-- 支持 `date`/`updated`，并按时区解析（读取源文件原始 frontmatter，避免 Astro 的 UTC 偏移）。
+- 集合是 `pagesCollection`，文件路径（相对 `src/content/pages/`、去掉扩展名）就是 URL：`music.mdx` → `/music`，`notes/a.mdx` → `/notes/a`。`index.mdx` 对应 `/index`，不会重写为父路径。
+- 不需要 `layout` frontmatter；`src/pages/[...page].astro` 会显式套 `PageLayout`（Astro 不会为内容集合条目自动读取 `layout`，页面 schema 也不接受它）。
+- schema 是 strict 的：只接受 `title`、`date`、`updated`、`description`、`draft`、`hideFrom`、`comments`；`slug`、`permalink`、`pin`、`password`、`layout` 会构建报错。`title` 必填且不能为空；`comments` 默认 `true`。
+- 与固定路由、`/page/*` 等保留前缀、`/daily/**`、`/post/**` 等已有内容 URL 冲突时，构建会报错并指出文件；页面 id 不能含 `?`、`#`、反斜杠或 `.` / `..` 路径段。
+- 默认进 sitemap 与 Pagefind。`draft: true` 只在开发环境生成，生产构建不生成详情页，也不进 sitemap/Pagefind；`hideFrom: [search]` 不输出 `data-pagefind-body`，`hideFrom: [sitemap]` 输出 `noindex` 且不进 sitemap。其余 `hideFrom` 值对独立页面没有额外影响（页面本来就不进首页、归档、RSS、分类/标签）。
+- 支持 `date` / `updated`，读取源文件原始 frontmatter 并按 `siteConfig.timezone` 解析，避免 Astro 的 UTC 偏移；日期展示、`<time datetime>` 与日记/文章一致。
+- 独立页面不参与首页、文章列表、归档、分类/标签、RSS；导航里要链接它们时，直接写 URL（例如 `/music`）。导航校验目前只认固定路由、内容 URL、分类/标签与分页，不读取页面集合，新增页面后请手动确认链接可用。

@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/current';
-import { getCustomPages } from '../lib/content/custom-pages';
 import { formatContentDate } from '../lib/content/date';
 import { collectTaxonomy, entriesForSurface, getAllEntries, isInSitemap } from '../lib/content/entries';
+import { getPageEntries, pageUrl } from '../lib/content/pages';
 import { totalPagesFor } from '../lib/pagination';
 import { absoluteUrl } from '../lib/site';
 
@@ -66,12 +66,11 @@ export const GET: APIRoute = async () => {
   const tags = await collectTaxonomy('tags');
   for (const tag of tags) add(tag.href);
 
-  const customPages = await getCustomPages();
-  for (const page of customPages) {
-    if (page.data.draft === true) continue;
-    const hideFrom = Array.isArray(page.data.hideFrom) ? page.data.hideFrom : [];
-    if (hideFrom.includes('sitemap')) continue;
-    add(page.route);
+  const pages = await getPageEntries();
+  for (const page of pages) {
+    if (page.data.draft) continue;
+    if (page.data.hideFrom.includes('sitemap')) continue;
+    add(pageUrl(page.id));
   }
 
   const body = [...urls.values()]

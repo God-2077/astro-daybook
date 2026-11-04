@@ -1,6 +1,6 @@
 # 音乐播放器
 
-`MusicPlayer` 可以在任意 MDX（文章、日记、自定义页）里导入，用来放一组可播放的曲目。样式沿用纸页日记的令牌与字号，卡片、圆角、阴影与列表高度过渡是这一组件的主题例外。
+`MusicPlayer` 可以在任意 MDX（文章、日记、独立页面）里导入，用来放一组可播放的曲目。样式沿用纸页日记的令牌与字号，卡片、圆角、阴影与列表高度过渡是这一组件的主题例外。
 
 ## 用法
 
@@ -22,7 +22,7 @@ import { MusicPlayer } from '@ui';
 />
 ```
 
-`src/pages/music.mdx` 是现成的示例页：音频、封面与歌词都托管在外部 CDN（`https://k-pan.edgeone.ksable.top/public/astro-daybook/music/`），仓库里不含任何音频、封面或歌词文件。`url` / `cover` / `lrc` 既可以是站内路径（如 `/music/xxx.mp3`），也可以是完整的 `https://` 地址。
+`src/content/pages/music.mdx` 是现成的示例页：音频、封面与歌词都托管在外部 CDN（`https://k-pan.edgeone.ksable.top/public/astro-daybook/music/`），仓库里不含任何音频、封面或歌词文件。`url` / `cover` / `lrc` 既可以是站内路径（如 `/music/xxx.mp3`），也可以是完整的 `https://` 地址。
 
 ## Props
 

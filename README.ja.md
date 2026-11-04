@@ -118,7 +118,7 @@ keywords: [静的ブログ]
 | タイトル、サブタイトル、作者、ドメイン、言語、ナビゲーション、ページ送り、コメント、SEO | `src/config/site.ts` |
 | 友だちリンクのグループ | `src/config/links.ts` |
 | このサイトについてページの本文 | `src/content/spec/about.mdx` |
-| 音楽ページのプレイリスト | `src/pages/music.mdx` |
+| 音楽ページのプレイリスト | `src/content/pages/music.mdx` |
 
 - すべての設定項目、コメントの接続、デプロイ、セキュリティの境界：[`docs/configuration.md`](./docs/configuration.md)
 - コンテンツのディレクトリ、frontmatter、表示可否：[`docs/content.md`](./docs/content.md)

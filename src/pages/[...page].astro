@@ -1,0 +1,49 @@
+---
+import { render } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+import type { PageEntry } from '../lib/content/pages';
+import { getPageEntries, pageUrl } from '../lib/content/pages';
+
+/**
+ * 独立页面动态路由：content/pages 下的 .md/.mdx -> /<id>
+ *
+ * - 这是根级 rest 路由，按 Astro 的路由优先级排在 [...slug].astro 之前。
+ *   对 /daily/**、/post/** 这类内容详情 URL，本路由没有静态路径，Astro dev
+ *   server 会回退到 [...slug]；生产构建则让两个路由各自生成自己的静态路径。
+ * - Astro 不会为内容集合条目自动应用 frontmatter.layout（本仓库也不是
+ *   @astrojs/markdown-satteri），所以这里显式包一层 PageLayout。
+ * - URL 冲突（固定路由、内容 URL、保留前缀）在 getPageEntries() 中校验。
+ */
+export async function getStaticPaths() {
+  const pages = await getPageEntries();
+  return pages
+    .filter((page) => !page.data.draft || import.meta.env.DEV)
+    .map((page) => {
+      const url = pageUrl(page.id);
+      return {
+        params: { page: url.slice(1) },
+        props: { page },
+      };
+    });
+}
+
+interface Props {
+  page: PageEntry;
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<PageLayout
+  title={page.data.title}
+  date={page.data.date}
+  updated={page.data.updated}
+  description={page.data.description}
+  draft={page.data.draft}
+  hideFrom={page.data.hideFrom}
+  comments={page.data.comments}
+  sourceFile={page.filePath}
+>
+  <Content />
+</PageLayout>

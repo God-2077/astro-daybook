@@ -118,7 +118,7 @@ keywords: [靜態部落格]
 | 標題、副標題、作者、網域、語言、導覽、分頁、評論、SEO | `src/config/site.ts` |
 | 友鏈分組 | `src/config/links.ts` |
 | 關於頁正文 | `src/content/spec/about.mdx` |
-| 音樂頁歌單 | `src/pages/music.mdx` |
+| 音樂頁歌單 | `src/content/pages/music.mdx` |
 
 - 全部設定欄位、評論接入、部署與安全邊界：[`docs/configuration.md`](./docs/configuration.md)
 - 內容目錄、frontmatter 與可見性：[`docs/content.md`](./docs/content.md)

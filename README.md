@@ -118,7 +118,7 @@ keywords: [静态博客]
 | 标题、副标题、作者、域名、语言、导航、分页、评论、SEO | `src/config/site.ts` |
 | 友链分组 | `src/config/links.ts` |
 | 关于页正文 | `src/content/spec/about.mdx` |
-| 音乐页歌单 | `src/pages/music.mdx` |
+| 音乐页歌单 | `src/content/pages/music.mdx` |
 
 - 全部配置字段、评论接入、部署与安全边界：[`docs/configuration.md`](./docs/configuration.md)
 - 内容目录、frontmatter 与可见性：[`docs/content.md`](./docs/content.md)

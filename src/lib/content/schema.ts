@@ -49,6 +49,24 @@ export const postSchema = z
   .strict();
 
 /**
+ * 独立页面（`src/content/pages`）。
+ *
+ * 页面 URL 由集合 id 决定，因此不接收 slug/permalink；独立页只由
+ * `src/pages/[...page].astro` 渲染并显式包一层 PageLayout，所以不需要 layout。
+ */
+export const pageSchema = z
+  .object({
+    title: z.string().trim().min(1, 'title 不能为空'),
+    date: dateValue.optional(),
+    updated: dateValue.optional(),
+    description: z.string().optional(),
+    draft: z.boolean().default(false),
+    hideFrom: z.array(z.enum(HIDE_FROM)).default([]),
+    comments: z.boolean().default(true),
+  })
+  .strict();
+
+/**
  * 关于页正文（`src/content/spec/about.mdx`）。
  *
  * 只承接正文，页面不读任何 frontmatter；因此用宽松的空对象，
@@ -58,3 +76,4 @@ export const specSchema = z.object({});
 
 export type DailyFrontmatter = z.infer<typeof dailySchema>;
 export type PostFrontmatter = z.infer<typeof postSchema>;
+export type PageFrontmatter = z.infer<typeof pageSchema>;
