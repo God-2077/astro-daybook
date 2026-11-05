@@ -66,7 +66,7 @@ pnpm dev        # 打开 http://localhost:4321
 2. 在 `src/content/daily/` 里新建一个 `.md` 文件，写下第一篇日记。
 3. `pnpm build` 生成 `dist/`，把整个目录上传到任意静态托管即可。
 
-托管平台（Vercel、Cloudflare Pages、Netlify 等）可以直接导入仓库：构建命令填 `pnpm build`，输出目录填 `dist`。详细步骤见[部署说明](./docs/configuration.md#部署)。
+托管平台（Vercel、Cloudflare Pages、Netlify 等）可以直接导入仓库：构建命令填 `pnpm build`，输出目录填 `dist`。详细步骤见[部署说明](./docs/configuration.md#部署)；用内容仓库 + Vercel 自动发布时，见 [Vercel 自动化部署](./docs/deployment-vercel.md)。
 
 ## 主题仓库与内容仓库（可选）
 
@@ -138,6 +138,7 @@ keywords: [静态博客]
 - 全部配置字段、评论接入、部署与安全边界：[`docs/configuration.md`](./docs/configuration.md)
 - 内容目录、frontmatter 与可见性：[`docs/content.md`](./docs/content.md)
 - 主题与内容分仓、clone/pull：[`docs/dual-repo.md`](./docs/dual-repo.md)
+- 用 Vercel 自动部署（Deploy Hook + 内容仓库 GitHub Action）：[`docs/deployment-vercel.md`](./docs/deployment-vercel.md)
 - 歌单与播放器：[`docs/music-player.md`](./docs/music-player.md)
 
 ## 鸣谢

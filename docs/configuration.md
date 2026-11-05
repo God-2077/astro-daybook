@@ -270,7 +270,7 @@ pnpm build      # 输出 dist/
 
 - 构建前把 `siteConfig.url` 改成真实域名：它参与 canonical、RSS、sitemap 与 OG 的绝对链接。
 - 托管平台需要填构建命令与输出目录时：命令 `pnpm build`，输出目录 `dist`。
-- 内容模式部署时构建命令改为 `pnpm build:content`；它会先生成内容站点，再建立 Pagefind 索引。需要把内容仓库一起检出时，按托管平台的文档配置 `CONTENT_REPO` 或改用把内容放进主题仓库的方式，详见 [`dual-repo.md`](dual-repo.md)。
+- 内容模式部署时构建命令改为 `pnpm build:content`；它会先生成内容站点，再建立 Pagefind 索引。需要把内容仓库一起检出时，按托管平台的文档配置 `CONTENT_REPO` 或改用把内容放进主题仓库的方式，详见 [`dual-repo.md`](dual-repo.md)。以 Vercel 为例的完整自动化流程（Fork 两个仓库、环境变量、Deploy Hook、内容仓库 GitHub Action）见 [`deployment-vercel.md`](deployment-vercel.md)。
 - 搜索索引由 `postbuild` 生成到 `dist/pagefind/`，所以要用 `pnpm build` 而不是直接 `astro build`，否则搜索不可用。
 - 本站默认部署在根路径 `/`。若必须放在子路径，需要同时调整 Astro 的 `base`、`trailingSlash` 以及 RSS / Pagefind 的资源路径，改动面较大，先确认是否真的需要。
 - `feed.xml`、`sitemap.xml`、`robots.txt` 由静态 endpoint 生成；在 `site.ts` 里关闭对应开关后，产物会一并消失。
