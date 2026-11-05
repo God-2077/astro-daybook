@@ -1273,7 +1273,7 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   border-bottom: 2px solid hsl(var(--rose));
   transition: transform .18s var(--ease);
 }
-.a-arc-switch[data-mode="diary"] .a-arc-thumb { transform: translateX(100%); }
+.a-arc-switch[data-index="1"] .a-arc-thumb { transform: translateX(100%); }
 .a-arc-opt {
   position: relative;
   z-index: 1;
@@ -3015,6 +3015,24 @@ html.a-no-scroll { overflow: hidden; }
     font-weight: 700;
   }
   .a-bottomnav .a-ico { width: 18px; height: 18px; }
+  .a-bottomnav a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 关闭底栏时不再预留底部空白，也让抽屉/原型提示回到无底栏基准 */
+  html[data-bottom-nav="off"] body { padding-bottom: 0; }
+  html[data-bottom-nav="off"] .a-drawer-foot {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  html[data-bottom-nav="off"] .a-proto {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  html[data-bottom-nav="off"] .a-hint {
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  }
 
   /* 抽屉盖住底栏；抽屉底部与原型栏/底栏错开 */
   .a-drawer-foot { padding-bottom: 110px; }

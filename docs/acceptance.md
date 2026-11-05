@@ -64,6 +64,9 @@
 - [ ] 点击搜索隐藏正文，关闭恢复；搜索 tabs 全部/日记/文章/页面可用。
 - [ ] View Transitions 后主题、搜索、TOC、抽屉仍正常。
 - [ ] 深色模式持久化；`prefers-reduced-motion` 下无描边动画。
+- [ ] 375/390 宽底部导航默认四项；`bottomNav.enabled: false` 时不渲染且页面没有底部预留空白。
+- [ ] 自定义 `bottomNav.items` 后顺序、标题、图标生效；外链新窗口打开；无效内链构建报错。
+- [ ] `archive.defaultType: 'diary'` 时归档默认日记、按钮日记在前；切回文章后统计、热力图、锚点正常。
 
 ## 首页配置
 

@@ -66,7 +66,12 @@ const clientI18n = getClientMessages(siteConfig.lang);
 ---
 
 <!doctype html>
-<html lang={localeMeta.htmlLang} data-view={view} data-theme-mode={siteConfig.theme}>
+<html
+  lang={localeMeta.htmlLang}
+  data-view={view}
+  data-theme-mode={siteConfig.theme}
+  data-bottom-nav={siteConfig.bottomNav.enabled ? 'on' : 'off'}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -181,7 +186,7 @@ const clientI18n = getClientMessages(siteConfig.lang);
     </main>
     <Footer />
     <Drawer />
-    <BottomNav />
+    {siteConfig.bottomNav.enabled && <BottomNav />}
     <slot name="bodyEnd" />
     {siteConfig.inject.bodyEnd && <Fragment set:html={siteConfig.inject.bodyEnd} />}
   </body>

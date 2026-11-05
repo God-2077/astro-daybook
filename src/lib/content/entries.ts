@@ -336,16 +336,14 @@ function validateNavLinks(entries: AnyEntry[], byUrl: Map<string, AnyEntry>): vo
     return false;
   };
 
-  const check = (item: { title: string; link: string }): void => {
+  const check = (item: { title?: string; link: string }): void => {
     if (/^https?:\/\//i.test(item.link)) return;
     if (!item.link.startsWith('/')) {
       throw new ProjectError(`导航链接 ${item.link} 必须以 / 开头`, 'src/config/site.ts');
     }
     if (!routeExists(item.link)) {
-      throw new ProjectError(
-        `导航链接 ${item.link}（${item.title}）没有对应路由；请修正链接或先创建页面`,
-        'src/config/site.ts',
-      );
+      const label = item.title ? `（${item.title}）` : '';
+      throw new ProjectError(`导航链接 ${item.link}${label}没有对应路由；请修正链接或先创建页面`, 'src/config/site.ts');
     }
   };
 
@@ -354,4 +352,5 @@ function validateNavLinks(entries: AnyEntry[], byUrl: Map<string, AnyEntry>): vo
     else check(item);
   }
   siteConfig.footerNav.forEach(check);
+  siteConfig.bottomNav.items.forEach(check);
 }

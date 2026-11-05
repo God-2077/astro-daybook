@@ -11,7 +11,13 @@
  */
 
 export type {
+  ArchiveConfig,
+  ArchiveConfigInput,
+  ArchiveType,
   ArtalkConfig,
+  BottomNavConfig,
+  BottomNavConfigInput,
+  BottomNavItem,
   CommentsConfig,
   CopyrightConfig,
   FriendLink,

@@ -73,9 +73,31 @@ nav: [
 - 分组必须带非空 `items`，且只能有一层；不支持三级菜单。
 - 站内链接必须以 `/` 开头，例如 `/posts`、`/archives`；不要写 `posts`。
 - 外链必须以 `http://` 或 `https://` 开头，且不能带查询参数或 hash。
-- `footerNav` 只接受一级链接 `{ title, link }[]`，规则同上；不写时按 `lang` 使用内置的归档、友链两项。
-- 移动端底部导航固定首页、文章、友链、关于四个入口；标题优先取 `nav` 中对应路径的一级链接或分组标题（`navLabelFor`，见 `src/lib/nav.ts`），未配置时回退到当前语言的内置文案。
-- 内部链接是否命中真实路由需要自行保证（配置层只校验格式，不做路由存在性检查）。
+- `footerNav` 只接受一级链接 `{ title, link }[]`，规则同上；不写时按 `lang` 使用内置的归档、友链两项。页脚不会自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
+- 移动端底部导航默认首页、文章、友链、关于四项；用 `bottomNav.enabled` 控制显示，`bottomNav.items` 整体替换入口。标题优先取 `bottomNav.items[].title`，其次取 `nav` 中对应路径的一级链接或分组标题（`navLabelFor`，见 `src/lib/nav.ts`），未配置时回退到当前语言的内置文案。
+- 内部链接是否命中真实路由需要自行保证（配置层只校验格式，不做路由存在性检查）；`bottomNav.items` 的站内链接例外，会在构建期检查路由。
+
+## 底部导航与归档默认类型
+
+```ts
+// src/config/site.ts
+bottomNav: {
+  enabled: true,
+  items: [
+    { link: '/', title: '日记', icon: 'i-book' },
+    { link: '/posts', title: '文章', icon: 'i-file' },
+    { link: '/friends' },
+    { link: '/about', icon: 'i-user' },
+  ],
+},
+archive: {
+  defaultType: 'diary',
+},
+```
+
+- `bottomNav` 默认开启四项；`enabled: false` 关闭底栏并取消页面底部为它预留的空白。
+- `items` 至少一项，整体替换默认入口；`title`、`icon` 可省略，`icon` 必须是 `src/assets/sprite.html` 中的 `i-*` id。
+- `archive.defaultType` 只接受 `'articles'` 或 `'diary'`，默认 `'articles'`；设为 `'diary'` 时日记按钮在前且默认选中。
 
 ## 内容称呼怎么写
 
@@ -89,7 +111,7 @@ labels: {
 ```
 
 - 只影响内容称呼：详情页类型与面包屑、置顶/加密提示、归档、搜索文案、RSS 标题等。
-- 不控制首页大标题（`home.title`），也不控制导航；底部导航标题优先跟随 `nav`。
+- 不控制首页大标题（`home.title`），也不控制导航；底部导航标题优先取 `bottomNav.items[].title`，其次跟随 `nav`。
 - 首页及分页页面的浏览器 `<title>` 使用 `labels.diary`，首页可见大标题仍用 `home.title`。
 - `home.showTitles` 只控制首页日记条目是否显示标题；详情/归档/RSS 不受影响（无标题的日记仍用日期回退）。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题。
 - 必须是必填的非空字符串（schema 层 `min(1)`）。
@@ -105,7 +127,7 @@ lang: 'zh_CN',
 ```
 
 - 一次构建只输出一种语言，没有站内切换器、`/[lang]` 路由或 hreflang。
-- `lang` 参与 `resolveSite()`：`home` / `labels` / `nav` / `footerNav` 的缺省值来自 `defaults.ts` 的 `LOCALE_DEFAULTS`；`comments.twikoo.lang`、`comments.waline.lang`、`comments.artalk.locale` 与 `seo.locale` 来自 `localePackages[lang].meta`，显式配置时仍优先。
+- `lang` 参与 `resolveSite()`：`home` / `labels` / `nav` / `footerNav` 的缺省值来自 `defaults.ts` 的 `LOCALE_DEFAULTS`；`bottomNav` 缺省为内置四项，标题按 `nav` 与当前语言推导；`comments.twikoo.lang`、`comments.waline.lang`、`comments.artalk.locale` 与 `seo.locale` 来自 `localePackages[lang].meta`，显式配置时仍优先。
 - 主题 UI 文案在 [`src/i18n/locales/`](../i18n/locales/)：`zh-CN.ts` 是 key 的基准，`en.ts` / `ja.ts` / `zh-TW.ts` 用 `satisfies LocalePackage` 保证 key 齐全。新增文案时四套一起改，`pnpm check` 会检查缺 key。
 - 日期格式、星期/月份名、复数字形与语言映射在各自的 `meta` / `counts` 中；`src/lib/content/date.ts` 只读 `localeMeta`。
 - 客户端脚本的语言包由 `BaseLayout.astro` 通过 `define:vars` 注入 `window.__DAYBOOK_I18N__`，避免把 `siteConfig` / Zod 打进浏览器包；`src/scripts/client.ts` 只读该全局，不直接 import `current.ts`。

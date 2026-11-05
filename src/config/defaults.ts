@@ -15,7 +15,7 @@
  */
 
 import type { SiteLang } from '../i18n/languages';
-import type { HomeConfig, LabelsConfig, NavItem, NavLinkItem, ThemeMode } from '../types/config';
+import type { ArchiveConfig, BottomNavItem, HomeConfig, LabelsConfig, NavItem, NavLinkItem, ThemeMode } from '../types/config';
 
 /**
  * 受支持的评论系统 provider 白名单。
@@ -70,6 +70,7 @@ const LOCALE_DEFAULTS: Record<SiteLang, LocaleDefaults> = {
     footerNav: [
       { title: '归档', link: '/archives' },
       { title: '友链', link: '/friends' },
+      { title: 'RSS', link: '/feed.xml' },
     ],
   },
   zh_TW: {
@@ -92,6 +93,7 @@ const LOCALE_DEFAULTS: Record<SiteLang, LocaleDefaults> = {
     footerNav: [
       { title: '歸檔', link: '/archives' },
       { title: '友鏈', link: '/friends' },
+      { title: 'RSS', link: '/feed.xml' },
     ],
   },
   ja: {
@@ -114,6 +116,7 @@ const LOCALE_DEFAULTS: Record<SiteLang, LocaleDefaults> = {
     footerNav: [
       { title: 'アーカイブ', link: '/archives' },
       { title: '友だち', link: '/friends' },
+      { title: 'RSS', link: '/feed.xml' },
     ],
   },
   en: {
@@ -136,6 +139,7 @@ const LOCALE_DEFAULTS: Record<SiteLang, LocaleDefaults> = {
     footerNav: [
       { title: 'Archives', link: '/archives' },
       { title: 'Friends', link: '/friends' },
+      { title: 'RSS', link: '/feed.xml' },
     ],
   },
 };
@@ -161,6 +165,14 @@ export function defaultNav(lang: SiteLang): NavItem[] {
 export function defaultFooterNav(lang: SiteLang): NavLinkItem[] {
   return LOCALE_DEFAULTS[lang].footerNav.map((item) => ({ ...item }));
 }
+
+/** 移动端底部导航默认值：四项只写链接，标题与图标由组件按导航配置推导。 */
+export function defaultBottomNav(): BottomNavItem[] {
+  return [{ link: '/' }, { link: '/posts' }, { link: '/friends' }, { link: '/about' }];
+}
+
+/** 归档页默认展示内容类型。 */
+export const DEFAULT_ARCHIVE: ArchiveConfig = { defaultType: 'articles' };
 
 /**
  * 默认主题偏好。

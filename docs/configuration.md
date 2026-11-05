@@ -56,11 +56,13 @@ export const siteConfig = defineSiteConfig({
 | `home` | `{ title, subtitle, showTitles }` | 按 `lang` 内置 | 首页可见大标题与副标题；`showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍按原规则显示标题（无标题时用日期回退）。只控制首页（含首页分页）的 H1，不决定内容称呼或浏览器标题。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题 |
 | `labels` | `{ diary }` | 按 `lang` 内置 | 站内「日记」类内容的称呼：详情页类型/面包屑、置顶/加密提示、归档、搜索、RSS、首页 `<title>` 等；可与首页标题不同 |
 | `nav` | `NavItem[]` | 按 `lang` 内置 | 顶部导航 |
-| `footerNav` | `{ title, link }[]` | 按 `lang` 内置（归档、友链） | 页脚导航（只能一级） |
+| `footerNav` | `{ title, link }[]` | 按 `lang` 内置（归档、友链） | 页脚导航（只能一级）；不会自动追加 RSS |
+| `bottomNav` | `{ enabled, items }` | `enabled: true`、内置四项 | 移动端底部导航；可关闭或整体替换入口 |
 | `copyright` | `{ enabled, yearFrom, author }` | `yearFrom` 当前年、`author` 取 `author` | 页脚版权 |
 | `icp` | `{ text, link? }[]` | `[]` | 备案号，可多个 |
 | `pagination.daily` | `number` | `20` | 首页每页日记数 |
 | `pagination.post` | `number` | `20` | 文章列表每页文章数 |
+| `archive` | `{ defaultType }` | `{ defaultType: 'articles' }` | 归档页默认类型；`'diary'` 时日记在前并默认选中 |
 | `rss` | `RssConfig` | 见下 | RSS |
 | `comments` | `CommentsConfig` | 见下 | 评论 |
 | `seo` | `SeoConfig` | 见下 | OG/Twitter |
@@ -82,7 +84,27 @@ type NavItem =
 - 内部链接必须以 `/` 开头；是否命中真实路由需要自行保证（配置层只校验格式，不做路由存在性检查）。
 - 二级菜单在移动端抽屉中折叠展示。
 - 当前项按路径前缀高亮；移动端抽屉会在当前项后显示 `✦`。
-- 移动端底部导航固定四个入口（首页、文章、友链、关于），标题优先取 `nav` 中对应路径的一级链接或分组标题；未配置时回退到当前语言的首页、文章、友链、关于文案。
+- 移动端底部导航默认显示首页、文章、友链、关于四个入口；可用 `bottomNav.items` 整体替换，详见下方「移动端底部导航」。
+
+### 移动端底部导航 `bottomNav`
+
+```ts
+bottomNav: {
+  enabled: true,
+  items: [
+    { link: '/', title: '日记', icon: 'i-book' },
+    { link: '/posts', title: '文章', icon: 'i-file' },
+    { link: '/friends' },
+    { link: '/about', icon: 'i-user' },
+  ],
+},
+```
+
+- 只在视口宽度 `<= 1023px` 时显示；桌面端不渲染，也不影响桌面布局。
+- `enabled: false` 时不输出底栏，并取消页面为底栏预留的底部空白。
+- `items` 至少一项，整体替换内置四项，不追加。`link` 必填；`title` 省略时依次取 `nav` 对应标题、内置文案，最后回退到链接本身；`icon` 省略时按内置链接映射，外链回退 `i-external`。
+- `icon` 必须形如 `i-*`，对应 `src/assets/sprite.html` 中的 symbol id；写错不会中断构建，但图标为空。
+- 内链规则与 `nav` 相同；外链自动新窗口打开。底部导航内的站内链接会在构建期检查路由是否存在。
 
 ### 内容称呼 `labels`
 
@@ -92,7 +114,7 @@ labels: {
 },
 ```
 
-只影响站内对「日记」类内容的称呼，不改变路由、分类或首页大标题。首页可见大标题仍由 `home.title` 控制；首页及分页页面的浏览器 `<title>` 使用 `labels.diary`；底部导航标题优先跟随 `nav`。空字符串会被配置层拒绝。
+只影响站内对「日记」类内容的称呼，不改变路由、分类或首页大标题。首页可见大标题仍由 `home.title` 控制；首页及分页页面的浏览器 `<title>` 使用 `labels.diary`；底部导航标题优先取 `bottomNav.items[].title`，其次跟随 `nav`。空字符串会被配置层拒绝。
 
 ### 构建语言 `lang`
 
@@ -103,7 +125,7 @@ lang: 'zh_CN', // 'en' | 'ja' | 'zh_CN' | 'zh_TW'
 这是**构建时**选项：一次 `pnpm build` 只输出一种语言，站内没有语言切换器，也不会生成 `/[lang]` 路由或 hreflang。要换语言，修改 `lang` 后重新构建即可。
 
 - 主题 UI 会跟随语言：导航默认文案、页面标题、空状态、按钮、分页、搜索面板、密码页、日期/星期/月份格式、RSS `<language>`、`<html lang>`、OG `og:locale`、JSON-LD `inLanguage`、Twikoo 界面语言等。
-- `home`、`labels`、`nav`、`footerNav` 省略时，会使用当前语言的内置默认值；显式配置的值不会被翻译。
+- `home`、`labels`、`nav`、`footerNav` 省略时，会使用当前语言的内置默认值；`bottomNav` 省略时使用内置四项入口，标题按当前语言推导。显式配置的值不会被翻译。
 - `seo.locale` 与 `comments.twikoo.lang` 省略时由 `lang` 推导，仍可单独覆盖。
 - 正文、`siteConfig.title` / `subtitle` / `description`、`src/content/spec/about.mdx`、`links.ts` 以及分类/标签名称都属于**内容**，不会自动翻译；需要其他语言时请自行准备对应内容。
 - 支持值与映射：
@@ -129,6 +151,19 @@ theme: 'system', // 'light' | 'dark' | 'system'
 ### 分页
 
 `pagination.daily` / `pagination.post` 必须为正整数。第一页是 `/` 或 `/posts`，不是 `/page/1`；越界返回 404。
+
+### 归档页默认类型 `archive`
+
+```ts
+archive: {
+  defaultType: 'diary', // 'articles' | 'diary'
+},
+```
+
+- 默认 `'articles'`。
+- 设为 `'diary'` 时，归档页默认选中日记，日记按钮排在文章按钮之前，统计与热力图也按日记显示。
+- 只改变默认选中项与按钮顺序；两组条目内部仍按日期从新到旧排序。
+- 默认状态由服务端直接输出，禁用 JavaScript 时也正确。
 
 ### RSS
 

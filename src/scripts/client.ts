@@ -500,7 +500,11 @@ function onClick(event: MouseEvent): void {
       button.setAttribute('aria-pressed', String(button.dataset.arcMode === mode));
     });
     const switchEl = arcMode.closest<HTMLElement>('.a-arc-switch');
-    if (switchEl) switchEl.dataset.mode = mode;
+    if (switchEl) {
+      switchEl.dataset.mode = mode;
+      const modeButtons = [...switchEl.querySelectorAll<HTMLButtonElement>('[data-arc-mode]')];
+      switchEl.dataset.index = String(modeButtons.indexOf(arcMode));
+    }
     const articles = document.querySelector<HTMLElement>('#a-arc-articles');
     const diary = document.querySelector<HTMLElement>('#a-arc-diary');
     if (articles) articles.hidden = mode !== 'articles';

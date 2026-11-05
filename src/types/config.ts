@@ -17,6 +17,38 @@ export interface NavGroupItem {
 
 export type NavItem = NavLinkItem | NavGroupItem;
 
+/** 移动端底部导航项；标题与图标省略时按链接推导。 */
+export interface BottomNavItem {
+  title?: string;
+  link: string;
+  icon?: string;
+}
+
+/** 解析后的移动端底部导航配置。 */
+export interface BottomNavConfig {
+  enabled: boolean;
+  items: BottomNavItem[];
+}
+
+/** 用户可写的移动端底部导航配置。 */
+export interface BottomNavConfigInput {
+  enabled?: boolean;
+  items?: BottomNavItem[];
+}
+
+/** 归档页默认展示的内容类型。 */
+export type ArchiveType = 'articles' | 'diary';
+
+/** 解析后的归档页配置。 */
+export interface ArchiveConfig {
+  defaultType: ArchiveType;
+}
+
+/** 用户可写的归档页配置。 */
+export interface ArchiveConfigInput {
+  defaultType?: ArchiveType;
+}
+
 export interface IcpItem {
   text: string;
   link?: string;
@@ -172,9 +204,11 @@ export interface SiteConfig {
   theme: ThemeMode;
   nav: NavItem[];
   footerNav: NavLinkItem[];
+  bottomNav: BottomNavConfig;
   copyright: CopyrightConfig;
   icp: IcpItem[];
   pagination: PaginationConfig;
+  archive: ArchiveConfig;
   rss: RssConfig;
   comments: CommentsConfig;
   robots: RobotsConfig;
@@ -203,9 +237,11 @@ export interface SiteConfigInput {
   theme?: ThemeMode;
   nav?: NavItem[];
   footerNav?: NavLinkItem[];
+  bottomNav?: BottomNavConfigInput;
   copyright?: Partial<CopyrightConfig>;
   icp?: IcpItem[];
   pagination?: Partial<PaginationConfig>;
+  archive?: ArchiveConfigInput;
   rss?: RssConfigInput;
   comments?: CommentsConfigInput;
   robots?: Partial<RobotsConfig>;

@@ -19,6 +19,41 @@ test('site config resolves defaults and derives footerBrand/since', () => {
   assert.equal(config.theme, 'system');
 });
 
+test('bottom nav defaults to four enabled entries and archive defaults to articles', () => {
+  const config = defineSiteConfig(base);
+  assert.equal(config.bottomNav.enabled, true);
+  assert.deepEqual(
+    config.bottomNav.items.map((item) => item.link),
+    ['/', '/posts', '/friends', '/about'],
+  );
+  assert.equal(config.archive.defaultType, 'articles');
+});
+
+test('bottom nav accepts disabled state, custom titles, icons and archive type', () => {
+  const config = defineSiteConfig({
+    ...base,
+    bottomNav: {
+      enabled: false,
+      items: [{ link: 'https://example.com', title: '外站', icon: 'i-external' }, { link: '/archives' }],
+    },
+    archive: { defaultType: 'diary' },
+  });
+  assert.equal(config.bottomNav.enabled, false);
+  assert.deepEqual(config.bottomNav.items, [
+    { link: 'https://example.com', title: '外站', icon: 'i-external' },
+    { link: '/archives' },
+  ]);
+  assert.equal(config.archive.defaultType, 'diary');
+});
+
+test('invalid bottom nav and archive config fail at config load', () => {
+  assert.throws(() => defineSiteConfig({ ...base, bottomNav: { items: [] } }), /bottomNav|items/);
+  assert.throws(() => defineSiteConfig({ ...base, bottomNav: { items: [{ link: 'posts' }] } }), /内部链接|http/);
+  assert.throws(() => defineSiteConfig({ ...base, bottomNav: { items: [{ link: '/', icon: 'book' }] } }), /bottomNav|icon/);
+  assert.throws(() => defineSiteConfig({ ...base, bottomNav: { foo: true } as never }), /bottomNav|Unrecognized/);
+  assert.throws(() => defineSiteConfig({ ...base, archive: { defaultType: 'posts' } as never }), /archive|defaultType|Invalid/);
+});
+
 test('site config resolves language-specific defaults and derived locales', () => {
   const zh = defineSiteConfig(base);
   assert.equal(zh.lang, 'zh_CN');

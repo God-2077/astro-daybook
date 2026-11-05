@@ -122,6 +122,30 @@ assert.equal((home.match(/datetime="2026-10-21"/g) ?? []).length, 1, '同一天�
 assert.match(home, /href="\/daily\/2026\/10\/21-night"/, '首页应包含无标题日记');
 assert.doesNotMatch(home, /<h4 class="a-entry-title"><a href="\/daily\/2026\/10\/21-night"/, '无标题日记不应渲染标题');
 
+assert.match(home, /<html[^>]*data-bottom-nav="on"/, 'html 应标记底部导航开启');
+const bottomNavAt = home.indexOf('<nav class="a-bottomnav"');
+assert.ok(bottomNavAt > -1, '默认应渲染移动端底部导航');
+const bottomNavHtml = home.slice(bottomNavAt, home.indexOf('</nav>', bottomNavAt) + 6);
+for (const link of ['/', '/posts', '/friends', '/about']) {
+  assert.ok(bottomNavHtml.includes(`href="${link}"`), `底部导航应包含 ${link}`);
+}
+const footerAt = home.indexOf('<footer class="a-footer"');
+assert.ok(footerAt > -1, '应渲染页脚');
+const footerHtml = home.slice(footerAt, home.indexOf('</footer>', footerAt) + 9);
+assert.doesNotMatch(footerHtml, /href="\/feed\.xml"/, '页脚不应自动追加 RSS');
+
+const archives = read('archives/index.html');
+assert.match(
+  archives,
+  /<div[^>]*class="a-arc-switch"[^>]*data-mode="articles"[^>]*data-index="0"/,
+  '归档默认应选中文章，并标记第一个标签',
+);
+assert.ok(archives.indexOf('data-arc-mode="articles"') < archives.indexOf('data-arc-mode="diary"'), '默认文章在前、日记在后');
+assert.match(archives, /id="a-arc-articles">/, '默认应显示文章归档列表');
+assert.match(archives, /id="a-arc-diary" hidden>/, '默认应隐藏日记归档列表');
+assert.match(archives, /data-arc-mode="articles"[^>]*aria-pressed="true"/, '文章标签默认按下');
+assert.match(archives, /data-arc-mode="diary"[^>]*aria-pressed="false"/, '日记标签默认未按下');
+
 // 置顶日记单独成组：曾经整月跟着置顶、把更新的月份挤到后面。
 const pinnedSectionAt = home.indexOf('a-month-group--pinned');
 const novemberAt = home.indexOf('a-month-label">2026 · 十一月');

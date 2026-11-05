@@ -8,8 +8,6 @@ import Icon from '../common/Icon.astro';
 const currentYear = currentYearInTimeZone(siteConfig.timezone);
 const yearRange =
   siteConfig.copyright.yearFrom === currentYear ? `${currentYear}` : `${siteConfig.copyright.yearFrom}–${currentYear}`;
-
-const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
 ---
 
 <footer class="a-footer">
@@ -26,7 +24,6 @@ const rssEnabled = siteConfig.rss.enabled && siteConfig.rss.default.enabled;
             {item.title}
           </a>
         ))}
-        {rssEnabled && <a href="/feed.xml">RSS</a>}
       </nav>
     </div>
 

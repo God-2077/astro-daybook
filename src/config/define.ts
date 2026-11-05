@@ -29,11 +29,11 @@ import type {
   LinksConfig,
   LinksConfigInput,
   NavItem,
-  NavLinkItem,
   SiteConfig,
   SiteConfigInput,
 } from '../types/config';
 import {
+  DEFAULT_ARCHIVE,
   DEFAULT_COMMENTS,
   DEFAULT_INJECT,
   DEFAULT_ROBOTS,
@@ -42,6 +42,7 @@ import {
   DEFAULT_SITEMAP,
   DEFAULT_THEME,
   DEFAULT_TIMEZONE,
+  defaultBottomNav,
   defaultFooterNav,
   defaultHome,
   defaultLabels,
@@ -133,7 +134,7 @@ function validateNavItem(item: NavItem, file: string, base: string): void {
  * - 外链：必须以 `http://` / `https://` 开头，且是合法 URL（不能带 query / hash）。
  * - 内链：必须以 `/` 开头；是否命中真实路由不在配置层校验，需要自行保证。
  */
-function validateNavLink(link: NavLinkItem, file: string, base: string): void {
+function validateNavLink(link: { title?: string; link: string }, file: string, base: string): void {
   if (isExternal(link.link)) {
     if (!validHttpUrl(link.link)) fail(file, `${base}.link`, `${link.link} 不是合法的 http(s) 外链`);
     return;
@@ -178,6 +179,9 @@ function validateSite(input: SiteConfig, file: string): void {
   });
   input.footerNav.forEach((item, index) => {
     validateNavLink(item, file, `footerNav[${index}]`);
+  });
+  input.bottomNav.items.forEach((item, index) => {
+    validateNavLink(item, file, `bottomNav.items[${index}]`);
   });
 
   input.icp.forEach((item, index) => {
@@ -264,11 +268,18 @@ function resolveSite(parsed: SiteConfigInput, file: string): SiteConfig {
       'items' in item ? { ...item, items: item.items.map((link) => ({ ...link })) } : { ...item },
     ),
     footerNav: (parsed.footerNav ?? defaultFooterNav(lang)).map((item) => ({ ...item })),
+    bottomNav: {
+      enabled: parsed.bottomNav?.enabled ?? true,
+      items: (parsed.bottomNav?.items ?? defaultBottomNav()).map((item) => ({ ...item })),
+    },
     copyright,
     icp: (parsed.icp ?? []).map((item) => ({ ...item })),
     pagination: {
       daily: parsed.pagination?.daily ?? 20,
       post: parsed.pagination?.post ?? 20,
+    },
+    archive: {
+      defaultType: parsed.archive?.defaultType ?? DEFAULT_ARCHIVE.defaultType,
     },
     rss: {
       enabled: parsed.rss?.enabled ?? DEFAULT_RSS.enabled,

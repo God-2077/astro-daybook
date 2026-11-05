@@ -57,6 +57,26 @@ const maxYear = Math.max(now.year, ...contentYears);
 const years = Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index);
 const yearRange = minYear === maxYear ? `${minYear}` : `${minYear}–${maxYear}`;
 
+const defaultMode = siteConfig.archive.defaultType;
+const archiveModes = defaultMode === 'diary' ? (['diary', 'articles'] as const) : (['articles', 'diary'] as const);
+const archiveTabs = {
+  articles: {
+    label: t('archive.articles'),
+    total: articleItems.length,
+    unit: t('archive.statUnit'),
+    noun: t('archive.statNounPosts'),
+    range: yearRange,
+  },
+  diary: {
+    label: diaryLabel,
+    total: diaryItems.length,
+    unit: t('archive.statUnit'),
+    noun: t('archive.statNounDiary', { diary: diaryLabel }),
+    range: yearRange,
+  },
+} as const;
+const defaultTab = archiveTabs[defaultMode];
+
 function heatFor(items: ArcItem[]): Record<string, number[]> {
   const counts: Record<string, number[]> = {};
   for (const year of years) counts[String(year)] = Array.from({ length: 12 }, () => 0);
@@ -113,30 +133,29 @@ for (const item of articleItems) {
 
       <div class="a-arc-top">
         <p class="a-arc-meta">
-          <strong id="a-arc-total">{articleItems.length}</strong><span id="a-arc-unit">{t('archive.statUnit')}</span><span
-            id="a-arc-noun">{t('archive.statNounPosts')}</span> · <span id="a-arc-range">{yearRange}</span><span
+          <strong id="a-arc-total">{defaultTab.total}</strong><span id="a-arc-unit">{defaultTab.unit}</span><span
+            id="a-arc-noun">{defaultTab.noun}</span> · <span id="a-arc-range">{defaultTab.range}</span><span
             id="a-arc-year-unit">{t('archive.yearUnit')}</span>
         </p>
-        <div class="a-arc-switch" data-mode="articles" role="group" aria-label={t('archive.typeAria')}>
+        <div
+          class="a-arc-switch"
+          data-mode={defaultMode}
+          data-index="0"
+          role="group"
+          aria-label={t('archive.typeAria')}
+        >
           <span class="a-arc-thumb" aria-hidden="true"></span>
-          <button
-            type="button"
-            class="a-arc-opt"
-            data-arc-mode="articles"
-            data-arc-total={articleItems.length}
-            data-arc-unit={t('archive.statUnit')}
-            data-arc-noun={t('archive.statNounPosts')}
-            data-arc-range={yearRange}
-            aria-pressed="true">{t('archive.articles')}</button>
-          <button
-            type="button"
-            class="a-arc-opt"
-            data-arc-mode="diary"
-            data-arc-total={diaryItems.length}
-            data-arc-unit={t('archive.statUnit')}
-            data-arc-noun={t('archive.statNounDiary', { diary: diaryLabel })}
-            data-arc-range={yearRange}
-            aria-pressed="false">{diaryLabel}</button>
+          {archiveModes.map((mode) => (
+            <button
+              type="button"
+              class="a-arc-opt"
+              data-arc-mode={mode}
+              data-arc-total={archiveTabs[mode].total}
+              data-arc-unit={archiveTabs[mode].unit}
+              data-arc-noun={archiveTabs[mode].noun}
+              data-arc-range={archiveTabs[mode].range}
+              aria-pressed={mode === defaultMode ? 'true' : 'false'}>{archiveTabs[mode].label}</button>
+          ))}
         </div>
       </div>
 
@@ -159,9 +178,13 @@ for (const item of articleItems) {
         </noscript>
       </div>
 
-      <div class="a-arc-years" id="a-arc-articles">
+      <div class="a-arc-years" id="a-arc-articles" hidden={defaultMode !== 'articles'}>
         {articleGroups.map((group) => (
-          <section class="a-arc-year" data-arc-year={group.year} id={`year-${group.year}`}>
+          <section
+            class="a-arc-year"
+            data-arc-year={group.year}
+            id={defaultMode === 'articles' ? `year-${group.year}` : undefined}
+          >
             <a class="a-arc-year-head" href={`#year-${group.year}`}>
               <h2 class="a-arc-year-num">
                 <svg class="a-star" aria-hidden="true"><use href="#i-star" /></svg>{group.year}
@@ -192,9 +215,13 @@ for (const item of articleItems) {
         ))}
       </div>
 
-      <div class="a-arc-years" id="a-arc-diary" hidden>
+      <div class="a-arc-years" id="a-arc-diary" hidden={defaultMode !== 'diary'}>
         {diaryGroups.map((group) => (
-          <section class="a-arc-year" data-arc-year={group.year}>
+          <section
+            class="a-arc-year"
+            data-arc-year={group.year}
+            id={defaultMode === 'diary' ? `year-${group.year}` : undefined}
+          >
             <a class="a-arc-year-head" href={`#year-${group.year}`}>
               <h2 class="a-arc-year-num">
                 <svg class="a-star" aria-hidden="true"><use href="#i-star" /></svg>{group.year}

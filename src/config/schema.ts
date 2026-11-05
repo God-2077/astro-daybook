@@ -35,6 +35,33 @@ const navGroupSchema = z.strictObject({
 /** 导航项：一级链接或二级分组（联合类型，按形状自动区分）。 */
 const navItemSchema = z.union([navLinkSchema, navGroupSchema]);
 
+/** 移动端底部导航项：链接必填，标题与图标可选。 */
+const bottomNavItemSchema = z.strictObject({
+  /** 链接文字；省略时按 nav 配置或内置文案推导。 */
+  title: nonEmpty.optional(),
+  /** 链接地址；规则与顶部导航相同。 */
+  link: nonEmpty,
+  /** sprite 图标 id，如 i-book；省略时按链接推导。 */
+  icon: z
+    .string()
+    .regex(/^i-[a-z0-9-]+$/)
+    .optional(),
+});
+
+/** 移动端底部导航：enabled / items 均可选。 */
+const bottomNavSchema = z.strictObject({
+  /** 是否显示移动端底部导航；默认 true。 */
+  enabled: z.boolean().optional(),
+  /** 底部入口列表；省略时使用内置四项，至少一项。 */
+  items: z.array(bottomNavItemSchema).min(1).optional(),
+});
+
+/** 归档页配置：defaultType 可选。 */
+const archiveSchema = z.strictObject({
+  /** 默认展示内容类型：articles 或 diary；默认 articles。 */
+  defaultType: z.enum(['articles', 'diary']).optional(),
+});
+
 /** 备案信息项：`{ text, link? }`。 */
 const icpSchema = z.strictObject({
   /** 备案号文字，必填。 */
@@ -226,12 +253,16 @@ export const siteConfigSchema = z.strictObject({
   nav: z.array(navItemSchema).optional(),
   /** 页脚导航；省略时使用当前语言的默认页脚导航。 */
   footerNav: z.array(navLinkSchema).optional(),
+  /** 移动端底部导航。 */
+  bottomNav: bottomNavSchema.optional(),
   /** 版权配置。 */
   copyright: copyrightSchema.optional(),
   /** 备案信息列表；默认 `[]`。 */
   icp: z.array(icpSchema).optional(),
   /** 分页配置。 */
   pagination: paginationSchema.optional(),
+  /** 归档页默认展示类型。 */
+  archive: archiveSchema.optional(),
   /** RSS 配置。 */
   rss: rssSchema.optional(),
   /** 评论配置。 */

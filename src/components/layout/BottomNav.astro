@@ -2,15 +2,35 @@
 import { siteConfig } from '../../config/site';
 import { t } from '../../i18n/current';
 import { isNavLinkActive, navLabelFor } from '../../lib/nav';
+import { isExternalUrl } from '../../lib/site';
 import Icon from '../common/Icon.astro';
 
 const path = Astro.url.pathname || '/';
-const items = [
-  { title: navLabelFor(siteConfig.nav, '/') ?? siteConfig.labels.diary, href: '/', icon: 'i-book' },
-  { title: navLabelFor(siteConfig.nav, '/posts') ?? t('nav.posts'), href: '/posts', icon: 'i-file' },
-  { title: navLabelFor(siteConfig.nav, '/friends') ?? t('nav.friends'), href: '/friends', icon: 'i-link' },
-  { title: navLabelFor(siteConfig.nav, '/about') ?? t('nav.about'), href: '/about', icon: 'i-user' },
-];
+
+const fallbackTitles: Record<string, string> = {
+  '/': siteConfig.labels.diary,
+  '/posts': t('nav.posts'),
+  '/friends': t('nav.friends'),
+  '/about': t('nav.about'),
+};
+
+const fallbackIcons: Record<string, string> = {
+  '/': 'i-book',
+  '/posts': 'i-file',
+  '/friends': 'i-link',
+  '/about': 'i-user',
+};
+
+const items = siteConfig.bottomNav.items.map((item) => {
+  const external = isExternalUrl(item.link);
+
+  return {
+    href: item.link,
+    external,
+    title: item.title ?? navLabelFor(siteConfig.nav, item.link) ?? fallbackTitles[item.link] ?? item.link,
+    icon: item.icon ?? fallbackIcons[item.link] ?? (external ? 'i-external' : 'i-link'),
+  };
+});
 
 function active(href: string): boolean {
   return isNavLinkActive(href, path);
@@ -19,7 +39,12 @@ function active(href: string): boolean {
 
 <nav class="a-bottomnav" aria-label={t('nav.bottom')}>
   {items.map((item) => (
-    <a href={item.href} aria-current={active(item.href) ? 'page' : undefined}>
+    <a
+      href={item.href}
+      target={item.external ? '_blank' : undefined}
+      rel={item.external ? 'noopener' : undefined}
+      aria-current={active(item.href) ? 'page' : undefined}
+    >
       <Icon name={item.icon} />
       <span>{item.title}</span>
     </a>

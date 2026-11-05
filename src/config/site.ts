@@ -136,6 +136,7 @@ export const siteConfig = defineSiteConfig({
    * - 默认：按 `lang` 使用内置导航（`zh_CN` 为日记 / 文章分组 / 友链 / 关于）。
    * - 注意：内部链接必须以 `/` 开头；外链必须 `http(s)://`，且不能带 query/hash。
    * - 复用：移动端底部导航会按 `href` 取这里的标题；命中分组子项时显示分组名。
+   *   `bottomNav.items[].title` 显式配置时优先于这里的推导。
    */
   //   nav: [
   //     { title: '日记', link: '/' },
@@ -157,11 +158,32 @@ export const siteConfig = defineSiteConfig({
    *
    * - 可选值：`{ title, link }[]`，只支持一级链接，规则与 `nav` 相同。
    * - 默认：按 `lang` 使用内置「归档 / 友链」；显式配置后不会被翻译。
+   * - 注意：页脚不再自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
    */
   //   footerNav: [
   //     { title: '归档', link: '/archives' },
   //     { title: '友链', link: '/friends' },
   //   ],
+
+  /**
+   * 移动端底部导航（可选）。
+   *
+   * - `enabled`：是否显示，默认 `true`；关闭后移动端不再渲染底栏，也不预留底部空白。
+   * - `items`：入口列表，至少一项；省略时使用内置四项（首页 / 文章 / 友链 / 关于）。
+   * - 每项字段：`link` 必填；`title` 可选，省略时按 `nav` 配置或内置文案推导；
+   *   `icon` 可选，取 `src/assets/sprite.html` 中的 id（如 `i-book`），省略时按链接推导。
+   * - 显式配置 `items` 会整体替换默认四项，而不是追加。
+   * - 注意：内部链接规则与 `nav` 相同；外链会新窗口打开。
+   */
+    // bottomNav: {
+    //   enabled: true,
+    //   items: [
+    //     { link: '/', title: '日记', icon: 'i-book' },
+    //     { link: '/posts', title: '文章', icon: 'i-file' },
+    //     { link: '/friends', title: '友链', icon: 'i-link' },
+    //     { link: '/about', title: '关于', icon: 'i-user' },
+    //   ],
+    // },
 
   /**
    * 分页数量（可选）。
@@ -173,6 +195,17 @@ export const siteConfig = defineSiteConfig({
    * - 注意：第一页是 `/` 或 `/posts`，不是 `/page/1`；越界分页返回 404。
    */
   pagination: { daily: 8, post: 8 },
+
+  /**
+   * 归档页默认展示类型（可选）。
+   *
+   * - `defaultType`：`'articles'` 或 `'diary'`，默认 `'articles'`。
+   * - 设为 `'diary'` 时，归档页默认选中日记，且日记按钮排在文章按钮之前。
+   * - 只影响归档页的类型切换，不改变条目内部的日期排序。
+   */
+    // archive: {
+    //   defaultType: 'diary',
+    // },
 
   /**
    * RSS 配置（可选）。
