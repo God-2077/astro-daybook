@@ -161,3 +161,6 @@ design
 .trae
 .dsh*
 .tmp*
+
+# 独立内容仓库（content:clone 的默认目录）
+/content/

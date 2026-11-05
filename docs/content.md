@@ -11,7 +11,9 @@ src/content/spec/    关于页正文（about.mdx）
 
 四个集合定义在 `src/content.config.ts`：`dailyCollection`、`postsCollection`、`pagesCollection`、`specCollection`，schema 在 `src/lib/content/schema.ts`。
 
-`spec/` 只放不进入索引与 RSS 的正文，由页面自己按 id 读取（`getEntry('specCollection', 'about')`）。它没有 frontmatter（`specSchema` 是空对象），小节用 `##` 写，构建时自动补 ✦ 与锚点；文件缺失会直接让构建失败并在错误里指出 `src/content/spec/about.mdx`。
+上面是**主题模式**的默认路径。内容模式下（`pnpm dev:content` / `pnpm build:content`），同样的四个目录位于 `CONTENT_REPO` 指向的内容仓库根目录（默认 `content/`），例如 `content/daily/`。两种模式的 frontmatter 与可见性规则完全一致；目录含义与 clone/pull 见 [`dual-repo.md`](dual-repo.md)。
+
+`spec/` 只放不进入索引与 RSS 的正文，由页面自己按 id 读取（`getEntry('specCollection', 'about')`）。它没有 frontmatter（`specSchema` 是空对象），小节用 `##` 写，构建时自动补 ✦ 与锚点；文件缺失会直接让构建失败，并在错误里指出当前内容根下的 `spec/about.mdx`。
 
 ## 日记 frontmatter
 
@@ -67,6 +69,7 @@ comments: true
 - 默认 slug 由文件相对集合根目录的路径生成，保留目录、去掉 `.md` / `.mdx`。
   - `src/content/daily/2026/10/23-year.md` → `/daily/2026/10/23-year`
   - `src/content/post/astro-blog-studio.mdx` → `/post/astro-blog-studio`
+  - 内容模式下把 `src/content/` 换成内容仓库根目录即可，slug 不变。
 - 配了 `permalink` 时以它为准：`permalink: notes/hello` → `/notes/hello`。
 - `slug` / `permalink` 末尾 `/` 可有可无；构建时规范为「以 `/` 开头、不以 `/` 结尾」。
 - 禁止 `?`、`#`、反斜杠与 `.` / `..` 路径段。

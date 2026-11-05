@@ -4,11 +4,15 @@ import CommentsSection from '../components/comments/CommentsSection.astro';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/current';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { contentBase } from '../lib/content/paths';
 import { ContentError } from '../lib/errors';
 
 const aboutEntry = await getEntry('specCollection', 'about');
 if (!aboutEntry) {
-  throw new ContentError('src/content/spec/about.mdx', '找不到关于页正文，请新建该文件（Markdown/MDX，无需 frontmatter）。');
+  throw new ContentError(
+    `${contentBase('spec')}/about.mdx`,
+    '找不到关于页正文，请新建该文件（Markdown/MDX，无需 frontmatter）。',
+  );
 }
 const { Content } = await render(aboutEntry);
 ---

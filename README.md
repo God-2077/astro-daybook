@@ -47,6 +47,7 @@
 - **音乐页**：把喜欢的歌单放进站内播放
 - **多语言**：一次构建输出简体中文、繁體中文、English、日本語中的一种界面
 - **手机友好**：小屏自动收起导航，底部导航随手切换
+- **主题与内容分仓（可选）**：内容仓库独立 clone/pull，写作提交不必混进主题历史
 
 ## 快速开始
 
@@ -66,6 +67,18 @@ pnpm dev        # 打开 http://localhost:4321
 3. `pnpm build` 生成 `dist/`，把整个目录上传到任意静态托管即可。
 
 托管平台（Vercel、Cloudflare Pages、Netlify 等）可以直接导入仓库：构建命令填 `pnpm build`，输出目录填 `dist`。详细步骤见[部署说明](./docs/configuration.md#部署)。
+
+## 主题仓库与内容仓库（可选）
+
+默认的 `pnpm dev` / `pnpm build` 使用主题自带的 `src/content/`。如果想让写作内容独立成 Git 仓库：
+
+1. 准备 `content/`（结构：`post/`、`daily/`、`pages/`、`spec/`、`config/`），或在远端建好后在 `.env` 填写 `CONTENT_REPO_URL`；
+2. 运行 `pnpm content:clone` 拉取内容仓库（已有示例骨架时先参考文档处理）；
+3. 用 `pnpm dev:content` / `pnpm build:content` 使用内容仓库，`pnpm content:pull` 更新。
+
+根目录的 `content/` 已被主题的 `.gitignore` 忽略，它只是示例骨架；正式内容应放在独立的内容仓库里。
+
+内容仓库的 `config/site.ts` 与 `links.ts` 通过 `import type` 复用主题的 `SiteConfigInput` / `LinksConfigInput` 类型，并默认导出普通对象；主题会用与 `src/config/` 相同的 schema 校验。完整说明见 [`docs/dual-repo.md`](./docs/dual-repo.md)。
 
 ## 更快捷地写日记（可选）
 
@@ -119,9 +132,12 @@ keywords: [静态博客]
 | 友链分组 | `src/config/links.ts` |
 | 关于页正文 | `src/content/spec/about.mdx` |
 | 音乐页歌单 | `src/content/pages/music.mdx` |
+| 内容仓库地址、目录、分支、SSH 私钥 | `.env` 的 `CONTENT_REPO_*` |
+| 内容模式下的站点配置、友链 | `content/config/site.ts`、`content/config/links.ts` |
 
 - 全部配置字段、评论接入、部署与安全边界：[`docs/configuration.md`](./docs/configuration.md)
 - 内容目录、frontmatter 与可见性：[`docs/content.md`](./docs/content.md)
+- 主题与内容分仓、clone/pull：[`docs/dual-repo.md`](./docs/dual-repo.md)
 - 歌单与播放器：[`docs/music-player.md`](./docs/music-player.md)
 
 ## 鸣谢

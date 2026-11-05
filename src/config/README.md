@@ -19,6 +19,8 @@
 
 类型定义单独放在 [`src/types/config.ts`](../types/config.ts)，schema 通过 `z.infer` 与之对齐。
 
+使用独立内容仓库时，配置入口换成 `<内容根>/config/site.ts` 与 `links.ts`：这两个文件通过 `import type` 复用 [`src/types/config.ts`](../types/config.ts) 的 `SiteConfigInput` / `LinksConfigInput`，默认导出普通对象，由 `scripts/site-context.ts` 读取后交给本目录的 `defineSiteConfig` / `defineLinksConfig` 校验。`import type` 运行时会被擦除，内容仓库不需要主题依赖；主题的 `src/config/site.ts` / `links.ts` 在内容模式的构建中由 Vite 插件替换，页面代码不需要改 import；Node 单测仍读取主题文件。完整说明见 [`docs/dual-repo.md`](../../docs/dual-repo.md)。
+
 ## 解析链路
 
 两个配置文件都走同一条链路：
@@ -28,7 +30,7 @@ site.ts ──defineSiteConfig()──▶ parse (schema.ts / Zod) ──▶ reso
 links.ts ──defineLinksConfig()──▶ parse ──▶ resolve（补空数组） ──▶ validate ──▶ linksConfig
 ```
 
-关于页的正文不在这里：它属于内容，放在 `src/content/spec/about.mdx`，由页面用 `getEntry('specCollection', 'about')` 读取。
+关于页的正文不在这里：它属于内容，放在当前内容根的 `spec/about.mdx`（主题模式为 `src/content/spec/about.mdx`），由页面用 `getEntry('specCollection', 'about')` 读取。
 
 - **parse**：`strictObject` 会拒绝未知字段（拼错键名不会静默失效），类型错误会带上字段路径。
 - **resolve**：`site.ts` 的用户值优先，缺省值来自 `defaults.ts`；部分字段还会互相推导，例如 `copyright.yearFrom` 取 `since`、`copyright.author` 取站点 `author`、`footerBrand` 取 `title`。

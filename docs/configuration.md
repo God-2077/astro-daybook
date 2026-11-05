@@ -15,6 +15,8 @@
 
 只写需要覆盖默认值的字段；所有字段都有 TypeScript 类型与运行期校验。
 
+如果使用独立内容仓库（`pnpm dev:content` / `pnpm build:content`），站点配置改从 `<内容根>/config/site.ts` 与 `<内容根>/config/links.ts` 读取，字段表与校验规则不变；内容仓库配置的写法见 [`dual-repo.md`](dual-repo.md#内容仓库配置)。
+
 维护者视角的解析链路与错误格式见 [`src/config/README.md`](../src/config/README.md)。
 
 ## `site.ts`
@@ -217,7 +219,7 @@ inject: {
 
 ## 关于页正文
 
-关于页没有单独的配置文件：正文写在 `src/content/spec/about.mdx`（无 frontmatter，`##` 小节自动带 ✦ 与锚点），由页面在构建期读取；文件缺失时构建直接失败并提示路径。头像、标题与副标题分别来自 `site.ts` 的 `avatar`、`author`、`subtitle`。
+关于页没有单独的配置文件：正文写在当前内容根的 `spec/about.mdx`（主题模式为 `src/content/spec/about.mdx`，内容模式为 `<内容根>/spec/about.mdx`；无 frontmatter，`##` 小节自动带 ✦ 与锚点），由页面在构建期读取；文件缺失时构建直接失败并提示路径。头像、标题与副标题分别来自 `site.ts` 的 `avatar`、`author`、`subtitle`。
 
 目录结构、frontmatter 与可见性规则见 [`content.md`](content.md)。
 
@@ -268,6 +270,7 @@ pnpm build      # 输出 dist/
 
 - 构建前把 `siteConfig.url` 改成真实域名：它参与 canonical、RSS、sitemap 与 OG 的绝对链接。
 - 托管平台需要填构建命令与输出目录时：命令 `pnpm build`，输出目录 `dist`。
+- 内容模式部署时构建命令改为 `pnpm build:content`；它会先生成内容站点，再建立 Pagefind 索引。需要把内容仓库一起检出时，按托管平台的文档配置 `CONTENT_REPO` 或改用把内容放进主题仓库的方式，详见 [`dual-repo.md`](dual-repo.md)。
 - 搜索索引由 `postbuild` 生成到 `dist/pagefind/`，所以要用 `pnpm build` 而不是直接 `astro build`，否则搜索不可用。
 - 本站默认部署在根路径 `/`。若必须放在子路径，需要同时调整 Astro 的 `base`、`trailingSlash` 以及 RSS / Pagefind 的资源路径，改动面较大，先确认是否真的需要。
 - `feed.xml`、`sitemap.xml`、`robots.txt` 由静态 endpoint 生成；在 `site.ts` 里关闭对应开关后，产物会一并消失。
@@ -280,6 +283,7 @@ pnpm build      # 输出 dist/
 - 配置与正文中的站外链接会加 `target="_blank" rel="noopener"`；Markdown 默认按 Astro 的安全策略处理原始 HTML。
 - `inject.headEnd` / `inject.bodyEnd` 按原样写入页面，不做转义或清洗；只用于站点所有者自己维护的可信 HTML。
 - Pagefind 只对密码页的标题与 `description` 建索引；被锁定的内容、`hideFrom` 含 `sitemap` 的条目、草稿与 404 页输出 `noindex`，密码页默认不进 sitemap。
+- `.env` 里的 `CONTENT_REPO_URL` 可能内联 HTTP token，`CONTENT_REPO_SSH_KEY` 指向私钥；不要提交 `.env` 或把凭据写进配置/文档。`content:clone` / `content:pull` 的失败日志会脱敏 URL 中的账号、token 与常见 query 参数。
 - 示例歌单的音频、封面与歌词托管在外部 CDN（地址见 `src/content/pages/music.mdx`），仓库不含这些文件；曲目版权归各自权利人，正式使用前请替换成自己的资源。
 
 ## 校验失败
@@ -290,6 +294,8 @@ pnpm build      # 输出 dist/
 [daybook:config] src/config/site.ts > nav[1].link
   nope 不是合法内部链接（必须以 / 开头）
 ```
+
+内容模式的配置错误会把文件路径显示为 `content/config/site.ts` 或 `content/config/links.ts`（实际路径随 `CONTENT_REPO` 变化）。
 
 常见错误：
 

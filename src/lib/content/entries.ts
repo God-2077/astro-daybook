@@ -4,6 +4,7 @@ import type { AnyEntry, ContentCollection, DailyData, DailyEntry, HideFrom, Post
 import { ContentError, ProjectError } from '../errors';
 import { parseContentDate } from './date';
 import { contentFormat } from './format';
+import { contentBase, relativePathForCollection } from './paths';
 import { readRawFrontmatter } from './raw';
 
 export const RESERVED_PREFIXES = ['/page/', '/posts/page/', '/categories/', '/tags/'];
@@ -34,16 +35,8 @@ function isDev(): boolean {
   return Boolean(import.meta.env?.DEV);
 }
 
-function collectionDir(collection: ContentCollection): string {
-  return `src/content/${collection}/`;
-}
-
 function relativeContentPath(collection: ContentCollection, filePath: string): string {
-  const normalized = filePath.replace(/\\/g, '/');
-  const marker = collectionDir(collection);
-  const index = normalized.lastIndexOf(marker);
-  if (index >= 0) return normalized.slice(index + marker.length);
-  return normalized.split('/').pop() ?? normalized;
+  return relativePathForCollection(filePath, contentBase(collection));
 }
 
 function normalizeSlug(value: string, file: string, field: string): string {

@@ -8,17 +8,23 @@
     "pnpm": ">=7.1.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "node scripts/astro.mjs dev",
+    "dev:content": "node scripts/astro.mjs dev --content",
+    "build": "node scripts/astro.mjs build",
+    "build:content": "node scripts/astro.mjs build --content && pagefind --site dist",
     "postbuild": "pagefind --site dist",
-    "preview": "astro preview",
-    "check": "astro check",
+    "preview": "node scripts/astro.mjs preview",
+    "preview:content": "node scripts/astro.mjs preview --content",
+    "check": "node scripts/astro.mjs check",
+    "check:content": "node scripts/astro.mjs check --content",
     "lint": "biome check .",
     "format": "biome format --write .",
     "og": "tsx scripts/make-og-image.ts",
     "test:unit": "node --import tsx --test tests/unit/*.test.ts",
     "test:build": "node --import tsx tests/build/assert-dist.ts",
-    "test": "pnpm test:unit && pnpm test:build"
+    "test": "pnpm test:unit && pnpm test:build",
+    "content:clone": "node --import tsx scripts/content-repo.ts clone",
+    "content:pull": "node --import tsx scripts/content-repo.ts pull"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.4",

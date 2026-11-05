@@ -17,6 +17,7 @@
       "!public",
       "!src/styles",
       "!src/content",
+      "!content",
       "!docs",
       "!**/*.md",
       "!pagefind.yml",
