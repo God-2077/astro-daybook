@@ -131,8 +131,6 @@ for (const link of ['/', '/posts', '/friends', '/about']) {
 }
 const footerAt = home.indexOf('<footer class="a-footer"');
 assert.ok(footerAt > -1, '应渲染页脚');
-const footerHtml = home.slice(footerAt, home.indexOf('</footer>', footerAt) + 9);
-assert.doesNotMatch(footerHtml, /href="\/feed\.xml"/, '页脚不应自动追加 RSS');
 
 const archives = read('archives/index.html');
 assert.match(

@@ -63,7 +63,7 @@ test('site config resolves language-specific defaults and derived locales', () =
   assert.equal(zh.nav[0]?.title, '日记');
   assert.deepEqual(
     zh.footerNav.map((item) => item.title),
-    ['归档', '友链'],
+    ['归档', '友链', 'RSS'],
   );
   assert.equal(zh.seo.locale, 'zh_CN');
   assert.equal(zh.comments.twikoo.lang, 'zh-CN');
@@ -83,7 +83,7 @@ test('site config resolves language-specific defaults and derived locales', () =
   assert.equal(en.nav[0]?.title, 'Diary');
   assert.deepEqual(
     en.footerNav.map((item) => item.title),
-    ['Archives', 'Friends'],
+    ['Archives', 'Friends', 'RSS'],
   );
   assert.equal(en.seo.locale, 'en_US');
   assert.equal(en.comments.twikoo.lang, 'en');
