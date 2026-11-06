@@ -26,28 +26,28 @@ export const linksConfig = defineLinksConfig({
    */
   groups: [
     {
-      name: '熟人',
-      description: '一起写东西、一起折腾工具的朋友。',
+      name: '知り合い',
+      description: '一緒に文章を書き、道具をいじっている友人たち。',
       links: [
-        { name: '纸飞机', url: 'https://example.com/paper-plane', description: '一个写日记的邻居。' },
-        { name: '岭上', url: 'https://example.com/ridge', description: '摄影与长文。' },
-        { name: '北窗', url: 'https://example.com/north-window', description: '前端、字体与书。' },
+        { name: '紙飛行機', url: 'https://example.com/paper-plane', description: '日記を書いている隣人。' },
+        { name: '峠の上', url: 'https://example.com/ridge', description: '写真と長い文章。' },
+        { name: '北の窓', url: 'https://example.com/north-window', description: 'フロントエンド、フォントと本。' },
       ],
     },
     {
-      name: '友链小伙伴',
-      description: '常来常往的独立博客。',
+      name: 'リンク仲間',
+      description: '行き来の多い個人ブログ。',
       links: [
-        { name: '微光', url: 'https://example.com/glimmer', description: '关于设计的小笔记。' },
-        { name: '海边', url: 'https://example.com/seaside', description: '慢一点的记录。' },
+        { name: 'かすかな光', url: 'https://example.com/glimmer', description: 'デザインについての小さなメモ。' },
+        { name: '海辺', url: 'https://example.com/seaside', description: 'ゆっくりした記録。' },
       ],
     },
     {
-      name: '单向关注',
-      description: '喜欢但还没有交换友链的站点。',
+      name: '一方的に注目',
+      description: '好きだけれど、まだリンクを交換していないサイト。',
       links: [
-        { name: 'Astro', url: 'https://astro.build', description: '本站使用的框架。' },
-        { name: 'MDN', url: 'https://developer.mozilla.org', description: '查文档的地方。' },
+        { name: 'Astro', url: 'https://astro.build', description: 'このサイトで使っているフレームワーク。' },
+        { name: 'MDN', url: 'https://developer.mozilla.org', description: 'ドキュメントを調べる場所。' },
       ],
     },
   ],
