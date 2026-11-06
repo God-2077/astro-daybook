@@ -100,7 +100,7 @@ export const siteConfig = defineSiteConfig({
    * - 用途：页脚版权起始年份（`copyright.yearFrom` 的缺省值）、归档页的起始提示。
    * - 可选值：`1900` 到「当前时区年份 + 1」之间的整数；默认当前年份。
    */
-  since: 2024,
+  since: 2026,
 
   /**
    * 默认主题偏好（可选）。
@@ -307,7 +307,7 @@ export const siteConfig = defineSiteConfig({
    * - `yearFrom`：版权起始年份，默认取 `since`。
    * - `author`：版权署名，默认取站点 `author`。
    */
-  copyright: { enabled: true, yearFrom: 2024 },
+  copyright: { enabled: true, yearFrom: 2026 },
 
   /**
    * 备案信息（可选）。
