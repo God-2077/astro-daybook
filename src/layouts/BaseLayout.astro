@@ -63,6 +63,12 @@ const structuredData = [websiteLd, ...(Array.isArray(jsonLd) ? jsonLd : jsonLd ?
 const structuredJson = JSON.stringify(structuredData).replace(/</g, '\\u003c');
 const rss = siteConfig.rss;
 const clientI18n = getClientMessages(siteConfig.lang);
+
+const fonts =
+  siteConfig.lang === 'ja'
+    ? ['/fonts/GenJyuuGothic-P-Regular/result.css', '/fonts/GenJyuuGothic-P-Bold/result.css']
+    : ['/fonts/ChillRoundFRegular/result.css', '/fonts/ChillRoundFBold/result.css'];
+
 ---
 
 <!doctype html>
@@ -160,8 +166,7 @@ const clientI18n = getClientMessages(siteConfig.lang);
     )}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/fonts/ChillRoundFRegular/result.css" />
-    <link rel="stylesheet" href="/fonts/ChillRoundFBold/result.css" />
+    {fonts.map((href) => <link rel="stylesheet" href={href} />)}
 
     <ClientRouter />
     <script type="application/ld+json" set:html={structuredJson}></script>

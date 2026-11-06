@@ -46,6 +46,11 @@
   --ease: cubic-bezier(.2, .6, .2, 1);
 }
 
+:lang(ja) {
+  --font-sans: "Gen Jyuu Gothic P Regular", "Zen Maru Gothic", system-ui, sans-serif;
+  --font-bold: "Gen Jyuu Gothic P Bold", system-ui, sans-serif;
+}
+
 .dark {
   --background: 256 18% 13%;
   --card: 256 18% 15%;

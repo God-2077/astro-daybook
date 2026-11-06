@@ -66,7 +66,7 @@ export const siteConfig = defineSiteConfig({
    *   也不生成 `/[lang]` 路由；切换语言需要修改这里后重新构建。
    * - 范围：正文、站点标题/描述、`src/content/spec/about.mdx`、`links.ts` 与分类/标签名称属于内容，不会被自动翻译。
    */
-  lang: 'zh_CN',
+  lang: 'ja',
 
   /**
    * 站点长描述（可选）。
