@@ -113,10 +113,13 @@ comments: true
 ## 正文图片
 
 - 图片独占一行时（与文字之间有没有空行都一样）会渲染为 `<figure class="a-figure"><div class="a-frame">…`，图注取图片 `alt`；与文字同一行的图片仍保持行内。
+- 位图（`src` 不以 `.svg` 结尾）的独占单图会额外带 `a-figure--raster`：视口宽于 767px 时最高约 2/3 屏高（`max-height: min(66vh, 640px)`），图框收紧包住照片并水平居中，图注从照片左缘开始；宽度达到或超过正文列宽的横图仍占满列宽、外观不变；比列宽更窄的小图按原始大小居中显示，不再被拉伸放大。
+- 视口 ≤ 767px 时不限高，竖图保持满栏显示；SVG 与 `.a-figure-row` 里的并排图也不参与限高。
 - 同一行用空格隔开的 2 张及以上图片会渲染为 `<div class="a-figure-row">` 内并排的 figure，每张各自保留细边框与自己图注；窄屏按列自动折行（手机上 3 张折成 2+1），不新增断点。
 - 所有正文图片自动加 `loading="lazy"` 与 `decoding="async"`，不阻塞首屏渲染。
 - 加载前容器显示灰色占位块（固定 1.6:1 比例、无动画）；加载完成后直接替换为图片；加载失败时在占位块内显示 `alt` 文案。
 - 本地图片建议放在 `public/images/`，正文用 `/images/...` 引用；远程图片与普通 Markdown 图片语法一致。
+- MDX 里也可以用 `Figure` 组件插图，生成同样的 `.a-figure` 结构与限高，见下文「插图组件」。
 
 ## 正文链接
 
@@ -172,6 +175,28 @@ import { Timeline, TimelineItem } from '@ui';
 - `TimelineItem` 接受可选的 `date`、`title`；`date` 是 ISO 日期时渲染为 `<time datetime>`，否则为 `<span>`。
 - 正文通过默认 slot 传入；日期在左侧栏，标题在正文列顶部，节点固定在细线上。
 - 样式只写在 `src/styles/daybook.css` 的 `.a-mdx-timeline*`，≤767 收窄日期栏。
+
+### 插图组件
+
+`src/components/content/Figure.astro` 是 MDX 里的单图容器，生成的 DOM 与 Markdown 独占一行的图片相同（`figure.a-figure > div.a-frame > img.a-img`），因此灰色骨架、点击放大与竖图限高都由既有的 `.a-figure*` 规则统一处理，不再单独写样式。
+
+```mdx
+import { Figure } from '@ui';
+import myImage from './1.jpg';
+
+<Figure src={myImage} alt="山脊上的日落" caption="图注；省略时取 alt，传空字符串则不显示" />
+```
+
+- `src`：必填。`import` 进来的图片走 Astro `<Image>`（构建期转 webp、输出 `width` / `height`，默认懒加载并异步解码）；传 `public/` 或远程地址字符串时退回普通 `<img>`，不参与优化。
+- `alt`：必填。空值或纯空白会在构建时报错；`caption` 省略时图注也取它。
+- `caption`：可选。省略时取 `alt`；显式传空字符串（或纯空白）时只渲染图片，不输出 `<figcaption>`。
+- `width` / `height`：可选，覆盖输出宽高；省略时 ESM 导入沿用原图尺寸，字符串地址不写宽高。两者都给时，字符串地址同样会用 `a-frame--sized` 预留骨架比例。
+- `loading`：`'lazy'` 或 `'eager'`，默认 `'lazy'`；首屏插图可以传 `eager`。
+- `quality`：可选，只对 ESM 导入的图片生效，透传给 Astro `<Image>`。
+
+尺寸已知的图框会带 `a-frame--sized`，加载前按图片自身宽高占位，避免骨架高度与成品不一致。ESM 导入的位图同样带 `a-figure--raster`，宽屏下与 Markdown 竖图一样限高（最高 `min(66vh, 640px)`）。
+
+示例见 `src/content/daily/new.mdx`（`Figure` + `./1.jpg`）；`src/content/daily/asd.mdx` 保留普通 Markdown 图片语法，可以对照两种写法。
 
 ## `hideFrom`
 

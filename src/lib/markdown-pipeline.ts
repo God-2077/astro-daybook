@@ -72,14 +72,23 @@ function normalizeFootnotes(node: HastNode): void {
   if (ol) setClassNames(ol, ['a-footnote-list']);
 }
 
+/** 位图有内禀宽高比，可以安全地限高缩放；SVG 没有内禀尺寸，必须保持满栏宽度。 */
+function isRasterImage(img: HastNode): boolean {
+  const src = img.properties?.src;
+  if (typeof src !== 'string') return true;
+  return !/\.svg$/i.test(src.split(/[?#]/)[0] ?? '');
+}
+
 /** 单图段落 → 原型 `<figure class="a-figure">` + 由 alt 生成的图注。 */
 function toFigure(img: HastNode, alt: string): HastNode {
   const caption = alt.trim();
+  const figureClasses = ['a-figure'];
+  if (isRasterImage(img)) figureClasses.push('a-figure--raster');
   const figureChildren: HastNode[] = [element('div', { className: ['a-frame'] }, [img])];
   if (caption.length > 0) {
     figureChildren.push(element('figcaption', {}, [{ type: 'text', value: caption }]));
   }
-  return element('figure', { className: ['a-figure'] }, figureChildren);
+  return element('figure', { className: figureClasses }, figureChildren);
 }
 
 /** 正文图片统一懒加载 + 异步解码，并挂 `a-img` 便于骨架屏样式定位。 */

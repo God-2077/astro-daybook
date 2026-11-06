@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+/**
+ * 正文插图容器，可以在 MDX 里通过 `@ui` 具名导入。
+ *
+ * 用法：
+ * ```mdx
+ * import { Figure } from '@ui';
+ * import myImage from './1.jpg';
+ *
+ * <Figure src={myImage} alt="山脊上的日落" caption="图注；省略时取 alt，传空字符串则不显示" />
+ * ```
+ *
+ * - `src` 传 ESM 导入的图片时走 Astro 图片优化（构建期转 webp、带 width / height，加载不跳版）；
+ *   传 `public/` 或远程字符串地址时退回普通 <img>，不参与优化。
+ * - DOM 与 Markdown 图片一致：`figure.a-figure > div.a-frame > img.a-img`，所以灰色骨架、
+ *   点击放大、竖图限高都由 `.a-figure*` 的既有规则统一处理，不额外加样式。
+ * - 位图 figure 会带 `a-figure--raster`（SVG 不带），独占一行且宽屏下的竖图最高约 2/3 屏高，
+ *   图框收紧包住照片并居中；并排多图仍用 Markdown 的行内图片语法。
+ */
+
+interface Props {
+  /** `import` 进来的图片，或 `public/` / 远程地址字符串。 */
+  src: ImageMetadata | string;
+  /** 替代文本，必填。 */
+  alt: string;
+  /** 图注；省略时取 alt，传空字符串则不渲染 figcaption。 */
+  caption?: string;
+  /** 输出宽高；省略时位图使用原图尺寸。 */
+  width?: number;
+  height?: number;
+  /** 默认懒加载。 */
+  loading?: 'lazy' | 'eager';
+  /** 只对 ESM 导入的图片生效。 */
+  quality?: number;
+}
+
+const { src, alt, caption, width, height, loading = 'lazy', quality } = Astro.props;
+
+if (typeof alt !== 'string' || alt.trim().length === 0) {
+  throw new Error('[daybook:figure] alt is required');
+}
+if (typeof src === 'string' && src.trim().length === 0) {
+  throw new Error('[daybook:figure] src must be an imported image or a non-empty path');
+}
+if (typeof src !== 'string' && (typeof src !== 'object' || src === null)) {
+  throw new Error('[daybook:figure] src must be an imported image or a non-empty path');
+}
+
+const imported = typeof src === 'string' ? undefined : src;
+const plain = typeof src === 'string' ? src : undefined;
+const srcPath = plain ? (plain.split(/[?#]/)[0] ?? '') : '';
+const isSvg = imported ? imported.format === 'svg' : /\.svg$/i.test(srcPath);
+const captionText = (caption ?? alt).trim();
+const sized = Boolean((width ?? imported?.width) && (height ?? imported?.height));
+---
+
+<figure class={`a-figure${isSvg ? '' : ' a-figure--raster'}`}>
+  <div class={`a-frame${sized ? ' a-frame--sized' : ''}`}>
+    {imported ? (
+      <Image
+        src={imported}
+        alt={alt}
+        class="a-img"
+        width={width}
+        height={height}
+        loading={loading}
+        quality={quality}
+      />
+    ) : (
+      <img
+        src={plain}
+        alt={alt}
+        class="a-img"
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="async"
+      />
+    )}
+  </div>
+  {captionText.length > 0 && <figcaption>{captionText}</figcaption>}
+</figure>

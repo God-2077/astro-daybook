@@ -112,8 +112,6 @@ const home = read('index.html');
 assert.match(home, /<html[^>]*data-theme-mode="system"/, 'html 应输出主题模式');
 assert.match(home, /id="a-loadbar"/, '应输出站内导航进度条');
 assert.match(home, /<title>日记/, '首页标题应使用 labels.diary');
-assert.match(home, /href="\/daily\/2026-10-20-redesign"/, '首页应包含 MDX 日记');
-assert.match(home, /把博客重新画一遍/, '首页应渲染 MDX 日记标题');
 assert.match(home, /<section class="a-day-group">/, '首页应按天分组');
 assert.match(home, /class="a-entry-cat">一段回顾</, '首页应显示日记 category');
 assert.match(home, /查看原文/, '首页应显示查看原文');
@@ -186,13 +184,24 @@ assert.doesNotMatch(
   'hideHomeTitle 日记不应在首页（含分页）渲染标题',
 );
 assert.match(feedHtml, /这篇日记在首页不显示标题/, 'hideHomeTitle 日记的正文仍应出现在首页（含分页）');
+assert.match(feedHtml, /href="\/daily\/2026-10-20-redesign"/, '首页（含分页）应包含 MDX 日记');
+assert.match(feedHtml, /把博客重新画一遍/, '首页（含分页）应渲染 MDX 日记标题');
 
 const friends = read('friends/index.html');
 assert.match(friends, /rel="noopener"/, '外链应保留 noopener');
 assert.doesNotMatch(friends, /noreferrer/, '友链不应再带 noreferrer');
 
 const markdownSyntax = read('post/markdown-syntax/index.html');
-assert.match(markdownSyntax, /<figure class="a-figure"><div class="a-frame">/, '正文图片应包在 figure 中');
+assert.match(
+  markdownSyntax,
+  /<figure class="a-figure a-figure--raster"><div class="a-frame">/,
+  '位图正文图片应带限高类并包在 figure 中',
+);
+assert.match(
+  markdownSyntax,
+  /<figure class="a-figure"><div class="a-frame"><img[^>]*src="\/images\/demo\/diary-line\.svg"/,
+  'SVG 图没有内禀尺寸，不应带限高类',
+);
 assert.match(markdownSyntax, /class="a-img"/, '正文图片应带 a-img');
 assert.match(markdownSyntax, /loading="lazy"/, '正文图片应懒加载');
 assert.match(markdownSyntax, /decoding="async"/, '正文图片应异步解码');
@@ -224,6 +233,7 @@ assert.match(mdxSyntax, /<h2 id="h-时间线"><svg class="a-h2-star"/, 'MDX 标�
 assert.match(mdxSyntax, /<figure class="a-figure"><div class="a-frame">/, 'MDX 单图应转 figure');
 assert.match(mdxSyntax, /class="a-img"[^>]*loading="lazy"/, 'MDX 图片应懒加载');
 assert.doesNotMatch(mdxSyntax, /<p>import /, 'MDX import 不应泄漏到正文');
+assert.doesNotMatch(mdxSyntax, /a-figure--raster/, 'MDX 页里的 SVG 图不应带限高类');
 
 const music = read('music/index.html');
 assert.match(music, /<section class="a-view" data-view="page"/, '独立页面应使用 PageLayout');

@@ -1944,6 +1944,8 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   text-align: center;
 }
 .a-frame.is-error img { opacity: 0; }
+/* Figure 组件自带宽高：骨架直接用图片本身占位，加载前后高度一致，不产生跳版。 */
+.a-frame--sized.is-pending { aspect-ratio: auto; }
 
 /* 公式（CSS 排印，不加载 MathJax） */
 .a-formula {

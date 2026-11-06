@@ -44,3 +44,27 @@ keywords: [图片, 图注, 排版]
 `alt` 留空时仍然保留图块，只是不显示说明文字：
 
 ![](https://k-pan.edgeone.ksable.top/public/astro-daybook/music/darling.jpg)
+
+## 一张竖图
+
+竖图在宽屏下最高约 2/3 屏高，图框收紧并居中；手机上仍按满栏显示。
+
+![竖图](https://dummyimage.com/1280x2276)
+
+## 插图组件
+
+用 `Figure` 组件代替 Markdown 图片语法：图片先 `import` 进来，再交给组件生成与正文一致的图框。
+
+但 `Figure` 组件不支持并排显示。想并排显示，只能用 Markdown 图片语法。
+
+```mdx
+import { Figure } from '@ui';
+import myImage from '/public/images/BV1tUxy6BEGV.webp';
+
+<Figure src={myImage} alt="被巨大幽灵袭击了…♡" />
+```
+
+import { Figure } from '@ui';
+import myImage from '/public/images/BV1tUxy6BEGV.webp';
+
+<Figure src={myImage} alt="被巨大幽灵袭击了…♡" />

@@ -20,6 +20,26 @@ test('standalone images become figures with lazy async images', async () => {
   assert.match(html, /decoding="async"/);
 });
 
+test('raster standalone images get the height-cap class', async () => {
+  const { html } = await renderMarkdown('![图注](/images/demo/photo.jpg)');
+  assert.match(html, /<figure class="a-figure a-figure--raster"><div class="a-frame">/);
+});
+
+test('svg figures keep the full-width layout without the cap class', async () => {
+  const { html } = await renderMarkdown('![线稿](/images/demo/diary-line.svg)');
+  assert.match(html, /<figure class="a-figure"><div class="a-frame">/);
+  assert.doesNotMatch(html, /a-figure--raster/);
+});
+
+test('remote and query-string raster images are capped, svg with query is not', async () => {
+  const { html } = await renderMarkdown(
+    '![远程](https://example.com/a.png) ![带参数](/images/a.jpg?w=800#top) ![svg](/images/b.svg?w=800)',
+  );
+  assert.equal((html.match(/a-figure--raster/g) ?? []).length, 2);
+  assert.match(html, /<div class="a-figure-row">\n?<figure class="a-figure a-figure--raster">/);
+  assert.match(html, /<figure class="a-figure"><div class="a-frame"><img[^>]*src="\/images\/b\.svg\?w=800"/);
+});
+
 test('inline images also get lazy async attributes without changing the paragraph', async () => {
   const { html } = await renderMarkdown('前面 ![图标](/icon.png) 后面');
   assert.match(html, /<p>前面 <img[^>]*class="a-img"[^>]*loading="lazy"[^>]*decoding="async"[^>]*> 后面<\/p>/);
