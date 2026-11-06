@@ -35,7 +35,7 @@ export const siteConfig = defineSiteConfig({
    * - 可选值：带 `http://` 或 `https://` 的完整地址；不能带查询参数或 hash。
    * - 注意：末尾的 `/` 会被自动去掉；部署前必须改成真实域名（此处为示例域名）。
    */
-  url: 'https://daybook.test.ksable.top',
+  url: 'https://daybook.demo.ksable.top',
 
   /**
    * 作者名（必填）。
