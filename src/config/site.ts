@@ -128,6 +128,9 @@ export const siteConfig = defineSiteConfig({
   //   },
 
   // 站内内容称呼 `labels.diary` 省略时按 `lang` 使用内置值（当前 `zh_CN` 为「日记」）。
+  //   labels: {
+  //     diary: '日记',
+  //   },
 
   /**
    * 顶部导航（可选）。
