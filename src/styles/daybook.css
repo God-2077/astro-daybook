@@ -1873,6 +1873,41 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   color: hsl(var(--muted-foreground));
 }
 
+/* 竖屏照片：限制高度，避免在宽屏上「顶天立地」。
+ * 只作用于正文里独占一行的位图 figure（管线按 src 加 `a-figure--raster`，SVG 与并排图不加）：
+ * 图框收紧包住照片并居中，图注从照片左缘开始；横图宽度不变。 */
+:is(.a-prose, .a-entry-text) > .a-figure--raster {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+:is(.a-prose, .a-entry-text) > .a-figure--raster .a-frame {
+  width: fit-content;
+  max-width: 100%;
+}
+:is(.a-prose, .a-entry-text) > .a-figure--raster .a-frame img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(66vh, 640px);
+}
+@media (max-width: 767px) {
+  /* 手机屏幕本来就窄：竖图保持满栏排布，只在宽屏上限制高度。 */
+  :is(.a-prose, .a-entry-text) > .a-figure--raster {
+    display: block;
+    width: auto;
+    margin-inline: 0;
+  }
+  :is(.a-prose, .a-entry-text) > .a-figure--raster .a-frame { width: auto; }
+  :is(.a-prose, .a-entry-text) > .a-figure--raster .a-frame img {
+    width: 100%;
+    max-height: none;
+  }
+}
+
 /* 同一行用空格排开的多图：各自保留细框与图注，按列等宽并排，窄屏自动折行 */
 .a-figure-row {
   display: grid;
