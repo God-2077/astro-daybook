@@ -13,6 +13,8 @@ import '../styles/daybook.css';
 import '../styles/app.css';
 import '../styles/search.css';
 import 'katex/dist/katex.min.css';
+import '../assets/fonts/ChillRoundFRegular/result.css';
+import '../assets/fonts/ChillRoundFBold/result.css';
 
 export interface Props {
   title?: string;
@@ -160,8 +162,7 @@ const clientI18n = getClientMessages(siteConfig.lang);
     )}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/fonts/ChillRoundFRegular/result.css" />
-    <link rel="stylesheet" href="/fonts/ChillRoundFBold/result.css" />
+
 
     <ClientRouter />
     <script type="application/ld+json" set:html={structuredJson}></script>
