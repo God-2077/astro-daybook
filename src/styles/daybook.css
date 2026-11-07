@@ -46,6 +46,11 @@
   --ease: cubic-bezier(.2, .6, .2, 1);
 }
 
+:lang(ja) {
+  --font-sans: "Gen Jyuu Gothic P Regular", "Zen Maru Gothic", system-ui, sans-serif;
+  --font-bold: "Gen Jyuu Gothic P Bold", system-ui, sans-serif;
+}
+
 .dark {
   --background: 256 18% 13%;
   --card: 256 18% 15%;
@@ -339,6 +344,8 @@ ul, ol { padding: 0; }
 .a-navrow {
   display: flex;
   align-items: flex-end;
+  /* 与品牌文字的底线齐平（= .a-brand 的 padding-bottom），报头下沿的双细线之前留出呼吸 */
+  margin-bottom: 16px;
   gap: 26px;
   min-width: 0;
 }
@@ -2847,14 +2854,17 @@ html.a-no-scroll { overflow: hidden; }
   color: hsl(var(--card-foreground));
 }
 .a-drawer-rule { margin-inline: 20px; }
-.a-drawer-nav { padding-top: 6px; }
+.a-drawer-nav {
+    padding-top: 6px;
+    margin-inline: 20px;
+}
 .a-drawer-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   min-height: 48px;
-  padding: 4px 20px;
+  padding: 4px 8px;
   border: 0;
   border-bottom: 1px solid hsl(var(--border));
   background: none;
@@ -2879,7 +2889,7 @@ html.a-no-scroll { overflow: hidden; }
   color: hsl(var(--pink-decor));
 }
 .a-drawer-sub {
-  padding-left: 38px;
+  padding-left: 20px;
   font-size: 14.5px;
   color: hsl(var(--muted-foreground));
   border-bottom-color: hsl(var(--border) / .65);
@@ -2893,8 +2903,9 @@ html.a-no-scroll { overflow: hidden; }
 .a-drawer-subgroup .a-drawer-link:last-child { border-bottom-color: hsl(var(--border)); }
 .a-drawer-foot {
   margin-top: 24px;
-  padding: 18px 20px 96px;
+  padding: 18px 8px 96px;
   border-top: 1px solid hsl(var(--border));
+  margin-inline: 20px;
 }
 .a-drawer-theme { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .a-drawer-label {
@@ -3083,8 +3094,10 @@ html.a-no-scroll { overflow: hidden; }
 /* ≤767：手机 —— 日期栏横排、目录表折行 */
 @media (max-width: 767px) {
   :root { --rail-pad: 0px; }
+  /* .a-wrap { padding-inline: 20px; } */
   .a-wrap { padding-inline: 32px; }
   .a-mast { padding-top: 16px; }
+  .a-mast .a-wrap { padding-inline: 20px; }
   .a-brand-name { font-size: 21px; }
   .a-brand-sub { font-size: 11px; letter-spacing: .06em; }
 

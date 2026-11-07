@@ -1,6 +1,6 @@
 {
   "name": "daybook",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -20,6 +20,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "og": "tsx scripts/make-og-image.ts",
+    "og:content": "tsx scripts/make-og-image.ts --content",
     "test:unit": "node --import tsx --test tests/unit/*.test.ts",
     "test:build": "node --import tsx tests/build/assert-dist.ts",
     "test": "pnpm test:unit && pnpm test:build",

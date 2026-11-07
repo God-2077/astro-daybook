@@ -8,6 +8,7 @@ import {
   relativePathForCollection,
   resolveCollectionBase,
   resolveContentRoot,
+  resolvePublicDir,
 } from '../../src/lib/content/paths';
 
 const root = path.resolve(process.cwd(), 'theme-under-test');
@@ -27,6 +28,15 @@ test('content mode resolves relative to the theme root', () => {
 
 test('content root cannot be the theme root', () => {
   assert.throws(() => resolveContentRoot(root, '.'), /不能是主题仓库根目录/);
+});
+
+test('public dir is isolated in content mode', () => {
+  assert.equal(resolvePublicDir(root, undefined), path.join(root, 'public'));
+  for (const value of ['', '0', 'false', 'FALSE', 'off', 'no']) {
+    assert.equal(resolvePublicDir(root, value), path.join(root, 'public'));
+  }
+  assert.equal(resolvePublicDir(root, 'content'), path.join(root, 'content', 'public'));
+  assert.equal(resolvePublicDir(root, '../shared-content'), path.join(path.dirname(root), 'shared-content', 'public'));
 });
 
 test('collection names are validated', () => {

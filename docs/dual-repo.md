@@ -6,12 +6,12 @@ Daybook 默认把示例内容放在主题仓库的 `src/content/`，适合只想
 
 ## 两种模式
 
-| 模式 | 触发方式 | 内容根 | 站点配置 |
-| --- | --- | --- | --- |
-| 主题模式（默认） | `pnpm dev` / `pnpm build` | `src/content/` | `src/config/site.ts`、`src/config/links.ts` |
-| 内容模式 | `pnpm dev:content` / `pnpm build:content` | `CONTENT_REPO` 指向的目录，默认 `content/` | `<内容根>/config/site.ts`、`<内容根>/config/links.ts` |
+| 模式 | 触发方式 | 内容根 | publicDir | 站点配置 |
+| --- | --- | --- | --- | --- |
+| 主题模式（默认） | `pnpm dev` / `pnpm build` | `src/content/` | `public/` | `src/config/site.ts`、`src/config/links.ts` |
+| 内容模式 | `pnpm dev:content` / `pnpm build:content` | `CONTENT_REPO` 指向的目录，默认 `content/` | `<内容根>/public/` | `<内容根>/config/site.ts`、`<内容根>/config/links.ts` |
 
-两种模式共用同一套路由、组件、frontmatter schema 与配置校验；区别只有内容目录和站点配置从哪里加载。
+两种模式共用同一套路由、组件、frontmatter schema 与配置校验；区别是内容目录、publicDir 和站点配置从哪里加载。内容模式不读取主题的 `public/`，两套静态资源互不影响。
 
 ```bash
 pnpm dev              # 主题模式，读 src/content/
@@ -30,12 +30,33 @@ content/
 ├── daily/      日记
 ├── pages/      独立页面
 ├── spec/       关于页正文（about.mdx）
+├── public/     静态资源（favicon、头像、图片、OG 图等）
 └── config/
     ├── site.ts 站点配置
     └── links.ts 友链配置
 ```
 
 四个内容目录与主题模式下的 `src/content/{post,daily,pages,spec}` 结构完全相同，frontmatter 规则见 [`content.md`](./content.md)。`config/` 只放配置，不参与内容集合。
+
+## 静态资源与 publicDir
+
+内容模式下 Astro 的 `publicDir` 指向 `<内容根>/public`，主题仓库的 `public/` 不参与内容模式的开发与构建。两套资源完全隔离，站内引用仍以 `/` 开头：
+
+```text
+<内容根>/public/favicon.svg      → /favicon.svg
+<内容根>/public/images/photo.jpg → /images/photo.jpg
+```
+
+迁移或升级内容仓库时，把主题 `public/` 里仍然需要的资源复制到 `<内容根>/public/`。示例骨架已包含 `favicon.svg`、`avatar.svg` 与 `og-default.png`，可以直接替换成自己的版本。
+
+OG 图按当前模式生成：
+
+```bash
+pnpm og            # 主题模式：写入 public/og-default.png
+pnpm og:content    # 内容模式：写入 <内容根>/public/og-default.png
+```
+
+`pnpm og:content` 会读取内容仓库的 `config/site.ts`，目录顺序为 `--content-repo`、`CONTENT_REPO_DIR`、最后回退到 `content`。修改站点标题、作者或 `since` 后重新生成，并把图片提交到内容仓库。
 
 ## 快速开始
 
@@ -174,10 +195,11 @@ pnpm dev:content --content-repo ../daybook-content
 
 ## 路径与模式限制
 
-- 内容根必须与主题仓库在**同一盘符**：Astro 的 glob base 需要能表示为相对项目根的路径，跨盘符路径会报错。
+- 内容根必须与主题仓库在**同一盘符**：Astro 的 glob base 需要能表示为相对项目根的路径，跨盘符路径会报错；`<内容根>/public` 也受同一限制。
 - 内容根不能是主题仓库根目录本身。
 - 内容模式下必须存在 `config/site.ts` 与 `config/links.ts`；缺失时构建配置阶段就会失败并给出路径。
 - 内容模式默认读取 `<内容根>/{post,daily,pages,spec}`；这些目录可以暂时为空，但建议与骨架保持一致。
+- 内容模式只使用 `<内容根>/public` 作为 `publicDir`，主题 `public/` 的资源不会复制进 `dist/`；需要时自行复制到内容仓库。
 - 内容模式下 `src/content/` 不参与构建；主题模式也完全不会读取 `content/`。两套内容不要同时修改。
 - 内容仓库不是 submodule，主题的 `pnpm install` 不会安装内容仓库，也不需要在内容仓库里安装依赖。
 
@@ -213,10 +235,12 @@ rm -rf .astro node_modules/.astro-content
 
 1. 先在主题仓库外创建内容仓库（或复制当前 `content/` 骨架）；
 2. 把 `src/content/{post,daily,pages,spec}` 里的文件按同名目录移动到内容仓库；
-3. 把 `src/config/site.ts` 与 `links.ts` 的**实际配置值**写成 `content/config/site.ts` / `links.ts` 的默认导出对象（不要复制 `defineSiteConfig(...)` 调用）；
-4. 在主题 `.env` 填写 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取（或直接把目录放到 `content/`）；
-5. 运行 `pnpm check:content` 与 `pnpm build:content`，逐页核对首页、文章、独立页面、关于页、RSS 与搜索；
-6. 确认无误后再考虑删除 `src/content/` 里的示例内容。主题模式与内容模式是两套独立内容，删除前先确认部署仍使用 `build:content`。
+3. 把主题 `public/` 里站内仍在引用的资源复制到 `<内容根>/public/`（至少 favicon、头像与 OG 图）；
+4. 把 `src/config/site.ts` 与 `links.ts` 的**实际配置值**写成 `content/config/site.ts` / `links.ts` 的默认导出对象（不要复制 `defineSiteConfig(...)` 调用）；
+5. 在主题 `.env` 填写 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取（或直接把目录放到 `content/`）；
+6. 运行 `pnpm og:content` 生成内容仓库的 `public/og-default.png`；
+7. 运行 `pnpm check:content` 与 `pnpm build:content`，逐页核对首页、文章、独立页面、关于页、RSS、搜索与静态资源；
+8. 确认无误后再考虑删除 `src/content/` 里的示例内容。主题模式与内容模式是两套独立内容，删除前先确认部署仍使用 `build:content`。
 
 ## 限制
 
@@ -229,6 +253,7 @@ rm -rf .astro node_modules/.astro-content
 
 - `pnpm test:unit`：路径解析与 Git 辅助函数的单元测试。
 - `pnpm lint`、`pnpm check`、`pnpm build`、`pnpm test`：主题模式必须全绿。
-- `pnpm check:content`、`pnpm build:content`：内容模式必须能读到内容仓库配置与示例内容，`dist/` 中出现 `daily/...`、`post/...`、`pages` 对应的路由。
+- `pnpm check:content`、`pnpm build:content`：内容模式必须能读到内容仓库配置与示例内容，`dist/` 中出现 `daily/...`、`post/...`、`pages` 对应的路由，以及内容仓库 `public/` 里的 `favicon.svg`、`avatar.svg`、`og-default.png`。
+- `pnpm og:content`：确认输出到 `<内容根>/public/og-default.png`，且主题 `public/og-default.png` 不被修改。
 - 用临时远端仓库验证 `content:clone` 与 `content:pull`；确认失败日志不包含 token/私钥。
-- 启动 `pnpm dev:content`，在浏览器检查首页、文章列表、独立页面、关于页与搜索索引。
+- 启动 `pnpm dev:content`，在浏览器检查首页、文章列表、独立页面、关于页、静态资源与搜索索引。

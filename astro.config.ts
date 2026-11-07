@@ -99,6 +99,7 @@ const contentCacheDir = context.mode === 'content' ? path.join(root, 'node_modul
 export default defineConfig({
   ...(contentCacheDir ? { cacheDir: contentCacheDir } : {}),
   site: context.siteConfig.url,
+  publicDir: context.publicDir,
   output: 'static',
   trailingSlash: 'never',
   env: {

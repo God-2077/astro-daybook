@@ -3,13 +3,15 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { defineLinksConfig, defineSiteConfig } from '../src/config/define';
-import { isContentRepoEnabled, resolveContentRoot } from '../src/lib/content/paths';
+import { isContentRepoEnabled, resolveContentRoot, resolvePublicDir } from '../src/lib/content/paths';
 import type { LinksConfig, LinksConfigInput, SiteConfig, SiteConfigInput } from '../src/types/config';
 import { CONTENT_CONFIG_MARKER } from './content-config-protocol';
 
 interface BaseSiteContext {
   /** 当前内容根目录（绝对路径）；主题模式是 src/content，内容模式是 CONTENT_REPO。 */
   contentRoot: string;
+  /** 当前模式的 public 目录（绝对路径）；主题模式是 <root>/public，内容模式是 <内容根>/public。 */
+  publicDir: string;
   /** 当前生效的站点配置。 */
   siteConfig: SiteConfig;
   /** 站点配置文件绝对路径，供 Vite 监听。 */
@@ -122,6 +124,7 @@ export async function loadSiteContext(root: string, themeSiteConfig: SiteConfig)
   const projectRoot = path.resolve(root);
   const rawContentRepo = process.env.CONTENT_REPO;
   const contentRoot = resolveContentRoot(projectRoot, rawContentRepo);
+  const publicDir = resolvePublicDir(projectRoot, rawContentRepo);
   const themeSiteFile = path.join(projectRoot, 'src', 'config', 'site.ts');
   const themeLinksFile = path.join(projectRoot, 'src', 'config', 'links.ts');
 
@@ -129,6 +132,7 @@ export async function loadSiteContext(root: string, themeSiteConfig: SiteConfig)
     return {
       mode: 'theme',
       contentRoot,
+      publicDir,
       siteConfig: themeSiteConfig,
       siteConfigFile: themeSiteFile,
       linksConfigFile: themeLinksFile,
@@ -149,6 +153,7 @@ export async function loadSiteContext(root: string, themeSiteConfig: SiteConfig)
   return {
     mode: 'content',
     contentRoot,
+    publicDir,
     siteConfig,
     linksConfig,
     siteConfigFile: siteFile,

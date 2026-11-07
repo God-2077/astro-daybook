@@ -23,7 +23,7 @@
 两个仓库各管什么：
 
 - **主题仓库**：代码、页面、样式。根目录的 `content/` 被 `.gitignore` 忽略，Fork 出来的仓库里没有你的内容。
-- **内容仓库**：写作内容 `post/`、`daily/`、`pages/`、`spec/`，以及站点配置 `config/site.ts`、`config/links.ts`。
+- **内容仓库**：写作内容 `post/`、`daily/`、`pages/`、`spec/`，静态资源 `public/`，以及站点配置 `config/site.ts`、`config/links.ts`。
 
 Fork 完先改内容仓库的 `config/site.ts`：
 

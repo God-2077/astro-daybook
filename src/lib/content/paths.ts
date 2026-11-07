@@ -58,6 +58,18 @@ export function resolveContentRoot(root: string = process.cwd(), raw: string | u
 }
 
 /**
+ * 解析当前模式下 Astro 的 publicDir（绝对路径）。
+ * 主题模式是 `<root>/public`；内容模式是 `<内容根>/public`，与主题 public 完全隔离。
+ */
+export function resolvePublicDir(root: string = process.cwd(), raw: string | undefined = process.env.CONTENT_REPO): string {
+  const base = normalizedRoot(root);
+  if (!isContentRepoEnabled(raw)) {
+    return path.join(base, 'public');
+  }
+  return path.join(resolveContentRoot(base, raw), 'public');
+}
+
+/**
  * 解析某个集合的绝对目录。
  */
 export function resolveCollectionBase(root: string, raw: string | undefined, collection: ContentRootCollection): string {

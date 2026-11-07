@@ -218,6 +218,7 @@ robots: { enabled: true, disallow: [] },
 ```
 
 - `seo.ogImage` 是默认 OG 图；文章/日记没有独立图片时使用。
+- 默认图由 `pnpm og` 生成到主题 `public/og-default.png`；内容模式用 `pnpm og:content` 生成到 `<内容根>/public/og-default.png`。生成后把图片提交到对应仓库。
 - `seo.locale` 是 `og:locale`，省略时由 `lang` 推导（`zh_CN` → `zh_CN`、`en` → `en_US`）；需要时仍可显式覆盖。
 - `sitemap.includeProtected` 为 `true` 时密码页也进 sitemap；默认排除。
 - `robots.disallow` 追加到 `Disallow`；密码页 URL 会自动追加，`Allow: /` 始终输出。
