@@ -11,10 +11,6 @@ const path = Astro.url.pathname || '/';
 function isActive(link: string): boolean {
   return isNavLinkActive(link, path);
 }
-
-function isGroupActive(items: { link: string }[]): boolean {
-  return items.some((item) => isActive(item.link));
-}
 ---
 
 <div class="a-drawer" id="a-drawer" role="dialog" aria-modal="true" aria-label={t('nav.label')} hidden>
@@ -29,14 +25,12 @@ function isGroupActive(items: { link: string }[]): boolean {
     {siteConfig.nav.map((item, index) =>
       'items' in item ? (
         <Fragment>
-          {/* fix: 移除移动端顶部导航栏的 button 的 aria-current 属性 */}
           <button
             type="button"
             class="a-drawer-link a-drawer-toggle ttt"
             data-drawer-group
             aria-expanded="false"
             aria-controls={`a-drawer-group-${index}`}
-            // aria-current={isGroupActive(item.items) ? 'page' : undefined}
           >
             {item.title}<Icon name="i-chevron-down" className="a-chev" />
           </button>
