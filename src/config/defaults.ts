@@ -111,7 +111,7 @@ const LOCALE_DEFAULTS: Record<SiteLang, LocaleDefaults> = {
         ],
       },
       { title: '友だち', link: '/friends' },
-      { title: 'このサイトについて', link: '/about' },
+      { title: '情報', link: '/about' },
     ],
     footerNav: [
       { title: 'アーカイブ', link: '/archives' },
