@@ -72,9 +72,9 @@ pnpm dev        # 打开 http://localhost:4321
 
 默认的 `pnpm dev` / `pnpm build` 使用主题自带的 `src/content/`。如果想让写作内容独立成 Git 仓库：
 
-1. 准备 `content/`（结构：`post/`、`daily/`、`pages/`、`spec/`、`config/`），或在远端建好后在 `.env` 填写 `CONTENT_REPO_URL`；
+1. 准备 `content/`（结构：`post/`、`daily/`、`pages/`、`spec/`、`public/`、`config/`），或在远端建好后在 `.env` 填写 `CONTENT_REPO_URL`；
 2. 运行 `pnpm content:clone` 拉取内容仓库（已有示例骨架时先参考文档处理）；
-3. 用 `pnpm dev:content` / `pnpm build:content` 使用内容仓库，`pnpm content:pull` 更新。
+3. 用 `pnpm dev:content` / `pnpm build:content` 使用内容仓库，`pnpm content:pull` 更新；静态资源放在 `content/public/`，`pnpm og:content` 会生成内容仓库自己的 OG 图。
 
 根目录的 `content/` 已被主题的 `.gitignore` 忽略，它只是示例骨架；正式内容应放在独立的内容仓库里。
 

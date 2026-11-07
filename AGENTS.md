@@ -52,8 +52,9 @@ src/
 ├─ types/        公共类型
 └─ content/      daily/（日记）、post/（文章）、pages/（独立页面，如 music.mdx）、spec/（关于页正文，如 about.mdx）
 
-content/         可选独立内容仓库：post/、daily/、pages/、spec/、config/；默认被 .gitignore 忽略
-public/          favicon、头像、寒蝉全圆体分片、音乐、og 图
+content/         可选独立内容仓库：post/、daily/、pages/、spec/、public/、config/；默认被 .gitignore 忽略
+public/         主题 public（仅主题模式）：favicon、头像、寒蝉全圆体分片、音乐、og 图；
+                内容模式改用 <内容根>/public，可由 pnpm og:content 生成 og 图
 docs/            配置、内容、音乐、部署与安全边界等文档
 scripts/         make-og-image.ts、astro.mjs（Astro 包装器：模式参数与内容缓存切换）、site-context.ts、
                  read-content-config.ts、content-repo.ts / content-repo-lib.ts（clone/pull）
@@ -69,7 +70,7 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`；�
 
 - 集合定义在 `src/content.config.ts`，schema 在 `src/lib/content/schema.ts`；两者都是 strict，写错字段会构建失败。
 - 配置是 TS 文件而非 YAML，加载时经 `src/config/schema.ts` 校验，非法值中断构建并指出字段路径。
-- 内容目录不硬编码：统一用 `src/lib/content/paths.ts` 的 `contentBase` / `contentGlobBase` / `relativePathForCollection`；新增读取内容路径的代码时不要写死 `src/content/`。
+- 内容目录与 publicDir 不硬编码：统一用 `src/lib/content/paths.ts` 的 `contentBase` / `contentGlobBase` / `relativePathForCollection` / `resolvePublicDir`；新增读取内容路径的代码时不要写死 `src/content/` 或 `public/`。
 - 内容模式下 `src/config/site.ts` / `links.ts` 会被插件替换为内容仓库配置，页面代码继续从这两个模块导入即可；配置加载与校验在 `scripts/site-context.ts`。
 - 内容仓库配置只允许通过 `import type` 复用主题的 `SiteConfigInput` / `LinksConfigInput`，不要 import 主题运行时模块；类型在 tsx 读取时擦除。内容文件的修改由 content layer 热更新，内容配置的修改由 Astro dev 自动重启，不要提示用户手动重启。
 - 组件里不写 `<style>`，样式与类名规则见下一节。
@@ -103,7 +104,8 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`；�
 | `pnpm content:clone` / `pnpm content:pull` | 按 `.env` 克隆 / 快进拉取内容仓库 |
 | `pnpm lint` / `pnpm format` | Biome 检查 / 格式化 |
 | `pnpm test` | 单元断言 + 构建产物断言 |
-| `pnpm og` | 重新生成 `public/og-default.png` |
+| `pnpm og` | 重新生成主题 `public/og-default.png` |
+| `pnpm og:content` | 为内容仓库生成 `<内容根>/public/og-default.png` |
 
 - 包管理器只用 pnpm：不要用 npm / yarn，也不要更换 lockfile。
 - `postbuild` 依赖 `.npmrc` 里的 `enable-pre-post-scripts=true`，不要删除或覆盖。

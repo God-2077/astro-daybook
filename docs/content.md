@@ -118,7 +118,7 @@ comments: true
 - 同一行用空格隔开的 2 张及以上图片会渲染为 `<div class="a-figure-row">` 内并排的 figure，每张各自保留细边框与自己图注；窄屏按列自动折行（手机上 3 张折成 2+1），不新增断点。
 - 所有正文图片自动加 `loading="lazy"` 与 `decoding="async"`，不阻塞首屏渲染。
 - 加载前容器显示灰色占位块（固定 1.6:1 比例、无动画）；加载完成后直接替换为图片；加载失败时在占位块内显示 `alt` 文案。
-- 本地图片建议放在 `public/images/`，正文用 `/images/...` 引用；远程图片与普通 Markdown 图片语法一致。
+- 本地图片放在当前模式的 public 目录：主题模式是 `public/images/`，内容模式是 `<内容根>/public/images/`；正文统一用 `/images/...` 引用。远程图片与普通 Markdown 图片语法一致。
 - MDX 里也可以用 `Figure` 组件插图，生成同样的 `.a-figure` 结构与限高，见下文「插图组件」。
 
 ## 正文链接
@@ -187,7 +187,7 @@ import myImage from './1.jpg';
 <Figure src={myImage} alt="山脊上的日落" caption="图注；省略时取 alt，传空字符串则不显示" />
 ```
 
-- `src`：必填。`import` 进来的图片走 Astro `<Image>`（构建期转 webp、输出 `width` / `height`，默认懒加载并异步解码）；传 `public/` 或远程地址字符串时退回普通 `<img>`，不参与优化。
+- `src`：必填。`import` 进来的图片走 Astro `<Image>`（构建期转 webp、输出 `width` / `height`，默认懒加载并异步解码）；传 public 路径（如 `/images/a.jpg`）或远程地址字符串时退回普通 `<img>`，不参与优化。
 - `alt`：必填。空值或纯空白会在构建时报错；`caption` 省略时图注也取它。
 - `caption`：可选。省略时取 `alt`；显式传空字符串（或纯空白）时只渲染图片，不输出 `<figcaption>`。
 - `width` / `height`：可选，覆盖输出宽高；省略时 ESM 导入沿用原图尺寸，字符串地址不写宽高。两者都给时，字符串地址同样会用 `a-frame--sized` 预留骨架比例。
