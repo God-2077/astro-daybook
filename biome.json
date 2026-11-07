@@ -21,7 +21,8 @@
       "!docs",
       "!**/*.md",
       "!pagefind.yml",
-      "!pnpm-lock.yaml"
+      "!pnpm-lock.yaml",
+      "!src/assets/fonts"
     ]
   },
   "formatter": {

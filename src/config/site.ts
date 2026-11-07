@@ -178,15 +178,15 @@ export const siteConfig = defineSiteConfig({
    * - 显式配置 `items` 会整体替换默认四项，而不是追加。
    * - 注意：内部链接规则与 `nav` 相同；外链会新窗口打开。
    */
-    // bottomNav: {
-    //   enabled: true,
-    //   items: [
-    //     { link: '/', title: '日记', icon: 'i-book' },
-    //     { link: '/posts', title: '文章', icon: 'i-file' },
-    //     { link: '/friends', title: '友链', icon: 'i-link' },
-    //     { link: '/about', title: '关于', icon: 'i-user' },
-    //   ],
-    // },
+  // bottomNav: {
+  //   enabled: true,
+  //   items: [
+  //     { link: '/', title: '日记', icon: 'i-book' },
+  //     { link: '/posts', title: '文章', icon: 'i-file' },
+  //     { link: '/friends', title: '友链', icon: 'i-link' },
+  //     { link: '/about', title: '关于', icon: 'i-user' },
+  //   ],
+  // },
 
   /**
    * 分页数量（可选）。
@@ -206,9 +206,9 @@ export const siteConfig = defineSiteConfig({
    * - 设为 `'diary'` 时，归档页默认选中日记，且日记按钮排在文章按钮之前。
    * - 只影响归档页的类型切换，不改变条目内部的日期排序。
    */
-    // archive: {
-    //   defaultType: 'diary',
-    // },
+  // archive: {
+  //   defaultType: 'diary',
+  // },
 
   /**
    * RSS 配置（可选）。
