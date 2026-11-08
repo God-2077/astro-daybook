@@ -125,6 +125,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': src,
+        '@mdx/client': path.join(src, 'lib', 'mdx', 'client.ts'),
+        '@mdx': path.join(src, 'lib', 'mdx', 'index.ts'),
       },
     },
     ...(context.mode === 'content'

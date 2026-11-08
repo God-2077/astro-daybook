@@ -60,6 +60,7 @@ const sitemap = locs(read('sitemap.xml'));
 assert.ok(sitemap.includes(`${siteUrl}/music`), '独立页面应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/post/astro-blog-studio`), '公开文章应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/post/mdx-syntax`), 'MDX 文章应进 sitemap');
+assert.ok(sitemap.includes(`${siteUrl}/post/meting-client`), 'Meting 示例文章应进 sitemap');
 assert.ok(sitemap.includes(`${siteUrl}/categories/文章`), '分类页应进 sitemap');
 assert.ok(!sitemap.includes(`${siteUrl}/post/locked-letter`), '密码文章默认不进 sitemap');
 assert.ok(!sitemap.includes(`${siteUrl}/daily/2026-09-20-draft`), 'draft 不进 sitemap');
@@ -247,6 +248,14 @@ assert.match(music, /data-lrc="https:\/\/[^"]+\.lrc"/, '示例歌词应指向外
 assert.match(music, /data-url="https:\/\/[^"]+\.mp3"/, '示例音频应指向外部地址');
 assert.doesNotMatch(music, /<p>import /, 'MusicPlayer import 不应泄漏到正文');
 
+const metingPost = read('post/meting-client/index.html');
+assert.match(metingPost, /meting\.fetchMusic\(/, 'Meting 示例文章应展示 fetchMusic 写法');
+assert.match(metingPost, /data-meting-source="[^"]*type&quot;:&quot;playlist/, 'Meting 示例文章应输出客户端播放器数据源');
+assert.match(metingPost, /data-meting-pending="true"/, '客户端播放器构建期应保持待加载状态');
+assert.match(metingPost, /data-meting-api="https:\/\/163\.hyc\.moe\/"/, '客户端播放器页面应输出浏览器端 Meting API 配置');
+assert.doesNotMatch(metingPost, /data-url="https:\/\/163\.hyc\.moe\//, '客户端模式不应把 Meting 曲目写进构建产物');
+assert.doesNotMatch(metingPost, /<p>import /, 'Meting 示例文章的 import 不应泄漏到正文');
+
 const mdxDaily = read('daily/2026-10-20-redesign/index.html');
 assert.match(mdxDaily, /<div class="a-prose" data-article-body>/, 'MDX 日记详情应渲染正文');
 assert.match(mdxDaily, /把博客重新画一遍/, 'MDX 日记标题应保留');
@@ -278,7 +287,7 @@ const hiddenSearchDaily = read('daily/2026-08-20-search-hidden/index.html');
 assert.doesNotMatch(hiddenSearchDaily, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 27, `Pagefind 页面集合应精确为 27 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 28, `Pagefind 页面集合应精确为 28 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);

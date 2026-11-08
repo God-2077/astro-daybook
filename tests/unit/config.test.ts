@@ -17,6 +17,44 @@ test('site config resolves defaults and derives footerBrand/since', () => {
   assert.equal(config.copyright.author, '测试作者');
   assert.equal(config.pagination.daily, 20);
   assert.equal(config.theme, 'system');
+  assert.deepEqual(config.mdx.meting, {
+    api: 'https://163.hyc.moe/',
+    timeout: 5000,
+    cache: {
+      enabled: true,
+      ttl: { playlist: 86_400_000, search: 86_400_000, default: 2_592_000_000 },
+    },
+  });
+});
+
+test('mdx meting config accepts overrides and rejects invalid values', () => {
+  const config = defineSiteConfig({
+    ...base,
+    mdx: {
+      meting: {
+        api: 'https://music.example/api/',
+        timeout: 12000,
+        cache: { enabled: false, ttl: { playlist: 1000, search: 2000, default: 3000 } },
+      },
+    },
+  });
+  assert.deepEqual(config.mdx.meting, {
+    api: 'https://music.example/api/',
+    timeout: 12000,
+    cache: { enabled: false, ttl: { playlist: 1000, search: 2000, default: 3000 } },
+  });
+
+  assert.throws(() => defineSiteConfig({ ...base, mdx: { meting: { api: 'not-a-url' } } }), /mdx.meting.api|http/);
+  assert.throws(() => defineSiteConfig({ ...base, mdx: { meting: { timeout: 0 } } }), /mdx.meting.timeout|greater than 0/);
+  assert.throws(
+    () => defineSiteConfig({ ...base, mdx: { meting: { cache: { ttl: { playlist: -1 } } } } }),
+    /mdx.meting.cache.ttl.playlist|-1|Too small|>=0/,
+  );
+  assert.throws(
+    () => defineSiteConfig({ ...base, mdx: { meting: { cache: { ttl: { default: 1.5 } } } } }),
+    /mdx.meting.cache.ttl.default|int|integer/,
+  );
+  assert.throws(() => defineSiteConfig({ ...base, mdx: { unknown: true } as never }), /mdx|Unrecognized/);
 });
 
 test('bottom nav defaults to four enabled entries and archive defaults to articles', () => {

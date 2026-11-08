@@ -70,6 +70,26 @@ export function resolvePublicDir(root: string = process.cwd(), raw: string | und
 }
 
 /**
+ * 解析 Meting 服务端缓存文件。
+ *
+ * - 主题模式：`<主题根>/.cache/meting-api-data.json`
+ * - 内容模式：`<内容根>/cache/meting-api-data.json`
+ *
+ * 内容模式下缓存放在内容仓库内部，便于随内容一起本地管理；它不属于内容集合，
+ * 外部内容仓库应把 `cache/` 加入 `.gitignore`。
+ */
+export function resolveMetingCacheFile(
+  root: string = process.cwd(),
+  raw: string | undefined = process.env.CONTENT_REPO,
+): string {
+  const base = normalizedRoot(root);
+  if (!isContentRepoEnabled(raw)) {
+    return path.join(base, '.cache', 'meting-api-data.json');
+  }
+  return path.join(resolveContentRoot(base, raw), 'cache', 'meting-api-data.json');
+}
+
+/**
  * 解析某个集合的绝对目录。
  */
 export function resolveCollectionBase(root: string, raw: string | undefined, collection: ContentRootCollection): string {

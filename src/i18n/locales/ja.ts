@@ -229,6 +229,8 @@ const messages = {
   'client.lightboxSlideCounter': '{index} / {total} 枚目',
 
   'music.player': '音楽プレーヤー',
+  'music.loading': '音楽を読み込んでいます…',
+  'music.loadError': '音楽を読み込めませんでした',
   'music.play': '再生',
   'music.pause': '一時停止',
   'music.previous': '前の曲',

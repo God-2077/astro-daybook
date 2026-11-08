@@ -140,6 +140,7 @@ keywords: [静态博客]
 - 主题与内容分仓、clone/pull：[`docs/dual-repo.md`](./docs/dual-repo.md)
 - 用 Vercel 自动部署（Deploy Hook + 内容仓库 GitHub Action）：[`docs/deployment-vercel.md`](./docs/deployment-vercel.md)
 - 歌单与播放器：[`docs/music-player.md`](./docs/music-player.md)
+- Meting 音乐客户端（MDX）：[`docs/meting.md`](./docs/meting.md)
 
 ## 鸣谢
 

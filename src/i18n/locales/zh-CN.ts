@@ -225,6 +225,8 @@ const messages = {
   'client.lightboxSlideCounter': '第 {index} / {total} 张',
 
   'music.player': '音乐播放器',
+  'music.loading': '正在加载音乐…',
+  'music.loadError': '音乐加载失败',
   'music.play': '播放',
   'music.pause': '暂停',
   'music.previous': '上一首',

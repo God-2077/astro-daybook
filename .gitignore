@@ -71,7 +71,7 @@ web_modules/
 !.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
-.cache
+.cache/*
 .parcel-cache
 
 # Next.js build output
@@ -84,7 +84,7 @@ dist
 .output
 
 # Gatsby files
-.cache/
+.cache/*
 # Comment in the public line in if your project uses Gatsby and not Next.js
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
@@ -164,3 +164,5 @@ design
 
 # 独立内容仓库（content:clone 的默认目录）
 /content/
+
+!.cache/meting-api-data.json

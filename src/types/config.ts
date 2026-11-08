@@ -174,6 +174,60 @@ export interface LabelsConfig {
   diary: string;
 }
 
+/** Meting-API 服务端缓存的分类 TTL，单位毫秒。 */
+export interface MetingCacheTtlConfig {
+  /** `playlist` 缓存时间。 */
+  playlist: number;
+  /** `search` 缓存时间。 */
+  search: number;
+  /** 其它类型的缓存时间。 */
+  default: number;
+}
+
+export interface MetingCacheTtlConfigInput {
+  playlist?: number;
+  search?: number;
+  default?: number;
+}
+
+/** Meting-API 服务端缓存配置。 */
+export interface MetingCacheConfig {
+  enabled: boolean;
+  ttl: MetingCacheTtlConfig;
+}
+
+export interface MetingCacheConfigInput {
+  enabled?: boolean;
+  ttl?: MetingCacheTtlConfigInput;
+}
+
+/** MDX 增强里的 Meting-API 客户端配置。 */
+export interface MetingConfig {
+  /** Meting-API 基础地址，例如 `https://163.hyc.moe/`。 */
+  api: string;
+  /** 单次请求超时时间，单位毫秒。 */
+  timeout: number;
+  /** 服务端构建缓存。 */
+  cache: MetingCacheConfig;
+}
+
+/** 用户可写的 Meting 配置。 */
+export interface MetingConfigInput {
+  api?: string;
+  timeout?: number;
+  cache?: MetingCacheConfigInput;
+}
+
+/** MDX 增强配置。 */
+export interface MdxConfig {
+  meting: MetingConfig;
+}
+
+/** 用户可写的 MDX 增强配置。 */
+export interface MdxConfigInput {
+  meting?: MetingConfigInput;
+}
+
 /** 全站自定义 HTML 注入；内容按原样输出，不做转义。 */
 export interface InjectConfig {
   /** 输出到所有页面 `</head>` 之前；默认 `''`。 */
@@ -217,6 +271,7 @@ export interface SiteConfig {
   taxonomy: TaxonomyConfig;
   home: HomeConfig;
   labels: LabelsConfig;
+  mdx: MdxConfig;
   inject: InjectConfig;
 }
 
@@ -250,6 +305,7 @@ export interface SiteConfigInput {
   taxonomy?: TaxonomyConfig;
   home?: Partial<HomeConfig>;
   labels?: Partial<LabelsConfig>;
+  mdx?: MdxConfigInput;
   inject?: InjectConfigInput;
 }
 

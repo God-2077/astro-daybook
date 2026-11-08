@@ -31,12 +31,15 @@ content/
 ├── pages/      独立页面
 ├── spec/       关于页正文（about.mdx）
 ├── public/     静态资源（favicon、头像、图片、OG 图等）
+├── cache/      Meting-API 构建缓存（可用于加速 Vercel 部署等）
 └── config/
     ├── site.ts 站点配置
     └── links.ts 友链配置
 ```
 
 四个内容目录与主题模式下的 `src/content/{post,daily,pages,spec}` 结构完全相同，frontmatter 规则见 [`content.md`](./content.md)。`config/` 只放配置，不参与内容集合。
+
+`cache/meting-api-data.json` 是 Meting 构建缓存，由 `pnpm build:content` / `pnpm dev:content` 自动生成。它不属于内容，内容仓库应把 `cache/` 加入自己的 `.gitignore`；主题模式的缓存则在 `.cache/meting-api-data.json`，已被主题仓库忽略。
 
 ## 静态资源与 publicDir
 
@@ -230,6 +233,8 @@ rm -rf .astro node_modules/.astro-content
 ```
 
 这些目录都是构建产物，不在 Git 中。
+
+Meting-API 的响应缓存与 Astro 内容缓存相互独立：主题模式在 `.cache/meting-api-data.json`，内容模式在 `<内容根>/cache/meting-api-data.json`。TTL 与开关由 `siteConfig.mdx.meting.cache` 控制，详见 [`meting.md`](./meting.md#服务端缓存)。
 
 ## 迁移现有内容
 

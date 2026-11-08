@@ -257,6 +257,33 @@ export const siteConfig = defineSiteConfig({
   },
 
   /**
+   * MDX 增强配置（可选）。
+   *
+   * - `mdx.meting.api`：Meting-API 基础地址；默认 `'https://163.hyc.moe/'`，推荐自部署。
+   * - `mdx.meting.timeout`：单次请求超时时间（毫秒）；默认 `5000`。
+   * - `mdx.meting.cache`：服务端请求缓存；默认开启。
+   *   - `ttl.playlist` / `ttl.search`：短缓存，默认 1 天。
+   *   - `ttl.default`：其它类型的长缓存，默认 30 天。
+   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` /
+   *   `meting.player()` 时，构建期请求使用的地址、超时与缓存。
+   * - 注意：`meting.player({ client: true })` 不读这个缓存，浏览器会直接请求 API。
+   */
+  mdx: {
+    meting: {
+      api: 'https://163.hyc.moe/',
+      timeout: 5000,
+      cache: {
+        enabled: true,
+        ttl: {
+          playlist: 1 * 24 * 60 * 60 * 1000,
+          search: 1 * 24 * 60 * 60 * 1000,
+          default: 30 * 24 * 60 * 60 * 1000,
+        },
+      },
+    },
+  },
+
+  /**
    * 全站自定义 HTML 注入（可选）。
    *
    * - `headEnd`：输出到每个页面 `</head>` 之前；`bodyEnd`：输出到 `</body>` 之前。

@@ -156,6 +156,7 @@ import { Timeline, TimelineItem } from '@ui';
 - **MDX 暂不支持 `password`**：构建期加密需要 HTML 字符串，遇到 `password` 会直接报错。需要加密的内容请继续用 `.md`。
 - `siteConfig.rss.fullText: true` 时，MDX 文章回退为摘要并在构建期输出一次警告；默认 `fullText: false` 不受影响。
 - 自动摘要与阅读时长会先剥离 MDX 的 ESM 与 `{表达式}`，结果仍是近似值。
+- 需要构建期拉取 Meting 音乐信息或直接渲染播放器时，用 `@mdx` 别名：`import { meting } from '@mdx'`。接口、参数与配置见 [`meting.md`](./meting.md)。
 
 ### 时间线组件
 

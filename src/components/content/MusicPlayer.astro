@@ -1,5 +1,6 @@
 ---
 import { t } from '../../i18n/current';
+import type { MetingClientSource } from '../../lib/meting-core';
 import { type MusicTrack, normalizePlaylist } from '../../lib/music';
 import Icon from '../common/Icon.astro';
 
@@ -21,22 +22,32 @@ import Icon from '../common/Icon.astro';
  */
 
 interface Props {
-  playlist: readonly MusicTrack[];
+  /** 构建期已解析的曲目；与 `metingSource` 二选一。 */
+  playlist?: readonly MusicTrack[];
+  /** 浏览器端 Meting 数据源；设置后构建期不请求 API。 */
+  metingSource?: MetingClientSource;
   /** 播完当前曲目后是否自动播放下一首，默认 false。 */
   autoPlayNext?: boolean;
   /** 是否默认展开播放列表，默认 false。 */
   playlistExpand?: boolean;
 }
 
-const { playlist, autoPlayNext = false, playlistExpand = false } = Astro.props;
+const { playlist, metingSource, autoPlayNext = false, playlistExpand = false } = Astro.props;
 
-const tracks = normalizePlaylist(playlist);
+const tracks = playlist ? normalizePlaylist(playlist) : [];
+const pending = Boolean(metingSource);
+if (!pending && tracks.length === 0) throw new Error('[daybook:music] playlist is empty');
+
 const [first] = tracks;
-if (!first) throw new Error('[daybook:music] playlist is empty');
-
 const panelId = `music-list-${crypto.randomUUID()}`;
-const playlistLabel = t('music.playlistCount', { count: tracks.length });
 const unknownArtist = t('music.unknownArtist');
+const loadingLabel = t('music.loading');
+const loadErrorLabel = t('music.loadError');
+const playlistLabelTemplate = t('music.playlistCount', { count: '{count}' });
+const playlistLabel = pending ? loadingLabel : t('music.playlistCount', { count: tracks.length });
+const title = first?.name ?? loadingLabel;
+const artist = first ? first.artist || unknownArtist : '';
+const cover = first?.cover;
 ---
 
 <section
@@ -46,26 +57,32 @@ const unknownArtist = t('music.unknownArtist');
   data-playing="false"
   data-open={playlistExpand ? 'true' : 'false'}
   data-auto-next={autoPlayNext ? 'true' : 'false'}
-  data-single={tracks.length === 1 ? 'true' : 'false'}
+  data-single={!pending && tracks.length === 1 ? 'true' : 'false'}
+  data-meting-source={metingSource ? JSON.stringify(metingSource) : undefined}
+  data-meting-pending={pending ? 'true' : undefined}
+  aria-busy={pending ? 'true' : undefined}
   data-label-play={t('music.play')}
   data-label-pause={t('music.pause')}
   data-label-error={t('music.error')}
+  data-label-loading={loadingLabel}
+  data-label-load-error={loadErrorLabel}
+  data-label-playlist={playlistLabelTemplate}
   data-label-unknown-artist={unknownArtist}
 >
-  <audio data-music-audio preload="metadata" src={first.url} hidden></audio>
+  <audio data-music-audio preload="metadata" src={first?.url} hidden></audio>
 
   <div class="a-music-main">
     <div class="a-music-cover">
       <img
         class="a-music-cover-img"
-        src={first.cover}
+        src={cover}
         alt=""
         width="120"
         height="120"
         decoding="async"
-        hidden={!first.cover}
+        hidden={!cover}
       />
-      <span class="a-music-cover-fallback" hidden={Boolean(first.cover)} aria-hidden="true">
+      <span class="a-music-cover-fallback" hidden={Boolean(cover)} aria-hidden="true">
         <Icon name="i-music" className="a-ico a-music-cover-ico" />
       </span>
     </div>
@@ -73,9 +90,9 @@ const unknownArtist = t('music.unknownArtist');
     <div class="a-music-info">
       <div class="a-music-titles">
         <div class="a-music-heading">
-          <span class="a-music-title" data-music-title>{first.name}</span>
-          <span class="a-music-sep" aria-hidden="true">-</span>
-          <span class="a-music-artist" data-music-artist>{first.artist || unknownArtist}</span>
+          <span class="a-music-title" data-music-title>{title}</span>
+          {artist && <span class="a-music-sep" aria-hidden="true">-</span>}
+          <span class="a-music-artist" data-music-artist>{artist}</span>
         </div>
 
         <div class="a-music-lyric" data-music-lyric data-empty="true">
@@ -91,12 +108,13 @@ const unknownArtist = t('music.unknownArtist');
           class="a-music-progress"
           data-music-progress
           role="slider"
-          tabindex="0"
+          tabindex={pending ? -1 : 0}
           aria-label={t('music.progress')}
           aria-valuemin="0"
           aria-valuemax="100"
           aria-valuenow="0"
           aria-valuetext="00:00 / --:--"
+          aria-disabled={pending ? 'true' : undefined}
         >
           <span class="a-music-progress-rail">
             <span class="a-music-progress-fill" data-music-fill></span>
@@ -113,14 +131,14 @@ const unknownArtist = t('music.unknownArtist');
     </div>
 
     <div class="a-music-controls">
-      <button class="a-music-btn" type="button" data-music-prev aria-label={t('music.previous')}>
+      <button class="a-music-btn" type="button" data-music-prev aria-label={t('music.previous')} disabled={pending}>
         <Icon name="i-prev" />
       </button>
-      <button class="a-music-play" type="button" data-music-play aria-label={t('music.play')}>
+      <button class="a-music-play" type="button" data-music-play aria-label={t('music.play')} disabled={pending}>
         <Icon name="i-play" className="a-ico a-music-ico-play" />
         <Icon name="i-pause" className="a-ico a-music-ico-pause" />
       </button>
-      <button class="a-music-btn" type="button" data-music-next aria-label={t('music.next')}>
+      <button class="a-music-btn" type="button" data-music-next aria-label={t('music.next')} disabled={pending}>
         <Icon name="i-next" />
       </button>
     </div>
@@ -133,10 +151,11 @@ const unknownArtist = t('music.unknownArtist');
       data-music-toggle
       aria-expanded={playlistExpand}
       aria-controls={panelId}
+      disabled={pending}
     >
       <span class="a-music-toggle-label">
         <Icon name="i-music" className="a-ico a-music-toggle-ico" />
-        {playlistLabel}
+        <span data-music-playlist-count>{playlistLabel}</span>
       </span>
       <Icon name="i-chevron-down" className="a-ico a-music-chev" />
     </button>

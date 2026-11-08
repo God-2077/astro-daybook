@@ -8,6 +8,7 @@ import {
   relativePathForCollection,
   resolveCollectionBase,
   resolveContentRoot,
+  resolveMetingCacheFile,
   resolvePublicDir,
 } from '../../src/lib/content/paths';
 
@@ -37,6 +38,15 @@ test('public dir is isolated in content mode', () => {
   }
   assert.equal(resolvePublicDir(root, 'content'), path.join(root, 'content', 'public'));
   assert.equal(resolvePublicDir(root, '../shared-content'), path.join(path.dirname(root), 'shared-content', 'public'));
+});
+
+test('meting cache lives in .cache or the content repo cache directory', () => {
+  assert.equal(resolveMetingCacheFile(root, undefined), path.join(root, '.cache', 'meting-api-data.json'));
+  assert.equal(resolveMetingCacheFile(root, 'content'), path.join(root, 'content', 'cache', 'meting-api-data.json'));
+  assert.equal(
+    resolveMetingCacheFile(root, '../shared-content'),
+    path.join(path.dirname(root), 'shared-content', 'cache', 'meting-api-data.json'),
+  );
 });
 
 test('collection names are validated', () => {
