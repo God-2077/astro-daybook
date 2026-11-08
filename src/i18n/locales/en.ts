@@ -242,6 +242,8 @@ const messages = {
   'client.lightboxSlideCounter': 'Image {index} of {total}',
 
   'music.player': 'Music player',
+  'music.loading': 'Loading music…',
+  'music.loadError': 'Could not load music',
   'music.play': 'Play',
   'music.pause': 'Pause',
   'music.previous': 'Previous track',

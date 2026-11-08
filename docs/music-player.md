@@ -24,11 +24,28 @@ import { MusicPlayer } from '@ui';
 
 `src/content/pages/music.mdx` 是现成的示例页：音频、封面与歌词都托管在外部 CDN（`https://k-pan.edgeone.ksable.top/public/astro-daybook/music/`），仓库里不含任何音频、封面或歌词文件。`url` / `cover` / `lrc` 既可以是站内路径（如 `/music/xxx.mp3`），也可以是完整的 `https://` 地址。
 
+也可以不手写 `playlist`，直接用 `@mdx` 的 Meting 客户端拉取歌单并渲染同一个组件：
+
+```mdx
+import { meting } from '@mdx';
+
+{await meting.player({
+  server: 'netease',
+  type: 'playlist',
+  id: '8900628861',
+  client: true, // 浏览器端取数；省略则在构建期取数
+  autoPlayNext: true,
+  playlistExpand: true,
+})}
+```
+
+`client: true` 时构建产物只有播放器空壳，浏览器请求完成后自动填入曲目；默认模式仍在构建期取数，并由 Meting 缓存加速。接口覆盖、缓存与配置见 [`meting.md`](./meting.md)。
+
 ## Props
 
 | 名称 | 类型 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- | --- |
-| `playlist` | `MusicTrack[]` | 是 | — | 曲目列表，至少一首；`name` 和 `url` 必填，缺失会在构建期报错。 |
+| `playlist` | `MusicTrack[]` | 手动使用时是 | — | 曲目列表，至少一首；`name` 和 `url` 必填，缺失会在构建期报错。`meting.player()` 会自行传入数据源。 |
 | `autoPlayNext` | `boolean` | 否 | `false` | 一首播完后是否自动播放下一首；最后一首播完停止并回到开头。 |
 | `playlistExpand` | `boolean` | 否 | `false` | 是否默认展开播放列表。 |
 

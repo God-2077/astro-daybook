@@ -36,6 +36,7 @@ import {
   DEFAULT_ARCHIVE,
   DEFAULT_COMMENTS,
   DEFAULT_INJECT,
+  DEFAULT_MDX,
   DEFAULT_ROBOTS,
   DEFAULT_RSS,
   DEFAULT_SEO,
@@ -210,6 +211,9 @@ function validateSite(input: SiteConfig, file: string): void {
   if (input.avatar && !isExternal(input.avatar) && !input.avatar.startsWith('/')) {
     fail(file, 'avatar', 'avatar 必须是 http(s) URL 或 / 开头的 public 路径');
   }
+  if (!validHttpUrl(input.mdx.meting.api)) {
+    fail(file, 'mdx.meting.api', `${input.mdx.meting.api} 不是合法的 http(s) 地址（不能带 query/hash）`);
+  }
   input.robots.disallow.forEach((path, index) => {
     if (!path.startsWith('/')) fail(file, `robots.disallow[${index}]`, 'robots.disallow 必须以 / 开头');
   });
@@ -341,6 +345,20 @@ function resolveSite(parsed: SiteConfigInput, file: string): SiteConfig {
     },
     labels: {
       diary: parsed.labels?.diary ?? labelDefaults.diary,
+    },
+    mdx: {
+      meting: {
+        api: parsed.mdx?.meting?.api ?? DEFAULT_MDX.meting.api,
+        timeout: parsed.mdx?.meting?.timeout ?? DEFAULT_MDX.meting.timeout,
+        cache: {
+          enabled: parsed.mdx?.meting?.cache?.enabled ?? DEFAULT_MDX.meting.cache.enabled,
+          ttl: {
+            playlist: parsed.mdx?.meting?.cache?.ttl?.playlist ?? DEFAULT_MDX.meting.cache.ttl.playlist,
+            search: parsed.mdx?.meting?.cache?.ttl?.search ?? DEFAULT_MDX.meting.cache.ttl.search,
+            default: parsed.mdx?.meting?.cache?.ttl?.default ?? DEFAULT_MDX.meting.cache.ttl.default,
+          },
+        },
+      },
     },
   };
 

@@ -1,0 +1,104 @@
+---
+title: Meting 客户端示例：在 MDX 里取一首歌
+date: 2026-11-08 09:00:00
+description: 用 @mdx 的 Meting 客户端在 MDX 里取歌曲、歌词并渲染 MusicPlayer 的写法示例；构建期示例只展示代码，页面末尾的客户端播放器在浏览器里加载曲目。
+categories: [文章]
+tags: [Meting, 音乐, MDX]
+keywords: [Meting-API, MusicPlayer, MDX]
+---
+
+import { meting } from '@mdx';
+
+`@mdx` 暴露了 `meting.fetchMusic()` 与 `meting.player()`：前者在构建期取数据，后者直接把同一份数据渲染成 `MusicPlayer`。构建期示例只记录写法，页面构建时不请求 Meting-API；末尾的客户端播放器则在浏览器里加载曲目。
+
+## 歌曲信息
+
+`fetchMusic({ type: 'song' })` 返回单个曲目对象：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `name` | `string` | 歌名 |
+| `artist` | `string` | 歌手 |
+| `album` | `string` | 专辑 |
+| `source` | `string` | 音源，如 `netease` |
+| `url` | `string` | 播放地址 |
+| `pic` / `cover` | `string` | 封面地址，两者相同 |
+| `lrc` | `string` | 歌词地址 |
+| `raw` | `object` | 接口返回的原始字段 |
+
+```mdx
+import { meting } from '@mdx';
+
+export const song = await meting.fetchMusic({
+  server: 'netease',
+  type: 'song',
+  id: '1969519579',
+});
+
+歌名：{song.name}
+歌手：{song.artist}
+```
+
+## 歌词
+
+`type: 'lrc'` 返回纯文本，不是 JSON；取到后可以直接放进 `<pre>`：
+
+```mdx
+export const lyrics = await meting.fetchMusic({
+  server: 'netease',
+  type: 'lrc',
+  id: '1969519579',
+});
+
+<pre>{lyrics.split(/\r?\n/).slice(0, 12).join('\n')}</pre>
+```
+
+## 播放器
+
+`meting.player()` 会把同一首歌曲转换成 `MusicPlayer`，参数与 `fetchMusic` 一致：
+
+```mdx
+{await meting.player({
+  server: 'netease',
+  type: 'song',
+  id: '1969519579',
+  autoPlayNext: false,
+  playlistExpand: false,
+})}
+```
+
+`playlist`、`albumlist` 与 `search` 会渲染成曲目列表。
+
+## 客户端播放器
+
+在参数里加 `client: true`，构建期不再请求接口，改由浏览器取数据：
+
+```mdx
+{await meting.player({
+  server: 'netease',
+  type: 'playlist',
+  id: '8900628861',
+  client: true,
+  autoPlayNext: true,
+  playlistExpand: true,
+})}
+```
+
+下面这个就是客户端模式，曲目在浏览器里加载：
+
+{await meting.player({
+  server: 'netease',
+  type: 'playlist',
+  id: '8900628861',
+  client: true,
+  autoPlayNext: true,
+  playlistExpand: false,
+})}
+
+浏览器端的接口地址与超时来自 `siteConfig.mdx.meting`，也可以用单次调用的 `api` / `timeout` 覆盖。
+
+## 说明
+
+- 构建期调用（上方的 `fetchMusic` 与 `player` 示例）会向 `siteConfig.mdx.meting.api` 发请求，超时由 `siteConfig.mdx.meting.timeout` 控制；`client: true` 时请求发生在浏览器。
+- 接口地址、完整参数与返回类型见 `docs/meting.md`。
+- 本文的构建期示例只展示写法，不实际发起请求。

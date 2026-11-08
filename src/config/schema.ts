@@ -219,6 +219,40 @@ const homeSchema = z.strictObject({
   showTitles: z.boolean().optional(),
 });
 
+/** Meting 缓存分类 TTL：单位毫秒，必须是非负整数。 */
+const metingCacheTtlSchema = z.strictObject({
+  /** `playlist` 缓存时间；默认 `86400000`（1 天）。 */
+  playlist: z.number().int().nonnegative().optional(),
+  /** `search` 缓存时间；默认 `86400000`（1 天）。 */
+  search: z.number().int().nonnegative().optional(),
+  /** 其它类型缓存时间；默认 `2592000000`（30 天）。 */
+  default: z.number().int().nonnegative().optional(),
+});
+
+/** Meting 服务端缓存开关与分类 TTL。 */
+const metingCacheSchema = z.strictObject({
+  /** 是否启用服务端缓存；默认 `true`。 */
+  enabled: z.boolean().optional(),
+  /** 分类缓存时间，单位毫秒。 */
+  ttl: metingCacheTtlSchema.optional(),
+});
+
+/** MDX 增强里的 Meting-API 客户端配置：`{ api?, timeout?, cache? }`。 */
+const metingSchema = z.strictObject({
+  /** Meting-API 基础地址；默认 `'https://163.hyc.moe/'`。 */
+  api: nonEmpty.optional(),
+  /** 单次请求超时时间（毫秒）；默认 `5000`，必须为正整数。 */
+  timeout: z.number().int().positive().optional(),
+  /** 服务端构建缓存；默认开启。 */
+  cache: metingCacheSchema.optional(),
+});
+
+/** MDX 增强配置：`{ meting? }`。 */
+const mdxSchema = z.strictObject({
+  /** Meting-API 客户端配置。 */
+  meting: metingSchema.optional(),
+});
+
 /**
  * 站点主配置 schema（对应 `src/config/site.ts`）。
  *
@@ -281,6 +315,8 @@ export const siteConfigSchema = z.strictObject({
   home: homeSchema.optional(),
   /** 站内「日记」类内容称呼。 */
   labels: labelsSchema.optional(),
+  /** MDX 增强配置。 */
+  mdx: mdxSchema.optional(),
 });
 
 /** 友链项：`{ name, url, avatar?, description? }`。 */

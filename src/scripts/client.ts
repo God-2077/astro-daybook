@@ -440,6 +440,11 @@ function initPage(): void {
       initMusicPlayers();
     });
   }
+  if (document.querySelector('[data-meting-source]')) {
+    void import('./meting-player').then(({ initMetingPlayers }) => {
+      initMetingPlayers();
+    });
+  }
 }
 
 function onClick(event: MouseEvent): void {

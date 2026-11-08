@@ -5,7 +5,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@ui": ["src/components/index.ts"]
+      "@ui": ["src/components/index.ts"],
+      "@mdx/client": ["src/lib/mdx/client.ts"],
+      "@mdx": ["src/lib/mdx/index.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react",

@@ -18,7 +18,6 @@ function label(root: HTMLElement, key: string, fallback: string): string {
 
 function initPlayer(root: HTMLElement): void {
   if (root.dataset.musicReady === 'true') return;
-  root.dataset.musicReady = 'true';
 
   const audio = root.querySelector<HTMLAudioElement>('[data-music-audio]');
   const playBtn = root.querySelector<HTMLButtonElement>('[data-music-play]');
@@ -55,6 +54,8 @@ function initPlayer(root: HTMLElement): void {
   ) {
     return;
   }
+
+  root.dataset.musicReady = 'true';
 
   const labels = {
     play: label(root, 'labelPlay', 'Play'),

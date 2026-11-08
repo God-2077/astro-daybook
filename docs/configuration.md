@@ -55,6 +55,12 @@ export const siteConfig = defineSiteConfig({
 | `theme` | `'light' \| 'dark' \| 'system'` | `'system'` | 默认主题；`system` 跟随 `prefers-color-scheme`，用户手动选择优先 |
 | `home` | `{ title, subtitle, showTitles }` | 按 `lang` 内置 | 首页可见大标题与副标题；`showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍按原规则显示标题（无标题时用日期回退）。只控制首页（含首页分页）的 H1，不决定内容称呼或浏览器标题。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题 |
 | `labels` | `{ diary }` | 按 `lang` 内置 | 站内「日记」类内容的称呼：详情页类型/面包屑、置顶/加密提示、归档、搜索、RSS、首页 `<title>` 等；可与首页标题不同 |
+| `mdx.meting.api` | `string` | `https://163.hyc.moe/` | MDX 里 `meting.fetchMusic()` / `meting.player()` / `@mdx/client` 使用的 Meting-API 地址；必须是 http(s) URL，不能带 query/hash |
+| `mdx.meting.timeout` | `number` | `5000` | Meting 请求超时时间（毫秒），必须是正整数；构建期与浏览器客户端共用 |
+| `mdx.meting.cache.enabled` | `boolean` | `true` | 是否启用服务端构建缓存 |
+| `mdx.meting.cache.ttl.playlist` | `number` | `86400000` | `playlist` 缓存时间（毫秒），默认 1 天 |
+| `mdx.meting.cache.ttl.search` | `number` | `86400000` | `search` 缓存时间（毫秒），默认 1 天 |
+| `mdx.meting.cache.ttl.default` | `number` | `2592000000` | 其它类型缓存时间（毫秒），默认 30 天 |
 | `nav` | `NavItem[]` | 按 `lang` 内置 | 顶部导航 |
 | `footerNav` | `{ title, link }[]` | 按 `lang` 内置（归档、友链） | 页脚导航（只能一级）；不会自动追加 RSS |
 | `bottomNav` | `{ enabled, items }` | `enabled: true`、内置四项 | 移动端底部导航；可关闭或整体替换入口 |
@@ -115,6 +121,31 @@ labels: {
 ```
 
 只影响站内对「日记」类内容的称呼，不改变路由、分类或首页大标题。首页可见大标题仍由 `home.title` 控制；首页及分页页面的浏览器 `<title>` 使用 `labels.diary`；底部导航标题优先取 `bottomNav.items[].title`，其次跟随 `nav`。空字符串会被配置层拒绝。
+
+### MDX 增强 `mdx`
+
+```ts
+mdx: {
+  meting: {
+    api: 'https://163.hyc.moe/', // 推荐自部署
+    timeout: 5000,
+    cache: {
+      enabled: true,
+      ttl: {
+        playlist: 86_400_000, // 1 天
+        search: 86_400_000, // 1 天
+        default: 2_592_000_000, // 30 天
+      },
+    },
+  },
+},
+```
+
+- 供 MDX 里的 `import { meting } from '@mdx'` 与浏览器端的 `@mdx/client` 使用，详细用法与接口覆盖见 [`meting.md`](./meting.md)。
+- `api` 必须是 http(s) URL，不能带 query/hash；末尾斜杠会原样保留，自部署在子路径下时写成 `https://example.com/meting/`。
+- `timeout` 约束构建期请求；`meting.player({ client: true })` 会在浏览器里使用同一超时值。
+- `cache` 只作用于服务端构建：`playlist` / `search` 默认短期缓存，其它类型默认长期缓存；`url` / `pic` 也按 `default` 缓存，需要更新时使用 `refresh: true`。
+- 所有字段都可省略，默认值如上；在内容仓库模式下同样写在 `<内容根>/config/site.ts` 中。
 
 ### 构建语言 `lang`
 
