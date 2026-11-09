@@ -142,6 +142,7 @@ assert.match(archives, /id="a-arc-articles">/, '默认应显示文章归档列�
 assert.match(archives, /id="a-arc-diary" hidden>/, '默认应隐藏日记归档列表');
 assert.match(archives, /data-arc-mode="articles"[^>]*aria-pressed="true"/, '文章标签默认按下');
 assert.match(archives, /data-arc-mode="diary"[^>]*aria-pressed="false"/, '日记标签默认未按下');
+assert.match(archives, /class="a-arc-entry-title">\s*2026\/10\/21-night/, '归档里无标题日记应使用 slug 作为标题');
 
 // 置顶日记单独成组：曾经整月跟着置顶、把更新的月份挤到后面。
 const pinnedSectionAt = home.indexOf('a-month-group--pinned');

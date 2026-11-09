@@ -236,7 +236,7 @@ for (const item of articleItems) {
               <a class="a-arc-entry" href={item.entry.url} data-arc-month={item.monthKey}>
                 <time class="a-arc-date" datetime={item.datetime}>{item.monthDay}</time>
                 <span class="a-arc-entry-title">
-                  {getEntryTitle(item.entry)}
+                  {getEntryTitle(item.entry, { dailyFallback: 'slug' })}
                   {item.locked && (
                     <svg class="a-lock-inline a-lock-trail" aria-hidden="true" focusable="false">
                       <use href="#i-lock" />
