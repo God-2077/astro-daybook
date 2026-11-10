@@ -33,13 +33,12 @@ import { meting } from '@mdx';
   server: 'netease',
   type: 'playlist',
   id: '8900628861',
-  client: true, // 浏览器端取数；省略则在构建期取数
   autoPlayNext: true,
   playlistExpand: true,
 })}
 ```
 
-`client: true` 时构建产物只有播放器空壳，浏览器请求完成后自动填入曲目；默认模式仍在构建期取数，并由 Meting 缓存加速。接口覆盖、缓存与配置见 [`meting.md`](./meting.md)。
+`client` 默认为 `true`：构建产物只有播放器空壳，浏览器请求完成后自动填入曲目；显式传 `client: false` 时改在构建期取数，并由 Meting 缓存加速。接口覆盖、缓存与配置见 [`meting.md`](./meting.md)。
 
 ## Props
 

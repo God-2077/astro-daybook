@@ -144,7 +144,7 @@ mdx: {
 
 - 供 MDX 里的 `import { meting } from '@mdx'` 与浏览器端的 `@mdx/client` 使用，详细用法与接口覆盖见 [`meting.md`](./meting.md)。
 - `api` 必须是 http(s) URL，不能带 query/hash；末尾斜杠会原样保留，自部署在子路径下时写成 `https://example.com/meting/`。
-- `timeout` 约束构建期请求；`meting.player({ client: true })` 会在浏览器里使用同一超时值。
+- `timeout` 约束构建期请求；`meting.player()` 默认在浏览器端取数，使用页面上的同一超时值，传 `client: false` 时才走构建期请求。
 - `cache` 只作用于服务端构建：`playlist` / `search` 默认短期缓存，其它类型默认长期缓存；`url` / `pic` 也按 `default` 缓存，需要更新时使用 `refresh: true`。
 - 所有字段都可省略，默认值如上；在内容仓库模式下同样写在 `<内容根>/config/site.ts` 中。
 

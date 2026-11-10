@@ -222,15 +222,15 @@ export const DEFAULT_THEME: ThemeMode = 'system';
 /**
  * MDX 增强的默认值。
  *
- * - 用途：`site.ts` 未配置 `mdx.meting` 时，MDX 里的 `meting.fetchMusic()` /
- *   `meting.player()` 使用这里的 Meting-API 地址与请求超时。
+ * - 用途：`site.ts` 未配置 `mdx.meting` 时，MDX 里的 `meting.fetchMusic()` 或
+ *   `meting.player({ client: false })` 使用这里的 Meting-API 地址与请求超时。
  * - 字段：
  *   - `api`：Meting-API 基础地址，默认 `'https://163.hyc.moe/'`；自部署时替换成自己的地址。
  *   - `timeout`：单次请求超时时间（毫秒），默认 `5000`。
  *   - `cache.enabled`：服务端缓存开关，默认 `true`。
  *   - `cache.ttl.playlist` / `search`：短缓存，默认 1 天（`86400000`）。
  *   - `cache.ttl.default`：其它类型的长缓存，默认 30 天（`2592000000`）。
- * - 注意：服务端缓存只影响构建/开发时请求；浏览器端 `client: true` 不读该缓存。
+ * - 注意：服务端缓存只影响构建/开发时请求；`meting.player()` 默认在浏览器端取数（`client` 默认 `true`），不读该缓存。
  */
 export const DEFAULT_MDX = {
   meting: {

@@ -9,7 +9,7 @@ keywords: [Meting-API, MusicPlayer, MDX]
 
 import { meting } from '@mdx';
 
-`@mdx` 暴露了 `meting.fetchMusic()` 与 `meting.player()`：前者在构建期取数据，后者直接把同一份数据渲染成 `MusicPlayer`。构建期示例只记录写法，页面构建时不请求 Meting-API；末尾的客户端播放器则在浏览器里加载曲目。
+`@mdx` 暴露了 `meting.fetchMusic()` 与 `meting.player()`：前者在构建期取数据，后者默认在浏览器端取数（传 `client: false` 可改回构建期）。构建期示例只记录写法，页面构建时不请求 Meting-API；末尾的客户端播放器则在浏览器里加载曲目。
 
 ## 歌曲信息
 
@@ -55,13 +55,14 @@ export const lyrics = await meting.fetchMusic({
 
 ## 播放器
 
-`meting.player()` 会把同一首歌曲转换成 `MusicPlayer`，参数与 `fetchMusic` 一致：
+`meting.player()` 会把查询渲染成 `MusicPlayer`，参数与 `fetchMusic` 一致，另加播放器选项；下面的例子显式传 `client: false`，在构建期取数：
 
 ```mdx
 {await meting.player({
   server: 'netease',
   type: 'song',
   id: '1969519579',
+  client: false,
   autoPlayNext: false,
   playlistExpand: false,
 })}
@@ -71,26 +72,24 @@ export const lyrics = await meting.fetchMusic({
 
 ## 客户端播放器
 
-在参数里加 `client: true`，构建期不再请求接口，改由浏览器取数据：
+`client` 默认为 `true`，构建期不再请求接口，改由浏览器取数据；下面的写法与省略 `client` 一致：
 
 ```mdx
 {await meting.player({
   server: 'netease',
   type: 'playlist',
   id: '8900628861',
-  client: true,
   autoPlayNext: true,
   playlistExpand: true,
 })}
 ```
 
-下面这个就是客户端模式，曲目在浏览器里加载：
+下面这个就是默认的客户端模式，曲目在浏览器里加载：
 
 {await meting.player({
   server: 'netease',
   type: 'playlist',
   id: '8900628861',
-  client: true,
   autoPlayNext: true,
   playlistExpand: false,
 })}
@@ -99,6 +98,6 @@ export const lyrics = await meting.fetchMusic({
 
 ## 说明
 
-- 构建期调用（上方的 `fetchMusic` 与 `player` 示例）会向 `siteConfig.mdx.meting.api` 发请求，超时由 `siteConfig.mdx.meting.timeout` 控制；`client: true` 时请求发生在浏览器。
+- 构建期调用（上方的 `fetchMusic` 与显式 `client: false` 的 `player` 示例）会向 `siteConfig.mdx.meting.api` 发请求，超时由 `siteConfig.mdx.meting.timeout` 控制；客户端模式（默认）请求发生在浏览器。
 - 接口地址、完整参数与返回类型见 `docs/meting.md`。
 - 本文的构建期示例只展示写法，不实际发起请求。

@@ -2,8 +2,8 @@
 
 `@mdx` 内置一个 [Meting-API](https://github.com/liuran001/meting-api) 客户端，分两种运行位置：
 
-- **构建期**（默认）：在 MDX 里拉取歌曲、歌单、专辑、搜索结果与歌词，再渲染成普通文本或 `MusicPlayer`。请求会经过服务端缓存，适合大多数页面。
-- **浏览器端**：`meting.player({ client: true })` 只输出播放器空壳，由浏览器请求 API 后填充；`@mdx/client` 提供通用的浏览器 fetch API。适合大歌单或不想增加构建时请求的页面。
+- **浏览器端**（默认）：`meting.player()` 只输出播放器空壳，由浏览器请求 API 后填充；`@mdx/client` 提供通用的浏览器 fetch API。适合大歌单或不想增加构建时请求的页面。
+- **构建期**：`meting.player({ client: false })` 在 MDX 里拉取歌曲、歌单、专辑、搜索结果与歌词，再渲染成普通文本或 `MusicPlayer`。请求会经过服务端缓存，适合对首屏与 SEO 有要求的页面。
 
 ## 配置
 
@@ -112,7 +112,7 @@ export const lyrics = await meting.fetchMusic({
 
 ## 直接渲染播放器
 
-`meting.player()` 会拉取曲目并返回 `MusicPlayer`，可以直接放在 MDX 表达式里：
+`meting.player()` 会把查询渲染成 `MusicPlayer`，可以直接放在 MDX 表达式里。默认在浏览器端取数；下面的例子显式传 `client: false`，改在构建期取数：
 
 ```mdx
 import { meting } from '@mdx';
@@ -121,27 +121,28 @@ import { meting } from '@mdx';
   server: 'netease',
   type: 'playlist',
   id: '8900628861',
+  client: false,
   autoPlayNext: true,
   playlistExpand: true,
 })}
 ```
 
 - 查询参数与 `fetchMusic` 相同，但 `type` 只支持 `song`、`playlist`、`albumlist`、`search`。
+- `client`：是否在浏览器端取数，默认 `true`；传 `false` 时在构建期请求并写入服务端缓存。
 - `autoPlayNext`：一首播完后自动播放下一首，默认 `false`。
 - `playlistExpand`：默认展开播放列表，默认 `false`。
 - 单曲（`type=song`）会渲染成单曲播放器；歌单/专辑/搜索会渲染成曲目列表。
 - 组件样式、歌词、进度条与键盘操作与手写 `<MusicPlayer>` 完全一致，见 [`music-player.md`](./music-player.md)。
 
-### 客户端播放器
+### 客户端播放器（默认）
 
-在同一个对象里加 `client: true`，构建期不再请求 Meting-API：
+`client` 默认为 `true`，下面的写法与省略 `client` 等价，构建期不请求 Meting-API：
 
 ```mdx
 {await meting.player({
   server: 'netease',
   type: 'playlist',
   id: '8900628861',
-  client: true,
   autoPlayNext: true,
   playlistExpand: true,
 })}
@@ -150,7 +151,7 @@ import { meting } from '@mdx';
 - 构建产物只有播放器空壳和 `data-meting-source`；浏览器读取页面上的 `data-meting-api` / `data-meting-timeout`，请求完成后填入曲目。
 - 首屏会显示「正在加载音乐…」；失败时显示「音乐加载失败」，详细错误只输出到浏览器控制台。
 - 客户端模式没有服务端缓存，每次页面加载都会请求 API；浏览器 HTTP 缓存仍可能生效。
-- 无 JavaScript 时只会保留加载空壳。对 SEO 或稳定性要求高的页面建议使用默认构建期模式。
+- 无 JavaScript 时只会保留加载空壳。对 SEO 或稳定性要求高的页面传 `client: false` 使用构建期模式。
 
 ## 浏览器端 fetch API
 
@@ -259,8 +260,8 @@ export const audio = await meting.request({
 
 ## 行为与边界
 
-- **构建期请求**：MDX 里的顶层 `await` 在构建时执行。缓存未命中、离线构建、API 不可达或超时会直接让构建失败（或按缓存策略等待），错误信息带 `[daybook:meting]` 前缀和请求地址。
-- **超时**：默认 `5000ms`。构建期由 `siteConfig.mdx.meting.timeout` 控制；浏览器 `client: true` 使用页面上的 `data-meting-timeout`，同样默认 `5000ms`。
+- **构建期请求**（`fetchMusic()`、`request()` 与 `client: false` 的 `player()`）：MDX 里的顶层 `await` 在构建时执行。缓存未命中、离线构建、API 不可达或超时会直接让构建失败（或按缓存策略等待），错误信息带 `[daybook:meting]` 前缀和请求地址。
+- **超时**：默认 `5000ms`。浏览器端（`client` 省略或为 `true`）使用页面上的 `data-meting-timeout`；构建期由 `siteConfig.mdx.meting.timeout` 控制。
 - **限流**：公共 API 有 30 秒限流窗口，超限返回 HTTP 429。不要在 MDX 里循环调用；构建大量页面时建议自部署 Meting-API，并依赖服务端缓存。
 - **重定向**：`type=url` / `type=pic` 默认返回 302。构建期读取 `Location` 后返回目标地址；浏览器端直接返回接口地址。返回的 CDN 地址可能带时效，需要更新时使用 `refresh: true`。
 - **混合内容**：如果 `api` 是 HTTPS，而响应里的 `url` / `pic` / `lrc` 是同一 host 的 HTTP 地址，客户端会自动升级为 HTTPS，避免浏览器拦截。HTTPS 站点不要配置 HTTP 的 Meting API。

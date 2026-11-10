@@ -9,8 +9,8 @@
  * {await meting.player({ server: 'netease', type: 'song', id: '1969519579' })}
  * ```
  *
- * `fetchMusic` / `request` 是构建期数据接口，`player` 会把结果直接转成
- * `MusicPlayer` 组件。浏览器端不会加载这个模块。
+ * `fetchMusic` / `request` 是构建期数据接口；`player` 默认输出浏览器端播放器空壳
+ * （`client: true`），传 `client: false` 时在构建期取数并渲染 `MusicPlayer`。
  */
 
 import { jsx } from 'astro/jsx-runtime';
@@ -25,7 +25,7 @@ export interface MetingPlayerOptions extends MetingOptions {
   autoPlayNext?: boolean;
   /** 是否默认展开播放列表；默认 false。 */
   playlistExpand?: boolean;
-  /** 为 true 时不在构建期请求，改为浏览器端拉取并填充播放器。 */
+  /** 是否在浏览器端拉取，默认 true；为 false 时在构建期请求并渲染可播放数据。 */
   client?: boolean;
 }
 
@@ -43,7 +43,7 @@ export async function player(input: MetingPlayerInput, extra: MetingPlayerOption
   const {
     autoPlayNext = false,
     playlistExpand = false,
-    client = false,
+    client = true,
     api,
     timeout,
     signal,

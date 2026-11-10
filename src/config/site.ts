@@ -280,9 +280,9 @@ export const siteConfig = defineSiteConfig({
    * - `mdx.meting.cache`：服务端请求缓存；默认开启。
    *   - `ttl.playlist` / `ttl.search`：短缓存，默认 1 天。
    *   - `ttl.default`：其它类型的长缓存，默认 30 天。
-   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` /
-   *   `meting.player()` 时，构建期请求使用的地址、超时与缓存。
-   * - 注意：`meting.player({ client: true })` 不读这个缓存，浏览器会直接请求 API。
+   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` 或
+   *   `meting.player({ client: false })` 时，构建期请求使用的地址、超时与缓存。
+   * - 注意：`meting.player()` 默认在浏览器端取数（`client` 默认 `true`），不读这个缓存，浏览器会直接请求 API。
    */
   mdx: {
     meting: {
