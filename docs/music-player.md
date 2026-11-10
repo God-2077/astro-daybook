@@ -40,6 +40,8 @@ import { meting } from '@mdx';
 
 `client` 默认为 `true`：构建产物只有播放器空壳，浏览器请求完成后自动填入曲目；显式传 `client: false` 时改在构建期取数，并由 Meting 缓存加速。接口覆盖、缓存与配置见 [`meting.md`](./meting.md)。
 
+Markdown 里也可以不写 MDX：用 `:::music` 容器直接写 YAML 歌单，或用 `::meting{...}` 叶子指令生成同样的播放器。语法与字段限制见 [`markdown.md`](./markdown.md#音乐播放器)。
+
 ## Props
 
 | 名称 | 类型 | 必填 | 默认 | 说明 |

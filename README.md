@@ -137,6 +137,7 @@ keywords: [静态博客]
 
 - 全部配置字段、评论接入、部署与安全边界：[`docs/configuration.md`](./docs/configuration.md)
 - 内容目录、frontmatter 与可见性：[`docs/content.md`](./docs/content.md)
+- Markdown 扩展（脚注、Mermaid、指令、Alert、嵌入与播放器）：[`docs/markdown.md`](./docs/markdown.md)
 - 主题与内容分仓、clone/pull：[`docs/dual-repo.md`](./docs/dual-repo.md)
 - 用 Vercel 自动部署（Deploy Hook + 内容仓库 GitHub Action）：[`docs/deployment-vercel.md`](./docs/deployment-vercel.md)
 - 歌单与播放器：[`docs/music-player.md`](./docs/music-player.md)

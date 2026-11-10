@@ -151,6 +151,7 @@ import { Timeline, TimelineItem } from '@ui';
 规则：
 
 - MDX 默认继承 `astro.config.ts` 的 `markdown.processor`，因此标题 ✦、`a-h2-anchor`、图片 figure/懒加载、表格包裹、脚注样式与 `.md` 完全一致。
+- 脚注方括号、Mermaid、GitHub Alert、折叠块、嵌入指令与行内指令在 `.md` / `.mdx` 中同样可用；完整语法与构建期错误行为见 [`markdown.md`](./markdown.md)。
 - 组件 children 里也可以写 Markdown（记得用空行分隔段落）；插件会递归 `mdxJsxFlowElement` / `mdxJsxTextElement`，组件内的图片与表格同样得到站点结构。
 - 相对路径按 MDX 文件自身位置解析（文章在 `src/content/post/` 时是 `../../components/...`）；推荐直接用 `@ui` 别名具名导入：`import { Timeline, TimelineItem } from '@ui'`。别名在 `tsconfig.json` 的 `paths` 里指向 `src/components/index.ts`，文件移动时不用改 import，编辑器的跳转/补全也走同一份配置。
 - **MDX 暂不支持 `password`**：构建期加密需要 HTML 字符串，遇到 `password` 会直接报错。需要加密的内容请继续用 `.md`。

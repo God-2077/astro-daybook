@@ -53,6 +53,7 @@ function applyTheme(preference: ThemePreference): void {
   document.documentElement.dataset.theme = theme;
   syncThemeColor(theme);
   syncThemeControls();
+  document.dispatchEvent(new CustomEvent('daybook:theme-change', { detail: { theme } }));
 }
 
 function setTheme(preference: ThemePreference, persist = true): void {
@@ -443,6 +444,21 @@ function initPage(): void {
   if (document.querySelector('[data-meting-source]')) {
     void import('./meting-player').then(({ initMetingPlayers }) => {
       initMetingPlayers();
+    });
+  }
+  if (document.querySelector('[data-mermaid]')) {
+    void import('./mermaid').then(({ initMermaid }) => {
+      initMermaid();
+    });
+  }
+  if (document.querySelector('[data-github-card]')) {
+    void import('./github-card').then(({ initGithubCards }) => {
+      initGithubCards();
+    });
+  }
+  if (document.querySelector('[data-embed]')) {
+    void import('./embed').then(({ initEmbeds }) => {
+      initEmbeds();
     });
   }
 }

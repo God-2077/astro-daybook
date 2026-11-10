@@ -7,7 +7,7 @@ import type { AstroIntegration, AstroUserConfig } from 'astro';
 import { defineConfig, envField } from 'astro/config';
 import { type ContentSiteContext, loadSiteContext, type SiteContext } from './scripts/site-context';
 import { siteConfig as themeSiteConfig } from './src/config/site';
-import { rehypePlugins, remarkPlugins, SHIKI_CONFIG } from './src/lib/markdown-pipeline';
+import { createMarkdownPipeline, SHIKI_CONFIG } from './src/lib/markdown-pipeline';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const context = await loadSiteContext(root, themeSiteConfig);
@@ -85,11 +85,10 @@ function contentConfigWatchIntegration(siteContext: SiteContext): AstroIntegrati
   };
 }
 
+const pipeline = createMarkdownPipeline(context.siteConfig.lang);
+
 const markdown: NonNullable<AstroUserConfig['markdown']> = {
-  processor: unified({
-    remarkPlugins,
-    rehypePlugins,
-  }),
+  processor: unified(pipeline),
   shikiConfig: SHIKI_CONFIG,
 };
 
