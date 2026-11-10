@@ -49,6 +49,26 @@ export interface ArchiveConfigInput {
   defaultType?: ArchiveType;
 }
 
+/** 无标题日记出现的位置。 */
+export type DailyTitleFallbackPosition = 'detail' | 'archive' | 'feed';
+
+/** 无标题日记的内置回退策略。 */
+export type DailyTitleFallbackStrategy = 'date' | 'slug' | 'untitled';
+
+/** 带占位符的自定义回退标题模板。 */
+export interface DailyTitleFallbackTemplate {
+  template: string;
+}
+
+/** 单个位置的回退策略：内置策略或自定义模板。 */
+export type DailyTitleFallbackValue = DailyTitleFallbackStrategy | DailyTitleFallbackTemplate;
+
+/** 解析后的无标题日记回退配置。 */
+export type DailyTitleFallbackConfig = Record<DailyTitleFallbackPosition, DailyTitleFallbackValue>;
+
+/** 用户可写的无标题日记回退配置。 */
+export type DailyTitleFallbackConfigInput = Partial<DailyTitleFallbackConfig>;
+
 export interface IcpItem {
   text: string;
   link?: string;
@@ -263,6 +283,8 @@ export interface SiteConfig {
   icp: IcpItem[];
   pagination: PaginationConfig;
   archive: ArchiveConfig;
+  /** 无标题日记在详情页、归档与 RSS 中的回退标题。 */
+  dailyTitleFallback: DailyTitleFallbackConfig;
   rss: RssConfig;
   comments: CommentsConfig;
   robots: RobotsConfig;
@@ -297,6 +319,7 @@ export interface SiteConfigInput {
   icp?: IcpItem[];
   pagination?: Partial<PaginationConfig>;
   archive?: ArchiveConfigInput;
+  dailyTitleFallback?: DailyTitleFallbackConfigInput;
   rss?: RssConfigInput;
   comments?: CommentsConfigInput;
   robots?: Partial<RobotsConfig>;

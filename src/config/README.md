@@ -10,10 +10,10 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| [`site.ts`](./site.ts) | 站点主配置：标题、URL、作者与头像、构建语言、导航、内容称呼、分页、RSS、评论、MDX 增强（Meting）、SEO、sitemap、robots、版权、备案、自定义 HTML 注入。是唯一带完整默认值合并的配置文件。 |
+| [`site.ts`](./site.ts) | 站点主配置：标题、URL、作者与头像、构建语言、导航、内容称呼、分页、归档、无标题日记回退、RSS、评论、MDX 增强（Meting）、SEO、sitemap、robots、版权、备案、自定义 HTML 注入。是唯一带完整默认值合并的配置文件。 |
 | [`links.ts`](./links.ts) | 友链页配置：分组与组内友链。 |
 | [`define.ts`](./define.ts) | 解析入口与语义校验：`defineSiteConfig` / `defineLinksConfig`，以及 `isCommentsRendered`、`isSupportedCommentProvider`。 |
-| [`defaults.ts`](./defaults.ts) | 默认值：`LOCALE_DEFAULTS`（四语言的 `home` / `labels` / `nav` / `footerNav`）与 `defaultHome` / `defaultLabels` / `defaultNav` / `defaultFooterNav`、`DEFAULT_RSS`、`DEFAULT_COMMENTS`、`DEFAULT_INJECT`、`DEFAULT_MDX`、`DEFAULT_THEME` 等；受支持的评论 provider 白名单 `SUPPORTED_COMMENT_PROVIDERS` 也在这里。 |
+| [`defaults.ts`](./defaults.ts) | 默认值：`LOCALE_DEFAULTS`（四语言的 `home` / `labels` / `nav` / `footerNav`）与 `defaultHome` / `defaultLabels` / `defaultNav` / `defaultFooterNav`、`DEFAULT_ARCHIVE`、`DEFAULT_DAILY_TITLE_FALLBACK`、`DEFAULT_RSS`、`DEFAULT_COMMENTS`、`DEFAULT_INJECT`、`DEFAULT_MDX`、`DEFAULT_THEME` 等；受支持的评论 provider 白名单 `SUPPORTED_COMMENT_PROVIDERS` 也在这里。 |
 | [`schema.ts`](./schema.ts) | Zod schema：只做结构与类型校验（未知字段直接拒绝，可见字段均带类型约束）。 |
 | [`index.ts`](./index.ts) | 统一出口：re-export 两个配置对象、评论相关工具函数与 `src/types/config.ts` 中的全部类型。页面一般从 `../config/site` 等处直接引入，需要类型时从 `../types/config` 或 `../config` 引入。 |
 
@@ -99,6 +99,24 @@ archive: {
 - `items` 至少一项，整体替换默认入口；`title`、`icon` 可省略，`icon` 必须是 `src/assets/sprite.html` 中的 `i-*` id。
 - `archive.defaultType` 只接受 `'articles'` 或 `'diary'`，默认 `'articles'`；设为 `'diary'` 时日记按钮在前且默认选中。
 
+## 无标题日记的标题回退
+
+`dailyTitleFallback` 只对没有 `title` 的日记生效；文章仍要求标题：
+
+```ts
+// src/config/site.ts
+dailyTitleFallback: {
+  detail: 'date',
+  archive: 'slug',
+  feed: 'date',
+},
+```
+
+- 位置：`detail`（详情页）、`archive`（归档列表）、`feed`（RSS）。
+- 值：`'date'`、`'slug'`、`'untitled'`（当前语言「未命名」），或 `{ template: '...' }`。
+- 模板占位符：`{date}`、`{slug}`、`{diary}`（`labels.diary`）、`{untitled}`；未知占位符会以 `dailyTitleFallback.<位置>.template` 报错，空模板会被 schema 拒绝。
+- 默认值保持旧行为：详情/RSS 用日期，归档用 slug；详情页无标题 H1 仍视觉隐藏。
+
 ## 内容称呼怎么写
 
 `labels.diary` 是站内对「日记」类内容的统一称呼，默认随 `lang` 变化（`zh_CN` 为 `'日记'`，`en` 为 `'Diary'`）：
@@ -113,7 +131,7 @@ labels: {
 - 只影响内容称呼：详情页类型与面包屑、置顶/加密提示、归档、搜索文案、RSS 标题等。
 - 不控制首页大标题（`home.title`），也不控制导航；底部导航标题优先取 `bottomNav.items[].title`，其次跟随 `nav`。
 - 首页及分页页面的浏览器 `<title>` 使用 `labels.diary`，首页可见大标题仍用 `home.title`。
-- `home.showTitles` 只控制首页日记条目是否显示标题；详情/归档/RSS 不受影响（无标题的日记仍用日期回退）。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题。
+- `home.showTitles` 只控制首页日记条目是否显示标题；详情/归档/RSS 的标题回退由 `dailyTitleFallback` 控制。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题。
 - 必须是必填的非空字符串（schema 层 `min(1)`）。
 - 新增读取处时请用 `siteConfig.labels.diary`，不要再用 `home.title` 充当内容称呼。
 

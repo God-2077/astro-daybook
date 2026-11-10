@@ -53,7 +53,7 @@ export const siteConfig = defineSiteConfig({
 | `timezone` | `string` | `Asia/Shanghai` | IANA 时区；日期展示、RSS、sitemap 使用 |
 | `since` | `number` | 当前时区年份 | 建站年份 |
 | `theme` | `'light' \| 'dark' \| 'system'` | `'system'` | 默认主题；`system` 跟随 `prefers-color-scheme`，用户手动选择优先 |
-| `home` | `{ title, subtitle, showTitles }` | 按 `lang` 内置 | 首页可见大标题与副标题；`showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍按原规则显示标题（无标题时用日期回退）。只控制首页（含首页分页）的 H1，不决定内容称呼或浏览器标题。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题 |
+| `home` | `{ title, subtitle, showTitles }` | 按 `lang` 内置 | 首页可见大标题与副标题；`showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 的标题回退见 `dailyTitleFallback`。只控制首页（含首页分页）的 H1，不决定内容称呼或浏览器标题。单篇日记可用 frontmatter `hideHomeTitle: true` 单独关闭自己的首页条目标题 |
 | `labels` | `{ diary }` | 按 `lang` 内置 | 站内「日记」类内容的称呼：详情页类型/面包屑、置顶/加密提示、归档、搜索、RSS、首页 `<title>` 等；可与首页标题不同 |
 | `mdx.meting.api` | `string` | `https://163.hyc.moe/` | MDX 里 `meting.fetchMusic()` / `meting.player()` / `@mdx/client` 使用的 Meting-API 地址；必须是 http(s) URL，不能带 query/hash |
 | `mdx.meting.timeout` | `number` | `5000` | Meting 请求超时时间（毫秒），必须是正整数；构建期与浏览器客户端共用 |
@@ -69,6 +69,7 @@ export const siteConfig = defineSiteConfig({
 | `pagination.daily` | `number` | `20` | 首页每页日记数 |
 | `pagination.post` | `number` | `20` | 文章列表每页文章数 |
 | `archive` | `{ defaultType }` | `{ defaultType: 'articles' }` | 归档页默认类型；`'diary'` 时日记在前并默认选中 |
+| `dailyTitleFallback` | `{ detail, archive, feed }` | `{ detail: 'date', archive: 'slug', feed: 'date' }` | 无标题日记的回退标题；每项为 `'date' \| 'slug' \| 'untitled'` 或 `{ template }`，见下 |
 | `rss` | `RssConfig` | 见下 | RSS |
 | `comments` | `CommentsConfig` | 见下 | 评论 |
 | `seo` | `SeoConfig` | 见下 | OG/Twitter |
@@ -195,6 +196,24 @@ archive: {
 - 设为 `'diary'` 时，归档页默认选中日记，日记按钮排在文章按钮之前，统计与热力图也按日记显示。
 - 只改变默认选中项与按钮顺序；两组条目内部仍按日期从新到旧排序。
 - 默认状态由服务端直接输出，禁用 JavaScript 时也正确。
+
+### 无标题日记的标题回退 `dailyTitleFallback`
+
+日记的 `title` 可以省略，文章仍必填。没有标题时，按出现位置选择回退方式：
+
+```ts
+dailyTitleFallback: {
+  detail: 'date',
+  archive: 'slug',
+  feed: 'date',
+},
+```
+
+- `detail` 影响详情页的隐藏 H1、浏览器 `<title>`、面包屑、JSON-LD 与 Pagefind；`archive` 影响归档列表；`feed` 影响三份 RSS。
+- 每个位置可设为 `'date'`（站点时区下的日期，如 `2026-10-21`）、`'slug'`（如 `2026/10/21-night`）、`'untitled'`（当前语言的「未命名」文案），或 `{ template: '...' }`。
+- 模板占位符：`{date}`、`{slug}`、`{diary}`（即 `labels.diary`）、`{untitled}`；未知占位符会以 `dailyTitleFallback.<位置>.template` 中断构建，模板不能为空。
+- 默认值保持旧行为：详情页与 RSS 用日期，归档用 slug。
+- 只对日记生效；首页是否显示日记标题由 `home.showTitles` 与 frontmatter `hideHomeTitle` 控制。
 
 ### RSS
 
@@ -373,5 +392,6 @@ pnpm build      # 输出 dist/
 - 非法 URL、带 query/hash
 - 内部导航链接不是以 `/` 开头，或外链不是合法 http(s) URL
 - 分页不是正整数、`rss.limit` 超出 1..200
+- `dailyTitleFallback.*.template` 包含未知占位符，或模板为空
 - `taxonomy` 名称为空，或 slug 含 `/`、`?`、`#`
 - 内容 `permalink` 冲突（见 `docs/content.md`）

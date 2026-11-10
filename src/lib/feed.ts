@@ -61,7 +61,7 @@ export function itemFromEntry(entry: AnyEntry, options: { html?: string; fullTex
   const content = locked ? lockedBody : options.fullText && options.html ? absoluteLinks(options.html) : undefined;
 
   return {
-    title: getEntryTitle(entry),
+    title: getEntryTitle(entry, 'feed'),
     link,
     guid: link,
     pubDate: rssDate(entry.data.date, options.timeZone),

@@ -310,6 +310,9 @@ assert.ok(
 const diaryFeed = rssItems('feed-diary.xml');
 assert.ok(diaryFeed.some((item) => text(item.link).includes('/daily/')));
 assert.ok(diaryFeed.every((item) => text(item.link).includes('/daily/')));
+const untitledDiaryItem = diaryFeed.find((item) => text(item.link).includes('/daily/2026/10/21-night'));
+assert.ok(untitledDiaryItem, '无标题日记应进日记 RSS');
+assert.equal(text(untitledDiaryItem.title), '2026-10-21', '无标题日记 RSS 应使用日期回退标题');
 const postFeed = rssItems('feed-posts.xml');
 assert.ok(postFeed.every((item) => text(item.link).includes('/post/')));
 assert.ok(

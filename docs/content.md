@@ -37,7 +37,7 @@ hideHomeTitle: true # 可选，只关闭首页条目的标题
 
 日记没有 `categories` / `tags` / `keywords`；schema 是 strict 的，写了会构建报错。
 
-- `title` 可省略。没有标题时，详情页/RSS/Pagefind 用站点时区下的日期作为回退标题，归档列表用 slug；首页是否显示标题还受 `home.showTitles` 控制。
+- `title` 可省略。没有标题时的回退标题由 `site.ts` 的 `dailyTitleFallback` 按位置配置（默认详情页/RSS 用日期，归档列表用 slug）；首页是否显示标题还受 `home.showTitles` 控制。
 - `hideHomeTitle` 默认 `false`。设为 `true` 时只在该篇的首页条目里隐藏标题，正文、详情页、归档、RSS 与 Pagefind 都不受影响；它与站点级 `home.showTitles` 取与，两者都允许显示标题时才显示。
 - `category` 是日记自己的展示标签（如「日常」「一段回顾」），不会进入文章分类体系、不生成分类页/URL，也不作为 Pagefind 的 `category` 过滤条件。
 

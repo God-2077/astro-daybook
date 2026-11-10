@@ -15,7 +15,18 @@
  */
 
 import type { SiteLang } from '../i18n/languages';
-import type { ArchiveConfig, BottomNavItem, HomeConfig, LabelsConfig, NavItem, NavLinkItem, ThemeMode } from '../types/config';
+import type {
+  ArchiveConfig,
+  BottomNavItem,
+  DailyTitleFallbackConfig,
+  DailyTitleFallbackPosition,
+  DailyTitleFallbackStrategy,
+  HomeConfig,
+  LabelsConfig,
+  NavItem,
+  NavLinkItem,
+  ThemeMode,
+} from '../types/config';
 
 /**
  * 受支持的评论系统 provider 白名单。
@@ -173,6 +184,30 @@ export function defaultBottomNav(): BottomNavItem[] {
 
 /** 归档页默认展示内容类型。 */
 export const DEFAULT_ARCHIVE: ArchiveConfig = { defaultType: 'articles' };
+
+/** 无标题日记允许的内置回退策略。 */
+export const DAILY_TITLE_FALLBACK_STRATEGIES = [
+  'date',
+  'slug',
+  'untitled',
+] as const satisfies readonly DailyTitleFallbackStrategy[];
+
+/** 自定义回退模板支持的占位符。 */
+export const DAILY_TITLE_FALLBACK_PLACEHOLDERS = ['date', 'slug', 'diary', 'untitled'] as const;
+
+/** 无标题日记出现的位置。 */
+export const DAILY_TITLE_FALLBACK_POSITIONS = [
+  'detail',
+  'archive',
+  'feed',
+] as const satisfies readonly DailyTitleFallbackPosition[];
+
+/** 无标题日记的默认回退：详情与 RSS 用日期，归档用 slug。 */
+export const DEFAULT_DAILY_TITLE_FALLBACK: DailyTitleFallbackConfig = {
+  detail: 'date',
+  archive: 'slug',
+  feed: 'date',
+};
 
 /**
  * 默认主题偏好。

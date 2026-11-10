@@ -119,7 +119,7 @@ export const siteConfig = defineSiteConfig({
    * - 默认：按 `lang` 使用内置文案（`zh_CN` 为「日记 / 一篇一篇，日子就有了形状。」）。
    * - 注意：`subtitle` 为空时页面会回退到站点副标题/描述。
    * - 标题：`title` 只控制首页大标题；站内「日记」类内容的称呼见 `labels.diary`。
-   * - `showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍有自己的标题回退。
+   * - `showTitles: false` 只关闭首页日记条目的标题；详情/归档/RSS 的回退标题见 `dailyTitleFallback`。
    */
   //   home: {
   //     title: '日记',
@@ -208,6 +208,22 @@ export const siteConfig = defineSiteConfig({
    */
   // archive: {
   //   defaultType: 'diary',
+  // },
+
+  /**
+   * 无标题日记的回退标题（可选）。
+   *
+   * - `detail`：详情页标题（隐藏 H1 的文本、浏览器标题、面包屑、结构化数据与 Pagefind），默认 `'date'`。
+   * - `archive`：归档列表标题，默认 `'slug'`。
+   * - `feed`：RSS 条目标题，默认 `'date'`。
+   * - 每项可为 `'date'`、`'slug'`、`'untitled'`（当前语言的内置「未命名」文案），
+   *   或 `{ template: '...' }`；可用占位符为 `{date}`、`{slug}`、`{diary}`、`{untitled}`。
+   * - 只影响没有 `title` 的日记；文章标题仍必填。无标题日记的详情页 H1 保持视觉隐藏。
+   */
+  // dailyTitleFallback: {
+  //   detail: 'date',
+  //   archive: 'slug',
+  //   feed: 'date',
   // },
 
   /**
