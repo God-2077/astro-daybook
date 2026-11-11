@@ -1,4 +1,5 @@
 import { format } from '../i18n/format';
+import { articleTier, diaryScale, diaryTier } from '../lib/heat';
 import { readClientMessages } from './client-messages';
 
 const messages = readClientMessages();
@@ -365,11 +366,13 @@ function renderHeat(mode: 'articles' | 'diary'): void {
   html += '</div>';
 
   for (const year of data.years) {
+    const row = data.counts[mode]?.[String(year)] ?? [];
+    const scale = mode === 'diary' ? diaryScale(row) : null;
     html += `<div class="a-heat-row" data-year="${year}">`;
     html += `<span class="a-heat-year">${year}</span>`;
     for (const month of months) {
-      const count = data.counts[mode]?.[String(year)]?.[month - 1] ?? 0;
-      const tier = Math.min(count, 4);
+      const count = row[month - 1] ?? 0;
+      const tier = mode === 'articles' ? articleTier(count) : diaryTier(count, scale);
       const key = `${year}-${String(month).padStart(2, '0')}`;
       const label = format(count === 1 ? messages.heatLabelOne : messages.heatLabelOther, {
         year,
