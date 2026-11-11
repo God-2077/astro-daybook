@@ -37,7 +37,7 @@ function createFrame(provider: Provider, id: string, autoplay: boolean, title: s
   iframe.allow =
     provider === 'youtube'
       ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-      : 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+      : 'autoplay; picture-in-picture; encrypted-media';
   return iframe;
 }
 
