@@ -4362,8 +4362,8 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
 :is(.a-prose, .a-entry-text) .a-md-fold-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1em;
+  justify-content: flex-start;
+  gap: 0.2em;
   padding: 10px 12px;
   list-style: none;
   cursor: pointer;
@@ -4379,6 +4379,7 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   flex: none;
   width: 6px;
   height: 6px;
+  margin-left: auto;
   margin-right: 2px;
   border-right: 1.5px solid hsl(var(--muted-foreground));
   border-bottom: 1.5px solid hsl(var(--muted-foreground));
@@ -4408,7 +4409,7 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
 :is(.a-prose, .a-entry-text) .a-md-underline[data-type="wavy"] { text-decoration-style: wavy; }
 :is(.a-prose, .a-entry-text) .a-md-underline[data-type="dot"] { text-decoration-style: dotted; }
 :is(.a-prose, .a-entry-text) .a-md-underline[data-type="dashed"] { text-decoration-style: dashed; }
-:is(.a-prose, .a-entry-text) .a-md-underline[data-type="double"] { text-decoration-style: double; text-decoration-thickness: .18em; }
+:is(.a-prose, .a-entry-text) .a-md-underline[data-type="double"] { text-decoration-style: double; text-decoration-thickness: .08em; }
 
 :is(.a-prose, .a-entry-text) .a-md-kbd {
   display: inline-block;
