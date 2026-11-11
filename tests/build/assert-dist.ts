@@ -224,20 +224,21 @@ assert.match(
 );
 
 const mdxSyntax = read('post/mdx-syntax/index.html');
-assert.match(mdxSyntax, /<ol class="a-mdx-timeline">/, 'MDX 时间线应渲染为有序列表');
-assert.match(mdxSyntax, /<li class="a-mdx-timeline-item">/, 'MDX 时间线条目应渲染');
-assert.match(
-  mdxSyntax,
-  /<time class="a-mdx-timeline-date" datetime="2026-09-20">2026-09-20<\/time>/,
-  '时间线日期应使用 time[datetime]',
-);
-assert.match(mdxSyntax, /<p class="a-mdx-timeline-title">先统一 Markdown 管线<\/p>/, '时间线标题应渲染');
-assert.match(mdxSyntax, /来自 MDX：2/, 'MDX 表达式应在构建期求值');
-assert.match(mdxSyntax, /<h2 id="h-时间线"><svg class="a-h2-star"/, 'MDX 标题应复用 h2 ✦ 管线');
+assert.match(mdxSyntax, /例如今天是 2026 年/, 'MDX 表达式应在构建期求值');
+assert.match(mdxSyntax, /<h2 id="h-表达式与图片"><svg class="a-h2-star"/, 'MDX 标题应复用 h2 ✦ 管线');
 assert.match(mdxSyntax, /<figure class="a-figure"><div class="a-frame">/, 'MDX 单图应转 figure');
 assert.match(mdxSyntax, /class="a-img"[^>]*loading="lazy"/, 'MDX 图片应懒加载');
 assert.doesNotMatch(mdxSyntax, /<p>import /, 'MDX import 不应泄漏到正文');
 assert.doesNotMatch(mdxSyntax, /a-figure--raster/, 'MDX 页里的 SVG 图不应带限高类');
+
+const markdownExtensions = read('post/markdown-extensions/index.html');
+assert.match(markdownExtensions, /<ol class="a-timeline">/, '时间线指令应渲染为有序列表');
+assert.match(markdownExtensions, /<li class="a-tl-item">/, '时间线条目应渲染');
+assert.match(markdownExtensions, /<time datetime="2026-11-01">11\.01<\/time>/, '时间线日期应使用 time[datetime] 与 MM.DD 显示');
+assert.match(markdownExtensions, /<p class="a-tl-title">新的一天<\/p>/, '时间线标题应渲染');
+assert.match(markdownExtensions, /<p>早上起来，天气很好/, '时间线正文应渲染');
+assert.match(markdownExtensions, /<p class="a-tl-title">完成主题设计<\/p>/, '第二个事件标题应渲染');
+assert.doesNotMatch(markdownExtensions, /class="a-tl-title">旧组件退场/, '没有 title 的事件不应输出标题');
 
 const music = read('music/index.html');
 assert.match(music, /<section class="a-view" data-view="page"/, '独立页面应使用 PageLayout');
@@ -290,7 +291,7 @@ const hiddenSearchDaily = read('daily/2026-08-20-search-hidden/index.html');
 assert.doesNotMatch(hiddenSearchDaily, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 30, `Pagefind 页面集合应精确为 30 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 31, `Pagefind 页面集合应精确为 31 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);

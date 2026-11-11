@@ -92,6 +92,8 @@ function decorate(node: Blockquote, type: AlertType, lang: SiteLang): void {
 export function remarkAlerts(lang: SiteLang) {
   return (tree: Root): void => {
     visit(tree, 'blockquote', (node) => {
+      const hName = (node.data as AlertData | undefined)?.hName;
+      if (hName && hName !== 'blockquote') return;
       if (hasAlertClass(node)) return;
 
       const first = node.children[0];

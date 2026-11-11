@@ -186,3 +186,75 @@ test('invalid directive attributes reject the build', async () => {
     (error: Error) => error.message.includes('type 只能是'),
   );
 });
+
+test('timeline directives render dated events with optional titles', async () => {
+  const { html } = await renderMarkdown(
+    md(
+      '::::timeline',
+      '',
+      ':::event{date="2026-11-01" title="新的一天"}',
+      '早上起来，**天气很好**。',
+      ':::',
+      '',
+      ':::event{date="2026-11-03"}',
+      '没有标题的事件。',
+      ':::',
+      '',
+      '::::',
+    ),
+  );
+
+  assert.ok(html.includes('<ol class="a-timeline">'));
+  assert.ok(html.includes('<li class="a-tl-item">'));
+  assert.ok(html.includes('<div class="a-tl-date"><time datetime="2026-11-01">11.01</time><span>2026</span></div>'));
+  assert.ok(html.includes('<span class="a-tl-node" aria-hidden="true"></span>'));
+  assert.ok(html.includes('<p class="a-tl-title">新的一天</p>'));
+  assert.ok(html.includes('<strong>天气很好</strong>'));
+  assert.ok(html.includes('<p>没有标题的事件。</p>'));
+  assert.equal((html.match(/class="a-tl-title"/g) ?? []).length, 1, '没有 title 的事件不应输出标题');
+});
+
+test('timeline directives reject invalid structure and dates', async () => {
+  const rejects = (markdown: string, text: string) =>
+    assert.rejects(
+      () => renderMarkdown(markdown),
+      (error: Error) => error.message.includes(text),
+    );
+
+  await rejects(md('::::timeline', ':::event{title="无日期"}', '正文', ':::', '::::'), '缺少 date');
+  await rejects(md('::::timeline', ':::event{date="2026-02-30"}', '正文', ':::', '::::'), '不是有效日期');
+  await rejects(md(':::event{date="2026-11-01"}', '正文', ':::'), '只能放在 ::::timeline');
+  await rejects(md('::::timeline', '::::'), '至少需要一个');
+  await rejects(md('::::timeline', ':::note', '内容', ':::', '::::'), '只能放 :::event');
+  await rejects(md('::::timeline', ':::event[标签]{date="2026-11-01"}', '正文', ':::', '::::'), '不支持 [标题]');
+  await rejects(md('::::timeline', ':::event{date="2026-11-01" place="x"}', '正文', ':::', '::::'), '不支持属性');
+  await rejects(
+    md(
+      '::::timeline',
+      ':::event{date="2026-11-01"}',
+      '::::timeline',
+      ':::event{date="2026-11-02"}',
+      '嵌套',
+      ':::',
+      '::::',
+      ':::',
+      '::::',
+    ),
+    '不能嵌套',
+  );
+  await rejects(
+    md(
+      '::::timeline',
+      ':::event{date="2026-11-01"}',
+      '> ::::timeline',
+      '> :::event{date="2026-11-02"}',
+      '> 嵌套',
+      '> :::',
+      '> ::::',
+      ':::',
+      '::::',
+    ),
+    '不能嵌套',
+  );
+  await rejects(md(':::timeline', ':::event{date="2026-11-01"}', '正文', ':::', '::::'), '4 个冒号');
+});

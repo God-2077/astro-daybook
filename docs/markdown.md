@@ -1,6 +1,6 @@
 # Markdown 扩展
 
-Daybook 的正文管线在 CommonMark / GFM 之外提供了一小组扩展：脚注方括号、Mermaid 图表、remark-directive 三类指令、GitHub Alert、折叠块、仓库与视频嵌入、音乐播放器，以及几个行内文本指令。它们同时适用于 `.md` 与 `.mdx`；样式沿用日记纸页的 1px 细线、无圆角与无投影，只有 GitHub Alert 的语义色和音乐播放器是经确认的例外。
+Daybook 的正文管线在 CommonMark / GFM 之外提供了一小组扩展：脚注方括号、Mermaid 图表、remark-directive 三类指令、GitHub Alert、折叠块、时间线、仓库与视频嵌入、音乐播放器，以及几个行内文本指令。它们同时适用于 `.md` 与 `.mdx`；样式沿用日记纸页的 1px 细线、无圆角与无投影，只有 GitHub Alert 的语义色和音乐播放器是经确认的例外。
 
 指令由 [remark-directive](https://github.com/remarkjs/remark-directive) 解析，构建期转换成普通 HTML 结构；不依赖客户端 Markdown 解析。除音乐播放器、GitHub 卡片和视频外，大多数扩展在禁用 JavaScript 时仍保持可读。
 
@@ -195,6 +195,29 @@ sequenceDiagram
 
 生成细线分隔，默认使用正文的实线；`.red` 使用 `--rose` 的淡色实线，作为章节之间的轻量标记。
 
+## 时间线
+
+外层 `::::timeline` 用 4 个冒号，内层 `:::event` 用 3 个；`date` 必填（`YYYY-MM-DD`），`title` 可选。正文支持 Markdown。
+
+```markdown
+::::timeline
+
+:::event{date="2026-11-01" title="新的一天"}
+早上起来，天气很好。
+:::
+
+:::event{date="2026-11-03"}
+没有标题的事件。
+:::
+
+::::
+```
+
+- 日期在构建期校验为真实日历日期，渲染为左侧 `MM.DD` + 年份，并用 `<time datetime="YYYY-MM-DD">` 保留语义。
+- 一个时间线至少需要一个 `:::event`；`::::timeline` 里只能放 `:::event`，事件里不能再嵌套时间线或事件。
+- 外层只写 3 个冒号会让后续事件落到时间线之外；构建会直接报错并提示改为 4 个冒号。
+- 样式只写在 `src/styles/daybook.css` 的 `.a-timeline*`，详情页正文与首页日记摘要共用；≤767 收窄日期栏。
+
 ## 表格、分隔线与日记流
 
 - GFM 表格使用 1px 细线框，表头与单元格共享 `--border`；宽表格由 `.a-table-wrap` 横向滚动。
@@ -213,7 +236,7 @@ MDX 继承 `astro.config.ts` 的 `markdown.processor`，因此上面的脚注、
 ::github{repo="withastro/astro"}
 ```
 
-需要构建期能力（例如 `meting.player()`、`Figure`、`Timeline`）时继续使用 MDX 组件；两套写法可以混用，但不要把组件写在 `:::music` 的 YAML 内容里。
+需要构建期能力（例如 `meting.player()`、`Figure`）时继续使用 MDX 组件；两套写法可以混用，但不要把组件写在 `:::music` 的 YAML 内容里。
 
 ## 安全与外部请求
 

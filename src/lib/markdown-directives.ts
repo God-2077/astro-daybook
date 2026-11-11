@@ -1,6 +1,6 @@
 import type { Element, ElementContent, Root as HastRoot, Properties } from 'hast';
 import { fromHtml } from 'hast-util-from-html';
-import type { Code, Paragraph, PhrasingContent, Root, RootContent } from 'mdast';
+import type { Blockquote, Code, List, ListItem, Paragraph, PhrasingContent, Root, RootContent } from 'mdast';
 import type { Position } from 'unist';
 import { visit } from 'unist-util-visit';
 import type { VFile } from 'vfile';
@@ -43,7 +43,7 @@ interface MutableDirective {
   data?: DirectiveData;
 }
 
-const CONTAINER_NAMES = new Set(['note', 'tip', 'important', 'warning', 'caution', 'fold', 'music']);
+const CONTAINER_NAMES = new Set(['note', 'tip', 'important', 'warning', 'caution', 'fold', 'music', 'timeline', 'event']);
 const LEAF_NAMES = new Set(['github', 'youtube', 'bilibili', 'meting', 'hr']);
 const TEXT_NAMES = new Set(['underline', 'ins', 'kbd', 'hidden', 'abbr']);
 
@@ -63,6 +63,7 @@ const GITHUB_REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{6,20}$/;
 const BILIBILI_ID = /^BV[0-9A-Za-z]{10}$/;
 const METING_TOKEN = /^[A-Za-z0-9_-]+$/;
+const TIMELINE_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function mutable(node: unknown): MutableDirective {
   return node as MutableDirective;
@@ -120,6 +121,19 @@ function setHtmlNode(node: MutableDirective, html: string): void {
     hName: element.tagName,
     hProperties: element.properties,
     hChildren: element.children,
+  };
+}
+
+function htmlBlock(html: string): Paragraph {
+  const element = firstElement(html);
+  return {
+    type: 'paragraph',
+    children: [],
+    data: {
+      hName: element.tagName,
+      hProperties: element.properties,
+      hChildren: element.children,
+    },
   };
 }
 
@@ -428,6 +442,153 @@ function thematicBreak(node: MutableDirective): void {
   setHtmlNode(node, '<hr' + htmlAttrs({ class: classes.join(' ') }) + '>');
 }
 
+function findNestedTimeline(nodes: RootContent[]): MutableDirective | undefined {
+  for (const child of nodes) {
+    if (child.type === 'containerDirective') {
+      const directive = mutable(child);
+      if (directive.name === 'timeline' || directive.name === 'event') return directive;
+    }
+    const children = (child as { children?: unknown }).children;
+    if (Array.isArray(children)) {
+      const nested = findNestedTimeline(children as RootContent[]);
+      if (nested) return nested;
+    }
+  }
+  return undefined;
+}
+
+function timelineDate(value: string, file: VFile, node: MutableDirective): { iso: string; label: string; year: string } {
+  const match = TIMELINE_DATE.exec(value);
+  if (!match) fail(file, node, ':::event 的 date 必须写成 YYYY-MM-DD。');
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) {
+    fail(file, node, ':::event 的 date 不是有效日期：' + value + '。');
+  }
+  return { iso: value, label: match[2] + '.' + match[3], year: match[1] };
+}
+
+function setTimeline(node: MutableDirective, file: VFile): void {
+  const start = node.position?.start.offset;
+  if (start !== undefined) {
+    const raw = String(file.value ?? '');
+    const lineEnd = raw.indexOf('\n', start);
+    const opening = raw.slice(start, lineEnd === -1 ? undefined : lineEnd).trimStart();
+    if (!opening.startsWith('::::timeline')) {
+      fail(file, node, '::::timeline 的外层需要使用 4 个冒号，内层 :::event 使用 3 个。');
+    }
+  }
+  if (Object.keys(node.attributes ?? {}).length > 0) {
+    fail(file, node, '::::timeline 不接受属性。');
+  }
+
+  const { label, body } = containerParts(node);
+  if (label) fail(file, node, '::::timeline 不支持自定义标题。');
+  if (body.length === 0) fail(file, node, '::::timeline 至少需要一个 :::event。');
+
+  const items: ListItem[] = [];
+  for (const child of body) {
+    if (child.type !== 'containerDirective') {
+      fail(file, node, '::::timeline 里只能放 :::event。');
+    }
+    const event = mutable(child);
+    if (event.name === 'timeline') {
+      fail(file, event, '::::timeline 不能嵌套。');
+    }
+    if (event.name !== 'event') {
+      fail(file, event, '::::timeline 里只能放 :::event，不能放 :::' + event.name + '。');
+    }
+
+    const { label: eventLabel, body: eventBody } = containerParts(event);
+    if (eventLabel) {
+      fail(file, event, ':::event 不支持 [标题] 写法，请使用 title 属性。');
+    }
+    const unknown = Object.keys(event.attributes ?? {}).filter((name) => name !== 'date' && name !== 'title');
+    if (unknown.length > 0) {
+      fail(file, event, ':::event 不支持属性 ' + unknown.join('、') + '，只接受 date 与 title。');
+    }
+    const value = attr(event, 'date');
+    if (!value) fail(file, event, ':::event 缺少 date 属性。');
+    const parsed = timelineDate(value, file, event);
+
+    const nested = findNestedTimeline(eventBody);
+    if (nested) fail(file, nested, '::::timeline 与 :::event 不能嵌套。');
+
+    const title = attr(event, 'title');
+    const dateBlock = htmlBlock(
+      '<div' +
+        htmlAttrs({ class: 'a-tl-date' }) +
+        '><time' +
+        htmlAttrs({ datetime: parsed.iso }) +
+        '>' +
+        escapeHtml(parsed.label) +
+        '</time><span>' +
+        escapeHtml(parsed.year) +
+        '</span></div>',
+    );
+    const nodeBlock: Paragraph = {
+      type: 'paragraph',
+      children: [],
+      data: {
+        hName: 'span',
+        hProperties: { className: ['a-tl-node'], ariaHidden: 'true' },
+      },
+    };
+    const bodyBlock: Blockquote = {
+      type: 'blockquote',
+      children: eventBody as Blockquote['children'],
+      data: {
+        hName: 'div',
+        hProperties: { className: ['a-tl-body'] },
+      },
+    };
+    const contentChildren: Blockquote['children'] = [];
+    if (title) {
+      contentChildren.push({
+        type: 'paragraph',
+        children: [{ type: 'text', value: title }],
+        data: {
+          hName: 'p',
+          hProperties: { className: ['a-tl-title'] },
+        },
+      });
+    }
+    contentChildren.push(bodyBlock);
+    const content: Blockquote = {
+      type: 'blockquote',
+      children: contentChildren,
+      data: {
+        hName: 'div',
+        hProperties: { className: ['a-tl-content'] },
+      },
+    };
+
+    items.push({
+      type: 'listItem',
+      spread: false,
+      children: [dateBlock, nodeBlock, content],
+      data: {
+        hName: 'li',
+        hProperties: { className: ['a-tl-item'] },
+      },
+    });
+  }
+
+  const list = node as unknown as List;
+  list.type = 'list';
+  list.ordered = true;
+  list.start = 1;
+  list.spread = false;
+  list.children = items;
+  list.data = {
+    ...(list.data ?? {}),
+    hName: 'ol',
+    hProperties: { className: ['a-timeline'] },
+  };
+}
+
 function handleContainer(
   node: MutableDirective,
   file: VFile,
@@ -452,6 +613,11 @@ function handleContainer(
     case 'music':
       musicFromYaml(node, file, (key, params) => translate(lang, key, params));
       return;
+    case 'timeline':
+      setTimeline(node, file);
+      return;
+    case 'event':
+      return fail(file, node, ':::event 只能放在 ::::timeline 里。');
     default:
       warn(file, node, '未知容器指令 :::' + node.name + '，已按普通内容输出。');
       return replaceWithChildren(node, parent, index);

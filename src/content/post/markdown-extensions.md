@@ -226,6 +226,26 @@ flowchart LR
 > [!IMPORTANT]
 > 使用 `:kbd` 时注意不要与行内代码混淆：`kbd[Ctrl]` 是代码，:kbd[Ctrl] 才是指令。
 
+## 时间线
+
+外层用 4 个冒号，内层事件用 3 个；`date` 必填，`title` 可省略。
+
+::::timeline
+
+:::event{date="2026-11-01" title="新的一天"}
+早上起来，天气很好。把阳台的椅子搬到光里，读了几页书。
+:::
+
+:::event{date="2026-11-03" title="完成主题设计"}
+终于把首页的布局调整好了。日期栏、细线和留白都回到了该在的位置。
+:::
+
+:::event{date="2026-11-08"}
+旧组件退场，新的指令接管。写起来更轻，读起来也更安静。
+:::
+
+::::
+
 ## MDX 示例
 
 以下仅作语法展示，本文档本身为 `.md`：
@@ -238,4 +258,4 @@ flowchart LR
 ::github{repo="withastro/astro"}
 ```
 
-在 `.mdx` 中也可以继续使用 `meting.player()`、`Figure`、`Timeline` 等构建期组件；两套写法可以混用，但不要把组件写进 `:::music` 的 YAML 内容里。
+在 `.mdx` 中也可以继续使用 `meting.player()`、`Figure` 等构建期组件；两套写法可以混用，但不要把组件写进 `:::music` 的 YAML 内容里。

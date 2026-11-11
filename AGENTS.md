@@ -40,7 +40,7 @@ src/
 ├─ components/
 │  ├─ layout/    Header / Footer / Drawer / BottomNav / Sprite
 │  ├─ common/    PageHead / Icon / EmptyState / Pager
-│  ├─ content/   DiaryEntry / PostRow / FeedHead / Toc / LockedContent / MusicPlayer / Timeline
+│  ├─ content/   DiaryEntry / PostRow / FeedHead / Toc / LockedContent / MusicPlayer
 │  ├─ views/     HomeFeed / PostIndex
 │  ├─ search/    SearchPanel.tsx（React + Pagefind）
 │  └─ comments/  Comments.tsx（provider 路由）+ providers/（Twikoo / Waline / Artalk）
