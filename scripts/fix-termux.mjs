@@ -20,10 +20,10 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const TAG = '[daybook:termux]';
-const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
+// 仓库目录取自当前工作目录：脚本需要在仓库根目录运行（pnpm fix:termux 也是如此）。
+const ROOT = process.cwd();
 const PACKAGE_FILE = path.join(ROOT, 'package.json');
 const WORKSPACE_FILE = path.join(ROOT, 'pnpm-workspace.yaml');
 const LOCKFILE_FILE = path.join(ROOT, 'pnpm-lock.yaml');
@@ -689,7 +689,6 @@ function main() {
     warn(`当前平台是 ${process.platform}，仍会写入 Termux 修复配置（--force）。`);
   }
 
-  process.chdir(ROOT);
   info(`仓库目录：${ROOT}`);
 
   if (!existsSync(PACKAGE_FILE)) fail('找不到 package.json，请在 Daybook 仓库根目录运行。');
