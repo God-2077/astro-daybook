@@ -7,6 +7,7 @@ import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 
 import type { SiteLang } from '../i18n/languages';
+import { translate } from '../i18n/translate';
 import { remarkAlerts } from './markdown-alerts';
 import { rehypeFootnoteRefs, remarkDirectives, remarkMermaid } from './markdown-directives';
 
@@ -304,6 +305,46 @@ export function rehypeArticleProse() {
   };
 }
 
+/** 代码块右上角的复制按钮；按钮由客户端解除 hidden 后才可交互。 */
+function codeCopyButton(lang: SiteLang): HastNode {
+  const copy = translate(lang, 'markdown.copyCode');
+  return element(
+    'button',
+    {
+      type: 'button',
+      className: ['a-code-copy'],
+      'data-code-copy': '',
+      hidden: true,
+      ariaLabel: copy,
+      title: copy,
+      'data-label-copy': copy,
+      'data-label-copied': translate(lang, 'markdown.copied'),
+      'data-label-failed': translate(lang, 'markdown.copyFailed'),
+    },
+    [element('svg', { className: ['a-ico'], ariaHidden: 'true', focusable: 'false' }, [element('use', { href: '#i-copy' })])],
+  );
+}
+
+/** 把 Shiki 生成的 pre 包进 a-code-block，右上角留出复制按钮的位置。 */
+function wrapCodeBlocks(node: HastNode, lang: SiteLang): void {
+  const parentIsBlock = isElement(node) && hasClass(node, 'a-code-block');
+  const children = node.children ?? [];
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index];
+    if (!parentIsBlock && isElement(child) && child.tagName === 'pre' && !hasClass(child, 'a-mermaid-source')) {
+      children[index] = element('div', { className: ['a-code-block'] }, [codeCopyButton(lang), child]);
+      continue;
+    }
+    wrapCodeBlocks(child, lang);
+  }
+}
+
+export function rehypeCodeBlocks(lang: SiteLang) {
+  return (tree: HastNode): void => {
+    wrapCodeBlocks(tree, lang);
+  };
+}
+
 export function rehypeExternalLinks() {
   return (tree: HastNode): void => {
     markExternalLinks(tree);
@@ -335,6 +376,7 @@ export function createMarkdownPipeline(lang: SiteLang): {
         },
       ],
       [rehypeFootnoteRefs, lang],
+      [rehypeCodeBlocks, lang],
       rehypeArticleProse,
       rehypeExternalLinks,
     ],

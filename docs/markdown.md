@@ -33,8 +33,18 @@ sequenceDiagram
 
 - 图表在浏览器端按需加载 Mermaid 并渲染，首屏不会为没有图表的页面付出下载成本。
 - 明暗主题切换时自动按当前 CSS 令牌重绘，颜色跟随站点，不引入独立配色。
+- 图表右上角提供放大、缩小、恢复与全屏四个按钮；缩放范围 50%–300%，全屏后按钮切换为「退出全屏」。
+- 在图表上按住拖动可平移，鼠标滚轮以指针位置为中心缩放，触屏可双指捏合；按钮与手势共用同一缩放/平移状态，恢复按钮回到 100% 与居中。
+- 图表上的手势会接管页面滚动（`touch-action: none`），查看长页面时请从图表外滚动；缩放到 100% 时不会产生横向位移。
+- 全屏优先使用浏览器 Fullscreen API；浏览器拒绝时退化为固定的阅读层，按 Esc 或「退出全屏」关闭。
 - 渲染失败时保留源码并显示本地化错误提示；禁用 JavaScript 时也能直接看到源码。
-- 图表容器可横向滚动，避免窄屏溢出。
+- 窄屏下图表在视口内裁剪，不会撑破正文列；放大后通过拖动查看。
+
+## 代码块
+
+所有 Shiki 代码块在右上角带一个复制按钮：脚本加载后按钮出现，桌面端悬停或键盘聚焦时显示，触屏设备上常显。复制成功后按钮短暂切换为勾选图标，失败时显示失败状态。
+
+复制按钮不改变 Markdown 写法，也不依赖代码块语言；禁用 JavaScript 时按钮不出现，代码本身不受影响。
 
 ## 指令
 
@@ -64,7 +74,7 @@ sequenceDiagram
 > Urgent info that needs immediate user attention.
 ```
 
-支持 `NOTE`、`TIP`、`IMPORTANT`、`WARNING`、`CAUTION` 五种类型。每种类型都有独立的图标、标题色与左侧 4px 语义线；五色采用 GitHub 的语义色（蓝、绿、紫、黄、红），是本页纸主题里经确认的配色例外。
+支持 `NOTE`、`TIP`、`IMPORTANT`、`WARNING`、`CAUTION` 五种类型。每种类型都有独立的图标、标题色与左侧 4px 语义线；五色参考 Mizuki 的语义色相（蓝、青、紫、橙、红），浅色模式按纸面白底略降明度以保证可读性。这是本页纸主题里经确认的配色例外。
 
 也可以使用容器指令，并自定义标题：
 
@@ -95,7 +105,7 @@ sequenceDiagram
 ### GitHub 仓库
 
 ```markdown
-::github{repo="radishzzz/astro-theme-retypeset"}
+::github{repo="God-2077/astro-daybook"}
 ```
 
 - `repo` 必须是 `owner/repo`，只接受字母、数字、下划线、短横线和点。
@@ -109,11 +119,13 @@ sequenceDiagram
 ```markdown
 ::youtube{id="R401j1QAvEg"}
 
-::bilibili{id="BV1sK4y1Z7KG"}
+::bilibili{id="BV1sK4y1Z7KG" autoload="false"}
 ```
 
-- 初始只渲染封面/标签与播放按钮，点击后才创建 `iframe`，避免第三方脚本和视频在页面加载时一起下载。
-- YouTube 使用 `youtube-nocookie.com` 的嵌入地址，并申请自动播放；Bilibili 使用官方 `player.bilibili.com` 地址。
+- 构建期只输出封面、平台标签与播放按钮；点击封面后播放器才可见。
+- 默认在页面加载后预创建一个 `autoplay=0` 的 `iframe`，藏在封面下方；点击时复用该 `iframe` 切换到自动播放，不重复加载播放器页面。
+- `autoload="false"` 会跳过预创建，严格等点击后才创建 `iframe`；只接受 `true` / `false`，默认 `true`。
+- YouTube 使用 `youtube-nocookie.com` 的嵌入地址；Bilibili 使用官方 `player.bilibili.com` 地址。预加载的 Bilibili 播放器先静音，点击后取消静音。
 - YouTube 封面来自 `i.ytimg.com`；封面加载失败时自动隐藏图片，只保留标签与播放键。
 - 两个平台都需要访客能访问对应域名；禁用 JavaScript 时展示跳转原视频的普通链接。
 - `id` 会做白名单校验：YouTube 只接受 6–20 位的字母、数字、下划线与短横线，Bilibili 只接受 `BV` 开头的 12 位视频号。
@@ -159,15 +171,17 @@ sequenceDiagram
 :ins[插入文字]
 :underline[波浪下划线]{type="wavy"}
 :underline[描点下划线]{type="dot"}
+:underline[虚线下划线]{type="dashed"}
+:underline[双线下划线]{type="double"}
 :kbd[Ctrl]
 :hidden[默认模糊]
 :hidden[黑条遮挡]{type="background"}
 :abbr[HTML]{title="HyperText Markup Language"}
 ```
 
-- `:underline` 与 `:ins` 默认实线下划线；`type` 可选 `line`、`wavy`、`dot`。
+- `:underline` 与 `:ins` 默认实线下划线；`type` 可选 `line`、`wavy`、`dot`、`dashed`、`double`，分别对应实线、波浪线、描点线、虚线与双实线。
 - `:kbd` 渲染为等宽字体的键帽，适合同步键盘快捷键。
-- `:hidden` 默认用 `blur(4px)` 模糊，`type="background"` 用前景色黑条遮挡；鼠标悬停或键盘聚焦时显示。
+- `:hidden` 默认用 `blur(4px)` 模糊，`type="background"` 用前景色黑条遮挡；鼠标悬停、键盘聚焦，或点击 / Enter / Space 时切换显示。触屏设备没有 hover，以点击切换为准。
 - `:abbr` 使用 `title` 属性给出缩写全称；缺少 `title` 时只发出构建警告。
 - 隐藏文字只是阅读层的遮挡，**不是安全边界**：原文仍在 HTML、RSS 和 Pagefind 搜索索引中，敏感信息不要使用。
 
@@ -180,6 +194,12 @@ sequenceDiagram
 ```
 
 生成细线分隔，默认使用正文的实线；`.red` 使用 `--rose` 的淡色实线，作为章节之间的轻量标记。
+
+## 表格、分隔线与日记流
+
+- GFM 表格使用 1px 细线框，表头与单元格共享 `--border`；宽表格由 `.a-table-wrap` 横向滚动。
+- 正文普通 `---` 仍是主题原有的虚线；`::hr` 才生成实线分隔。
+- 首页日记摘要（`.a-entry-text`）与详情页正文（`.a-prose`）共用表格、`::hr` 与脚注样式，展开的日记不会出现另一套排版。
 
 ## MDX
 

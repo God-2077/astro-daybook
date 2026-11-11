@@ -461,6 +461,16 @@ function initPage(): void {
       initEmbeds();
     });
   }
+  if (document.querySelector('[data-code-copy]')) {
+    void import('./code-copy').then(({ initCodeCopy }) => {
+      initCodeCopy();
+    });
+  }
+  if (document.querySelector('.a-md-hidden')) {
+    void import('./hidden-text').then(({ initHiddenText }) => {
+      initHiddenText();
+    });
+  }
 }
 
 function onClick(event: MouseEvent): void {

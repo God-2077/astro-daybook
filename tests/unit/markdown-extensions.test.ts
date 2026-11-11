@@ -40,11 +40,11 @@ test('fold becomes a closed details element', async () => {
 });
 
 test('github leaf directives render a static card shell', async () => {
-  const { html } = await renderMarkdown('::github{repo="radishzzz/astro-theme-retypeset"}');
-  assert.ok(html.includes('<a class="a-md-github" data-github-card="" data-github-repo="radishzzz/astro-theme-retypeset"'));
-  assert.ok(html.includes('href="https://github.com/radishzzz/astro-theme-retypeset"'));
-  assert.ok(html.includes('class="a-md-github-owner">radishzzz</span>'));
-  assert.ok(html.includes('class="a-md-github-repo">astro-theme-retypeset</span>'));
+  const { html } = await renderMarkdown('::github{repo="God-2077/astro-daybook"}');
+  assert.ok(html.includes('<a class="a-md-github" data-github-card="" data-github-repo="God-2077/astro-daybook"'));
+  assert.ok(html.includes('href="https://github.com/God-2077/astro-daybook"'));
+  assert.ok(html.includes('class="a-md-github-owner">God-2077</span>'));
+  assert.ok(html.includes('class="a-md-github-repo">astro-daybook</span>'));
   assert.ok(html.includes('data-github-stars'));
   assert.ok(html.includes('data-github-forks'));
   assert.ok(html.includes('data-github-license'));
@@ -59,6 +59,7 @@ test('youtube and bilibili leaf directives render click-to-play facades', async 
     youtube.includes('class="a-md-embed-facade" data-embed-facade="" href="https://www.youtube.com/watch?v=R401j1QAvEg"'),
   );
   assert.ok(youtube.includes('https://i.ytimg.com/vi/R401j1QAvEg/hqdefault.jpg'));
+  assert.ok(!youtube.includes('data-embed-autoload'));
   assert.ok(!youtube.includes('<iframe'));
 
   const bilibili = (await renderMarkdown('::bilibili{id="BV1sK4y1Z7KG"}')).html;
@@ -66,6 +67,13 @@ test('youtube and bilibili leaf directives render click-to-play facades', async 
   assert.ok(bilibili.includes('href="https://www.bilibili.com/video/BV1sK4y1Z7KG"'));
   assert.ok(bilibili.includes('class="a-md-embed-id">BV1sK4y1Z7KG</span>'));
   assert.ok(!bilibili.includes('<iframe'));
+});
+
+test('youtube autoload=false delays iframe creation until a click', async () => {
+  const { html } = await renderMarkdown('::youtube{id="R401j1QAvEg" autoload="false"}');
+  assert.ok(html.includes('data-embed-autoload="false"'));
+  assert.ok(html.includes('class="a-md-embed-facade"'));
+  assert.ok(!html.includes('<iframe'));
 });
 
 test('meting leaf directive renders the shared music player shell', async () => {
@@ -103,23 +111,43 @@ test('music container reads a YAML playlist and renders tracks', async () => {
 
 test('inline directives render underline, keyboard, hidden text and abbreviation', async () => {
   const { html } = await renderMarkdown(
-    ':underline[下划线] :ins[波浪]{type="wavy"} :ins[描点]{type="dot"} :kbd[Ctrl] :hidden[隐藏] :hidden[黑条]{type="background"} :abbr[HTML]{title="HyperText Markup Language"}',
+    ':underline[下划线] :ins[波浪]{type="wavy"} :ins[描点]{type="dot"} :ins[虚线]{type="dashed"} :ins[双线]{type="double"} :kbd[Ctrl] :hidden[隐藏] :hidden[黑条]{type="background"} :abbr[HTML]{title="HyperText Markup Language"}',
   );
   assert.ok(html.includes('<u data-type="line" class="a-md-underline">下划线</u>'));
   assert.ok(html.includes('<ins data-type="wavy" class="a-md-underline">波浪</ins>'));
   assert.ok(html.includes('<ins data-type="dot" class="a-md-underline">描点</ins>'));
+  assert.ok(html.includes('<ins data-type="dashed" class="a-md-underline">虚线</ins>'));
+  assert.ok(html.includes('<ins data-type="double" class="a-md-underline">双线</ins>'));
   assert.ok(html.includes('<kbd class="a-md-kbd">Ctrl</kbd>'));
   assert.ok(html.includes('<span data-type="blur" tabindex="0" class="a-md-hidden">隐藏</span>'));
   assert.ok(html.includes('<span data-type="background" tabindex="0" class="a-md-hidden">黑条</span>'));
   assert.ok(html.includes('<abbr title="HyperText Markup Language" class="a-md-abbr">HTML</abbr>'));
 });
 
+test('code blocks get a wrapper and a copy button', async () => {
+  const { html } = await renderMarkdown(md('\u0060\u0060\u0060js', 'const x = 1;', '\u0060\u0060\u0060'));
+  assert.ok(html.startsWith('<div class="a-code-block"><button type="button" class="a-code-copy" data-code-copy="" hidden'));
+  assert.ok(html.includes('aria-label="复制代码"'));
+  assert.ok(html.includes('data-label-copied="已复制"'));
+  assert.ok(html.includes('</button><pre class="astro-code'));
+  assert.ok(html.includes('<code>'));
+});
+
 test('mermaid fences become figures with the source kept for the client', async () => {
   const { html } = await renderMarkdown(md('```mermaid', 'sequenceDiagram', '    A->>B: Hi', '```'));
   assert.ok(html.startsWith('<figure class="a-mermaid" data-mermaid="">'));
+  assert.ok(html.includes('<div class="a-mermaid-tools" data-mermaid-tools="" hidden>'));
+  assert.ok(html.includes('data-mermaid-action="zoom-in"'));
+  assert.ok(html.includes('data-mermaid-action="zoom-out"'));
+  assert.ok(html.includes('data-mermaid-action="reset"'));
+  assert.ok(html.includes('data-mermaid-action="fullscreen"'));
+  assert.ok(html.includes('data-label-fullscreen="全屏查看"'));
+  assert.ok(html.includes('data-label-close="退出全屏"'));
   assert.ok(html.includes('<pre class="a-mermaid-source">sequenceDiagram'));
   assert.ok(html.includes('A->>B: Hi</pre>'));
-  assert.ok(html.includes('<div class="a-mermaid-canvas"></div>'));
+  assert.ok(
+    html.includes('<div class="a-mermaid-viewport" data-mermaid-viewport=""><div class="a-mermaid-canvas"></div></div>'),
+  );
   assert.ok(html.includes('<p class="a-mermaid-error" hidden>'));
   assert.ok(!html.includes('language-mermaid'));
   assert.ok(!html.includes('astro-code'));
@@ -148,5 +176,13 @@ test('invalid directive attributes reject the build', async () => {
   await assert.rejects(
     () => renderMarkdown(md(':::github{repo="a/b"}', ':::')),
     (error: Error) => error.message.includes('叶子'),
+  );
+  await assert.rejects(
+    () => renderMarkdown('::youtube{id="R401j1QAvEg" autoload="yes"}'),
+    (error: Error) => error.message.includes('autoload 只接受'),
+  );
+  await assert.rejects(
+    () => renderMarkdown(':underline[文本]{type="dotted"}'),
+    (error: Error) => error.message.includes('type 只能是'),
   );
 });

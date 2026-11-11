@@ -22,12 +22,13 @@
   --rose: 350.9 49% 50%;              /* #BE4154  文字粉 5.0:1 */
   --ring: 346.8 77.2% 49.8%;          /* #E11D48  焦点环 */
 
-  /* GitHub Alert 五色：用户指定的 GitHub 语义色，只用于 alert 图标与左边线 */
-  --alert-note: 212 92% 45%;          /* #0969DA */
-  --alert-tip: 137 66% 30%;           /* #1A7F37 */
-  --alert-important: 263 70% 59%;     /* #8250DF */
-  --alert-warning: 41 100% 30%;       /* #9A6700 */
-  --alert-caution: 356 72% 47%;       /* #CF222E */
+  /* GitHub Alert 五色：参考 Mizuki 的语义色相（蓝 / 青 / 紫 / 橙 / 红），
+     浅色模式按纸面白底略降明度，保证 16px 标题与正文的可读性。 */
+  --alert-note: 210 85% 50%;
+  --alert-tip: 172 90% 30%;
+  --alert-important: 275 60% 58%;
+  --alert-warning: 29 75% 45%;
+  --alert-caution: 359 70% 50%;
 
   /* 按钮：见 §2.5 */
   --btn-bg: 350.9 49% 50%;            /* #BE4154 */
@@ -78,11 +79,11 @@
   --btn-bg: 350 77% 70%;
   --btn-fg: 256 18% 13%;
 
-  --alert-note: 211 93% 58%;          /* #2F81F7 */
-  --alert-tip: 137 55% 49%;           /* #3FB950 */
-  --alert-important: 260 89% 71%;     /* #A371F7 */
-  --alert-warning: 42 68% 48%;        /* #D29922 */
-  --alert-caution: 4 93% 63%;         /* #F85149 */
+  --alert-note: 209 100% 69%;
+  --alert-tip: 173 100% 40%;
+  --alert-important: 275 75% 76%;
+  --alert-warning: 29 83% 61%;
+  --alert-caution: 0 85% 62%;
 
   --shadow-card: 0 5px 15px rgba(0, 0, 0, .35);
   --page-bg: linear-gradient(to top, #15121D 0, #1D1A27 768px);
@@ -1850,6 +1851,7 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   border-radius: 2px;
   background: hsl(var(--muted));
   color: hsl(var(--card-foreground));
+  overflow-wrap: anywhere;
 }
 .a-prose pre {
   margin: 1.6em 0;
@@ -3435,43 +3437,54 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
   color: hsl(var(--muted-foreground));
 }
 :is(.a-prose, .a-entry-text) mark { background: hsl(var(--pink-decor) / .22); color: inherit; padding: 0 .12em; }
-:is(.a-prose, .a-entry-text) u { text-decoration-color: hsl(var(--rose) / .55); text-underline-offset: .18em; }
+:is(.a-prose, .a-entry-text) u { text-decoration-thickness: .09em; text-decoration-color: hsl(var(--rose) / .85); text-underline-offset: .18em; }
 :is(.a-prose, .a-entry-text) sub,
 :is(.a-prose, .a-entry-text) sup { font-size: .72em; line-height: 0; }
-.a-prose table {
+:is(.a-prose, .a-entry-text) table {
   width: 100%;
   margin: 1.6em 0;
+  border: 1px solid hsl(var(--border));
   border-collapse: collapse;
   font-size: 15px;
   line-height: 1.6;
 }
-.a-prose th,
-.a-prose td {
+:is(.a-prose, .a-entry-text) th,
+:is(.a-prose, .a-entry-text) td {
   padding: 9px 12px;
-  border-bottom: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border));
   text-align: left;
   vertical-align: top;
 }
-.a-prose th {
+:is(.a-prose, .a-entry-text) th {
   font-family: var(--font-bold);
   font-size: 12.5px;
   font-weight: 700;
   letter-spacing: .06em;
   color: hsl(var(--muted-foreground));
 }
-.a-prose td.is-center, .a-prose th.is-center { text-align: center; }
-.a-prose td.is-right, .a-prose th.is-right { text-align: right; }
+:is(.a-prose, .a-entry-text) td.is-center,
+:is(.a-prose, .a-entry-text) th.is-center { text-align: center; }
+:is(.a-prose, .a-entry-text) td.is-right,
+:is(.a-prose, .a-entry-text) th.is-right { text-align: right; }
 /* GFM 表格用 align="" 属性表达列对齐，这里补齐原型 is-center / is-right 的效果。 */
-.a-prose td[align="center"], .a-prose th[align="center"] { text-align: center; }
-.a-prose td[align="right"], .a-prose th[align="right"] { text-align: right; }
+:is(.a-prose, .a-entry-text) td[align="center"],
+:is(.a-prose, .a-entry-text) th[align="center"] { text-align: center; }
+:is(.a-prose, .a-entry-text) td[align="right"],
+:is(.a-prose, .a-entry-text) th[align="right"] { text-align: right; }
 /* 宽表格在纸面上横向滚动：由 rehypeArticleProse 包一层 .a-table-wrap。 */
-.a-prose .a-table-wrap {
+:is(.a-prose, .a-entry-text) .a-table-wrap {
   margin: 1.6em 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.a-prose .a-table-wrap table { margin: 0; }
-.a-prose hr { border: 0; border-top: 1px dashed hsl(var(--border)); background: none; height: 0; margin: 2.4em 0; }
+:is(.a-prose, .a-entry-text) .a-table-wrap table { margin: 0; }
+:is(.a-prose, .a-entry-text) hr {
+  border: 0;
+  border-top: 1px dashed hsl(var(--border));
+  background: none;
+  height: 0;
+  margin: 2.4em 0;
+}
 /* 任务列表：复选框悬挂在左侧，文字对齐无序列表的内容边；嵌套层沿用 ul 的 1.4em 缩进。 */
 :is(.a-prose, .a-entry-text) .a-task-list { list-style: none; }
 :is(.a-prose, .a-entry-text) .a-task-list input[type="checkbox"] {
@@ -3497,7 +3510,7 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
   border-bottom: 1.6px solid hsl(var(--rose));
   transform: rotate(40deg);
 }
-.a-prose .a-footnotes {
+:is(.a-prose, .a-entry-text) .a-footnotes {
   margin-top: 2.4em;
   padding-top: 1em;
   border-top: 1px dotted hsl(var(--border));
@@ -3505,22 +3518,22 @@ html.dark .a-fold-toggle .a-chev { color: hsl(var(--rose)); }
   line-height: 1.85;
   color: hsl(var(--muted-foreground));
 }
-.a-prose .a-footnotes ol { padding-left: 1.4em; }
-.a-prose .a-fn-ref,
-.a-prose [data-footnote-ref] {
+:is(.a-prose, .a-entry-text) .a-footnotes ol { padding-left: 1.4em; }
+:is(.a-prose, .a-entry-text) .a-fn-ref,
+:is(.a-prose, .a-entry-text) [data-footnote-ref] {
   text-decoration: none;
   font-size: .74em;
   vertical-align: .35em;
   color: hsl(var(--rose));
   padding: 0 .12em;
 }
-.a-prose .a-fn-back,
-.a-prose [data-footnote-backref] {
+:is(.a-prose, .a-entry-text) .a-fn-back,
+:is(.a-prose, .a-entry-text) [data-footnote-backref] {
   text-decoration: none;
   color: hsl(var(--muted-foreground));
   margin-left: .3em;
 }
-.a-prose .a-footnotes li:target { background: hsl(var(--accent)); }
+:is(.a-prose, .a-entry-text) .a-footnotes li:target { background: hsl(var(--accent)); }
 /* MDX 时间线：沿用日期刻度的细线 + ✦ 节点语言，类名独立避免与日记日期栏冲突。 */
 .a-prose .a-mdx-timeline {
   --a-mdx-rail: 104px;
@@ -4248,6 +4261,61 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   font-variant-numeric: tabular-nums;
 }
 
+/* 代码块复制：按钮由 rehypeCodeBlocks 预先插入，脚本加载后取消 hidden。
+ * 默认淡出，悬停 / 键盘聚焦 / 触屏设备上出现。 */
+:is(.a-prose, .a-entry-text) .a-code-block {
+  position: relative;
+  margin: 1.6em 0;
+}
+:is(.a-prose, .a-entry-text) .a-code-block > pre { margin: 0; }
+:is(.a-prose, .a-entry-text) .a-code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  background: hsl(var(--card) / .94);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s var(--ease), color .16s var(--ease);
+}
+:is(.a-prose, .a-entry-text) .a-code-copy[hidden] { display: none; }
+:is(.a-prose, .a-entry-text) .a-code-copy .a-ico {
+  width: 14px;
+  height: 14px;
+}
+:is(.a-prose, .a-entry-text) .a-code-block:hover > .a-code-copy,
+:is(.a-prose, .a-entry-text) .a-code-block:focus-within > .a-code-copy,
+:is(.a-prose, .a-entry-text) .a-code-copy:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+:is(.a-prose, .a-entry-text) .a-code-copy[data-copied="copied"] {
+  border-color: hsl(var(--rose) / .45);
+  color: hsl(var(--rose));
+}
+:is(.a-prose, .a-entry-text) .a-code-copy[data-copied="failed"] {
+  border-color: hsl(var(--alert-caution) / .45);
+  color: hsl(var(--alert-caution));
+}
+.a-copy-buffer {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 :is(.a-prose, .a-entry-text) .a-md-alert {
   margin: 1.6em 0;
   padding: 0 0 0 16px;
@@ -4333,12 +4401,14 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
 
 :is(.a-prose, .a-entry-text) .a-md-underline {
   text-decoration-line: underline;
-  text-decoration-thickness: 0.08em;
-  text-decoration-color: hsl(var(--rose) / .55);
+  text-decoration-thickness: .11em;
+  text-decoration-color: hsl(var(--rose) / .9);
   text-underline-offset: .18em;
 }
 :is(.a-prose, .a-entry-text) .a-md-underline[data-type="wavy"] { text-decoration-style: wavy; }
 :is(.a-prose, .a-entry-text) .a-md-underline[data-type="dot"] { text-decoration-style: dotted; }
+:is(.a-prose, .a-entry-text) .a-md-underline[data-type="dashed"] { text-decoration-style: dashed; }
+:is(.a-prose, .a-entry-text) .a-md-underline[data-type="double"] { text-decoration-style: double; text-decoration-thickness: .18em; }
 
 :is(.a-prose, .a-entry-text) .a-md-kbd {
   display: inline-block;
@@ -4371,8 +4441,10 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   background: hsl(var(--foreground));
   color: transparent;
 }
-:is(.a-prose, .a-entry-text) .a-md-hidden:focus-visible { filter: none; }
-:is(.a-prose, .a-entry-text) .a-md-hidden[data-type="background"]:focus-visible {
+:is(.a-prose, .a-entry-text) .a-md-hidden:focus-visible,
+:is(.a-prose, .a-entry-text) .a-md-hidden[data-revealed] { filter: none; }
+:is(.a-prose, .a-entry-text) .a-md-hidden[data-type="background"]:focus-visible,
+:is(.a-prose, .a-entry-text) .a-md-hidden[data-type="background"][data-revealed] {
   background: hsl(var(--accent));
   color: inherit;
 }
@@ -4561,11 +4633,53 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
 }
 
 :is(.a-prose, .a-entry-text) .a-mermaid {
+  position: relative;
   margin: 1.6em 0;
   padding: 12px;
   border: 1px solid hsl(var(--border));
   background: hsl(var(--card));
-  overflow-x: auto;
+  overflow: hidden;
+}
+/* 视口负责裁剪和平移手势；touch-action: none 让双指缩放不被页面滚动抢走。 */
+:is(.a-prose, .a-entry-text) .a-mermaid-viewport {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-panning="true"] .a-mermaid-viewport { cursor: grabbing; }
+/* 图表工具条：渲染成功后由 mermaid.ts 取消 hidden。 */
+:is(.a-prose, .a-entry-text) .a-mermaid-tools {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid-tools[hidden] { display: none; }
+:is(.a-prose, .a-entry-text) .a-mermaid-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  background: hsl(var(--card) / .94);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color .16s var(--ease);
+}
+:is(.a-prose, .a-entry-text) .a-mermaid-tool .a-ico {
+  width: 14px;
+  height: 14px;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid-tool:disabled {
+  opacity: .4;
+  cursor: default;
 }
 :is(.a-prose, .a-entry-text) .a-mermaid-source {
   margin: 0;
@@ -4583,13 +4697,23 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
 :is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-state="done"] .a-mermaid-source { display: none; }
 :is(.a-prose, .a-entry-text) .a-mermaid-canvas {
   display: flex;
+  align-items: center;
   justify-content: center;
-  overflow-x: auto;
+  width: 100%;
+  transform-origin: center center;
+  transition: transform .18s var(--ease);
+  will-change: transform;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-panning="true"] .a-mermaid-canvas { transition: none; }
+:is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-state="done"] .a-mermaid-canvas {
+  min-height: 180px;
+  margin-top: 30px;
 }
 :is(.a-prose, .a-entry-text) .a-mermaid-canvas:empty { display: none; }
 :is(.a-prose, .a-entry-text) .a-mermaid-canvas svg {
   max-width: 100%;
   height: auto;
+  -webkit-user-drag: none;
 }
 :is(.a-prose, .a-entry-text) .a-mermaid-error {
   margin: 10px 0 0;
@@ -4597,6 +4721,50 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   line-height: 1.7;
   color: hsl(var(--rose));
 }
+
+/* 全屏阅读：优先使用 Fullscreen API；被浏览器拒绝时退化为固定阅读层。 */
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 24px;
+  border: 0;
+  background: hsl(var(--background));
+  overflow: hidden;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded { z-index: 120; }
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-tools,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-tools {
+  top: 16px;
+  right: 16px;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-viewport,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-viewport {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-canvas,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-canvas {
+  width: 100%;
+  margin-top: 0;
+  align-items: center;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-canvas svg,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-canvas svg {
+  max-height: calc(100vh - 120px);
+}
+html.is-mermaid-locked { overflow: hidden; }
 
 :is(.a-prose, .a-entry-text) hr.a-md-hr { border-top-style: solid; }
 :is(.a-prose, .a-entry-text) hr.a-md-hr.red { border-top-color: hsl(var(--rose) / .5); }
@@ -4613,6 +4781,22 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
     background: hsl(var(--accent));
   }
   :is(.a-prose, .a-entry-text) .a-md-embed-facade:hover .a-md-embed-poster { opacity: .96; }
+  :is(.a-prose, .a-entry-text) .a-code-copy:hover {
+    border-color: hsl(var(--rose) / .45);
+    color: hsl(var(--rose));
+  }
+  :is(.a-prose, .a-entry-text) .a-mermaid-tool:not(:disabled):hover {
+    border-color: hsl(var(--rose) / .45);
+    color: hsl(var(--rose));
+  }
+}
+
+/* 触屏没有 hover：复制按钮保持可见，点按即可复制。 */
+@media (hover: none) {
+  :is(.a-prose, .a-entry-text) .a-code-copy {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 @media (max-width: 767px) {
@@ -4644,6 +4828,43 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   }
   :is(.a-prose, .a-entry-text) .a-mermaid { padding: 10px; }
   :is(.a-prose, .a-entry-text) .a-mermaid-source { font-size: 12px; }
+  :is(.a-prose, .a-entry-text) .a-mermaid-tools {
+    top: 6px;
+    right: 6px;
+    gap: 3px;
+  }
+  :is(.a-prose, .a-entry-text) .a-mermaid-tool {
+    width: 26px;
+    height: 26px;
+  }
+  :is(.a-prose, .a-entry-text) .a-mermaid-tool .a-ico {
+    width: 13px;
+    height: 13px;
+  }
+  :is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-state="done"] .a-mermaid-canvas {
+    min-height: 150px;
+    margin-top: 28px;
+  }
+  :is(.a-prose, .a-entry-text) .a-code-copy {
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+  }
+  :is(.a-prose, .a-entry-text) .a-code-block > pre { padding: 14px; }
+  :is(.a-prose, .a-entry-text) .a-mermaid:fullscreen,
+  :is(.a-prose, .a-entry-text) .a-mermaid.is-expanded { padding: 16px; }
+  :is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-canvas svg,
+  :is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-canvas svg {
+    max-height: calc(100vh - 96px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.a-prose, .a-entry-text) .a-code-copy,
+  :is(.a-prose, .a-entry-text) .a-md-hidden,
+  :is(.a-prose, .a-entry-text) .a-mermaid-tool,
+  :is(.a-prose, .a-entry-text) .a-mermaid-canvas { transition: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

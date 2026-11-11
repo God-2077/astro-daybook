@@ -57,7 +57,7 @@ const ALERT_TITLE_KEYS: Record<AlertType, MessageKey> = {
   caution: 'markdown.alertCaution',
 };
 
-const UNDERLINE_TYPES = new Set(['line', 'wavy', 'dot']);
+const UNDERLINE_TYPES = new Set(['line', 'wavy', 'dot', 'dashed', 'double']);
 const HIDDEN_TYPES = new Set(['blur', 'background']);
 const GITHUB_REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{6,20}$/;
@@ -328,6 +328,12 @@ function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provide
     fail(file, node, '::bilibili 的 id 必须是 BV 号。');
   }
 
+  const autoloadValue = attr(node, 'autoload');
+  if (autoloadValue !== undefined && autoloadValue !== 'true' && autoloadValue !== 'false') {
+    fail(file, node, '::' + provider + ' 的 autoload 只接受 true 或 false。');
+  }
+  const autoload = autoloadValue !== 'false';
+
   const label = provider === 'youtube' ? tr('markdown.youtubeLabel') : tr('markdown.bilibiliLabel');
   const play = provider === 'youtube' ? tr('markdown.youtubePlay') : tr('markdown.bilibiliPlay');
   const href = provider === 'youtube' ? 'https://www.youtube.com/watch?v=' + id : 'https://www.bilibili.com/video/' + id;
@@ -371,6 +377,7 @@ function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provide
       'data-embed-provider': provider,
       'data-embed-id': id,
       'data-embed-title': play,
+      'data-embed-autoload': autoload ? undefined : 'false',
     }) +
     '>' +
     facade +
@@ -496,7 +503,7 @@ function handleText(
     case 'underline':
     case 'ins': {
       const type = attr(node, 'type') ?? 'line';
-      if (!UNDERLINE_TYPES.has(type)) fail(file, node, ':' + node.name + ' 的 type 只能是 line、wavy 或 dot。');
+      if (!UNDERLINE_TYPES.has(type)) fail(file, node, ':' + node.name + ' 的 type 只能是 line、wavy、dot、dashed 或 double。');
       setInlineNode(node, node.name === 'ins' ? 'ins' : 'u', 'a-md-underline', { dataType: type });
       return;
     }
@@ -575,16 +582,47 @@ export function rehypeFootnoteRefs(lang: SiteLang) {
   };
 }
 
+function mermaidTool(action: string, icon: string, label: string, extra: Record<string, string> = {}): string {
+  return (
+    '<button type="button"' +
+    htmlAttrs({
+      class: 'a-mermaid-tool',
+      'data-mermaid-action': action,
+      'aria-label': label,
+      title: label,
+      ...extra,
+    }) +
+    '>' +
+    iconSvg(icon) +
+    '</button>'
+  );
+}
+
 export function remarkMermaid(lang: SiteLang) {
   return (tree: Root): void => {
     visit(tree, 'code', (node: Code, index, parent) => {
       if (node.lang !== 'mermaid' || !parent || index === undefined) return;
+      const fullscreen = translate(lang, 'markdown.mermaidFullscreen');
+      const close = translate(lang, 'markdown.mermaidClose');
+      const tools =
+        '<div class="a-mermaid-tools" data-mermaid-tools hidden>' +
+        mermaidTool('zoom-in', 'i-plus', translate(lang, 'markdown.mermaidZoomIn')) +
+        mermaidTool('zoom-out', 'i-minus', translate(lang, 'markdown.mermaidZoomOut')) +
+        mermaidTool('reset', 'i-reset', translate(lang, 'markdown.mermaidReset')) +
+        mermaidTool('fullscreen', 'i-expand', fullscreen, {
+          'data-label-fullscreen': fullscreen,
+          'data-label-close': close,
+        }) +
+        '</div>';
       const html =
         '<figure class="a-mermaid" data-mermaid>' +
+        tools +
         '<pre class="a-mermaid-source">' +
         escapeHtml(node.value) +
         '</pre>' +
+        '<div class="a-mermaid-viewport" data-mermaid-viewport>' +
         '<div class="a-mermaid-canvas"></div>' +
+        '</div>' +
         '<p class="a-mermaid-error" hidden>' +
         escapeHtml(translate(lang, 'markdown.mermaidError')) +
         '</p>' +
