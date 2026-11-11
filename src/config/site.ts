@@ -110,7 +110,7 @@ export const siteConfig = defineSiteConfig({
    * - 注意：这里只作为首次访问的默认值；用户在抽屉里手动选择后会写入
    *   `localStorage['daybook-theme']` 并优先于该配置。
    */
-  theme: 'system',
+  theme: 'light',
 
   /**
    * 首页大标题、副标题与标题显示开关（可选）。
