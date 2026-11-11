@@ -122,12 +122,12 @@ sequenceDiagram
 ::bilibili{id="BV1sK4y1Z7KG" autoload="false"}
 ```
 
-- 构建期只输出封面、平台标签与播放按钮；点击封面后播放器才可见。
-- 默认在页面加载后预创建一个 `autoplay=0` 的 `iframe`，藏在封面下方；点击时复用该 `iframe` 切换到自动播放，不重复加载播放器页面。
-- `autoload="false"` 会跳过预创建，严格等点击后才创建 `iframe`；只接受 `true` / `false`，默认 `true`。
-- YouTube 使用 `youtube-nocookie.com` 的嵌入地址；Bilibili 使用官方 `player.bilibili.com` 地址。预加载的 Bilibili 播放器先静音，点击后取消静音。
-- YouTube 封面来自 `i.ytimg.com`；封面加载失败时自动隐藏图片，只保留标签与播放键。
-- 两个平台都需要访客能访问对应域名；禁用 JavaScript 时展示跳转原视频的普通链接。
+- 构建期只输出封面、平台标签与播放按钮；禁用 JavaScript 时它是指向原视频的普通链接。
+- 默认在页面脚本加载后立即创建 `autoplay=0` 的 `iframe`，并移除封面、标签与播放按钮，直接显示平台播放器。
+- `autoload="false"` 会保留封面，严格等点击后才创建带自动播放的 `iframe`；只接受 `true` / `false`，默认 `true`。
+- YouTube 使用 `youtube-nocookie.com` 的嵌入地址；Bilibili 使用官方 `player.bilibili.com` 地址。
+- YouTube 封面来自 `i.ytimg.com`；封面加载失败时自动隐藏图片，只保留标签与播放键（`autoload="false"` 时仍可见）。
+- 两个平台都需要访客能访问对应域名。
 - `id` 会做白名单校验：YouTube 只接受 6–20 位的字母、数字、下划线与短横线，Bilibili 只接受 `BV` 开头的 12 位视频号。
 
 ## 音乐播放器

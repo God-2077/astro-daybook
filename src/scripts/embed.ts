@@ -22,12 +22,11 @@ function bilibiliUrl(id: string, autoplay: boolean): string {
     bvid: id,
     p: '1',
     autoplay: autoplay ? '1' : '0',
-    muted: autoplay ? '0' : '1',
   });
   return `https://player.bilibili.com/player.html?${params.toString()}`;
 }
 
-function createFrame(provider: Provider, id: string, autoplay: boolean, preload: boolean, title: string): HTMLIFrameElement {
+function createFrame(provider: Provider, id: string, autoplay: boolean, title: string): HTMLIFrameElement {
   const iframe = document.createElement('iframe');
   iframe.className = 'a-md-embed-frame';
   iframe.title = title;
@@ -39,39 +38,22 @@ function createFrame(provider: Provider, id: string, autoplay: boolean, preload:
     provider === 'youtube'
       ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
       : 'autoplay; fullscreen; picture-in-picture; encrypted-media';
-  if (preload) {
-    // 预加载的 iframe 藏在前景封面之后，先不进入 Tab 顺序与读屏树。
-    iframe.tabIndex = -1;
-    iframe.setAttribute('aria-hidden', 'true');
-  }
   return iframe;
 }
 
-function preload(figure: HTMLElement, provider: Provider, id: string): void {
+function mount(figure: HTMLElement, provider: Provider, id: string): void {
   if (figure.querySelector('iframe') || figure.dataset.embedState) return;
-  const iframe = createFrame(provider, id, false, true, figure.dataset.embedTitle ?? '');
-  // 插到 facade 之前：同为绝对定位时，后出现的 facade 会盖在上面。
-  figure.prepend(iframe);
+  const iframe = createFrame(provider, id, false, figure.dataset.embedTitle ?? '');
+  // 封面只是加载前的占位：iframe 建好后立即移除，直接露出平台播放器。
+  figure.replaceChildren(iframe);
   figure.dataset.embedState = 'ready';
 }
 
 function play(figure: HTMLElement, facade: HTMLElement, provider: Provider, id: string): void {
-  const iframe = figure.querySelector<HTMLIFrameElement>('iframe');
-  if (iframe) {
-    iframe.removeAttribute('aria-hidden');
-    iframe.tabIndex = 0;
-    // 预加载地址不带 autoplay；点击后用同一 iframe 切到自动播放，避免留下静音的隐藏播放器。
-    iframe.src = provider === 'youtube' ? youtubeUrl(id, true) : bilibiliUrl(id, true);
-    facade.remove();
-    figure.dataset.embedState = 'playing';
-    iframe.focus();
-    return;
-  }
-
-  const created = createFrame(provider, id, true, false, figure.dataset.embedTitle ?? '');
-  facade.replaceWith(created);
+  const iframe = createFrame(provider, id, true, figure.dataset.embedTitle ?? '');
+  facade.replaceWith(iframe);
   figure.dataset.embedState = 'playing';
-  created.focus();
+  iframe.focus();
 }
 
 function onClick(event: MouseEvent): void {
@@ -106,7 +88,7 @@ function watchPoster(figure: HTMLElement): void {
   else poster.addEventListener('error', fail, { once: true });
 }
 
-/** 页面加载后预先创建 iframe；autoload="false" 的图仍等点击后才创建。 */
+/** 页面加载后挂载 iframe 并移除封面；autoload="false" 的图仍等点击后才创建。 */
 export function initEmbeds(): void {
   if (!bound) {
     bound = true;
@@ -117,6 +99,6 @@ export function initEmbeds(): void {
     if (figure.dataset.embedAutoload === 'false') continue;
     const provider = figure.dataset.embedProvider;
     const id = figure.dataset.embedId;
-    if (isProvider(provider) && id) preload(figure, provider, id);
+    if (isProvider(provider) && id) mount(figure, provider, id);
   }
 }

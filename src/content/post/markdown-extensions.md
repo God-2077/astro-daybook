@@ -123,7 +123,7 @@ flowchart TD
 
 ::bilibili{id="BV1sK4y1Z7KG"}
 
-默认会在页面加载后预创建播放器 iframe；加上 `autoload="false"` 可以等到点击才创建：
+默认会在页面脚本加载后立即把封面替换成播放器 iframe；加上 `autoload="false"` 会保留封面，等到点击才创建：
 
 ::youtube{id="R401j1QAvEg" autoload="false"}
 

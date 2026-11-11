@@ -50,7 +50,7 @@ test('github leaf directives render a static card shell', async () => {
   assert.ok(html.includes('data-github-license'));
 });
 
-test('youtube and bilibili leaf directives render click-to-play facades', async () => {
+test('youtube and bilibili leaf directives render poster facades', async () => {
   const youtube = (await renderMarkdown('::youtube{id="R401j1QAvEg"}')).html;
   assert.ok(
     youtube.includes('<figure class="a-md-embed" data-embed="" data-embed-provider="youtube" data-embed-id="R401j1QAvEg"'),
