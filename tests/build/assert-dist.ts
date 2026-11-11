@@ -193,12 +193,14 @@ const friends = read('friends/index.html');
 assert.match(friends, /rel="noopener"/, '外链应保留 noopener');
 assert.doesNotMatch(friends, /noreferrer/, '友链不应再带 noreferrer');
 
-const markdownSyntax = read('post/markdown-syntax/index.html');
+const imageLayout = read('post/image-layout/index.html');
 assert.match(
-  markdownSyntax,
+  imageLayout,
   /<figure class="a-figure a-figure--raster"><div class="a-frame">/,
   '位图正文图片应带限高类并包在 figure 中',
 );
+
+const markdownSyntax = read('post/markdown-syntax/index.html');
 assert.match(
   markdownSyntax,
   /<figure class="a-figure"><div class="a-frame"><img[^>]*src="\/images\/demo\/diary-line\.svg"/,

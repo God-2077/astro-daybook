@@ -1,127 +1,13 @@
 ---
-title: Mermaid 渲染测试文件
+title: Mermaid 渲染演示
 date: 2026-11-11 13:34:24
+description: Mermaid 渲染演示
+categories: [文章]
+tags: [Mermaid, 测试]
+keywords: [Mermaid, 渲染, 测试]
 ---
 
-## 目录
-
-1. [基础 Markdown](#1-基础-markdown)
-2. [流程图](#2-流程图-flowchart)
-3. [时序图](#3-时序图-sequencediagram)
-4. [类图](#4-类图-classdiagram)
-5. [状态图](#5-状态图-statediagram-v2)
-6. [实体关系图](#6-实体关系图-erdiagram)
-7. [用户旅程图](#7-用户旅程图-journey)
-8. [甘特图](#8-甘特图-gantt)
-9. [饼图](#9-饼图-pie)
-10. [象限图](#10-象限图-quadrantchart)
-11. [需求图](#11-需求图-requirementdiagram)
-12. [Git 图](#12-git-图-gitgraph)
-13. [思维导图](#13-思维导图-mindmap)
-14. [时间线](#14-时间线-timeline)
-15. [桑基图](#15-桑基图-sankey-beta)
-16. [XY 图表](#16-xy-图表-xychart-beta)
-17. [块图](#17-块图-block-beta)
-18. [数据包图](#18-数据包图-packet-beta)
-19. [C4 架构图](#19-c4-架构图-c4context)
-20. [综合场景](#20-综合场景)
-
----
-
-## 1. 基础 Markdown
-
-### 1.1 文本样式
-
-**粗体**、*斜体*、***粗斜体***、~~删除线~~、`行内代码`、H~2~O、E=mc^2^
-
-### 1.2 列表
-
-- 无序项 A
-- 无序项 B
-  - 嵌套项 B.1
-  - 嵌套项 B.2
-- 无序项 C
-
-1. 有序项一
-2. 有序项二
-   1. 嵌套有序 2.1
-   2. 嵌套有序 2.2
-3. 有序项三
-
-### 1.3 任务列表
-
-- [x] 完成需求评审
-- [x] 完成技术设计
-- [ ] 编写单元测试
-- [ ] 上线发布
-
-### 1.4 表格
-
-| 图表类型 | 关键字 | 最低版本 | 支持度 |
-| :--- | :--- | :---: | :---: |
-| 流程图 | `flowchart` | 8.0 | ✅ |
-| 时序图 | `sequenceDiagram` | 8.0 | ✅ |
-| 思维导图 | `mindmap` | 9.3 | ⚠️ |
-| 桑基图 | `sankey-beta` | 10.3 | ⚠️ |
-| XY 图表 | `xychart-beta` | 10.9 | ⚠️ |
-
-### 1.5 引用与代码块
-
-> 引用块第一层
->> 引用块第二层
-> > > 引用块第三层
-
-```python
-def hello(name: str) -> str:
-    """简单的问候函数"""
-    return f"Hello, {name}!"
-
-print(hello("Mermaid"))
-```
-
-```json
-{
-  "name": "mermaid-test",
-  "version": "1.0.0",
-  "deps": ["markdown", "mermaid"]
-}
-```
-
-### 1.6 链接与图片
-
-- [Mermaid 官网](https://mermaid.js.org/)
-- [Mermaid Live Editor](https://mermaid.live/)
-- 自动链接：<https://github.com/mermaid-js/mermaid>
-
-![占位图](https://placehold.co/600x120/4A90D9/FFFFFF?text=Mermaid+Test)
-
-### 1.7 脚注与定义
-
-这是一段带脚注的文字[^1]，还有第二个脚注[^2]。
-
-[^1]: 第一个脚注的内容。
-[^2]: 第二个脚注的内容。
-
-### 1.8 数学公式
-
-行内公式：$E = mc^2$
-
-块级公式：
-
-$$
-\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
-$$
-
-### 1.9 HTML 混排
-
-<div align="center">
-  <b>居中的 HTML 文本</b><br/>
-  <sub>下标</sub> / <sup>上标</sup>
-</div>
-
----
-
-## 2. 流程图 Flowchart
+## 1. 流程图 Flowchart
 
 ```mermaid
 flowchart TD
@@ -141,7 +27,7 @@ flowchart TD
     class D,F warn
 ```
 
-### 2.1 子图与方向
+### 1.1 子图与方向
 
 ```mermaid
 flowchart LR
@@ -159,7 +45,7 @@ flowchart LR
     Store <-->|HTTP / JSON| API
 ```
 
-### 2.2 其他图形节点
+### 1.2 其他图形节点
 
 ```mermaid
 flowchart LR
@@ -179,7 +65,7 @@ flowchart LR
 
 ---
 
-## 3. 时序图 SequenceDiagram
+## 2. 时序图 SequenceDiagram
 
 ```mermaid
 sequenceDiagram
@@ -232,7 +118,7 @@ sequenceDiagram
 
 ---
 
-## 4. 类图 ClassDiagram
+## 3. 类图 ClassDiagram
 
 ```mermaid
 classDiagram
@@ -281,7 +167,7 @@ classDiagram
 
 ---
 
-## 5. 状态图 StateDiagram v2
+## 4. 状态图 StateDiagram v2
 
 ```mermaid
 stateDiagram-v2
@@ -316,7 +202,7 @@ stateDiagram-v2
 
 ---
 
-## 6. 实体关系图 ERDiagram
+## 5. 实体关系图 ERDiagram
 
 ```mermaid
 erDiagram
@@ -382,7 +268,7 @@ erDiagram
 
 ---
 
-## 7. 用户旅程图 Journey
+## 6. 用户旅程图 Journey
 
 ```mermaid
 journey
@@ -407,7 +293,7 @@ journey
 
 ---
 
-## 8. 甘特图 Gantt
+## 7. 甘特图 Gantt
 
 ```mermaid
 gantt
@@ -440,7 +326,7 @@ gantt
 
 ---
 
-## 9. 饼图 Pie
+## 8. 饼图 Pie
 
 ```mermaid
 pie showData
@@ -454,7 +340,7 @@ pie showData
 
 ---
 
-## 10. 象限图 QuadrantChart
+## 9. 象限图 QuadrantChart
 
 ```mermaid
 quadrantChart
@@ -477,7 +363,7 @@ quadrantChart
 
 ---
 
-## 11. 需求图 RequirementDiagram
+## 10. 需求图 RequirementDiagram
 
 ```mermaid
 requirementDiagram
@@ -521,7 +407,7 @@ requirementDiagram
 
 ---
 
-## 12. Git 图 GitGraph
+## 11. Git 图 GitGraph
 
 ```mermaid
 gitGraph
@@ -549,7 +435,7 @@ gitGraph
 
 ---
 
-## 13. 思维导图 Mindmap
+## 12. 思维导图 Mindmap
 
 ```mermaid
 mindmap
@@ -589,7 +475,7 @@ mindmap
 
 ---
 
-## 14. 时间线 Timeline
+## 13. 时间线 Timeline
 
 ```mermaid
 timeline
@@ -614,9 +500,7 @@ timeline
 
 ---
 
-## 15. 桑基图 Sankey-Beta
-
-> ⚠️ 需要 Mermaid ≥ 10.3，数据使用 CSV 格式，第一行必须为空行。
+## 14. 桑基图 Sankey-Beta
 
 ```mermaid
 sankey-beta
@@ -639,9 +523,7 @@ Losses,Waste,10.4
 
 ---
 
-## 16. XY 图表 Xychart-Beta
-
-> ⚠️ 需要 Mermaid ≥ 10.9
+## 15. XY 图表 Xychart-Beta
 
 ```mermaid
 xychart-beta
@@ -662,9 +544,7 @@ xychart-beta horizontal
 
 ---
 
-## 17. 块图 Block-Beta
-
-> ⚠️ 需要 Mermaid ≥ 11.0
+## 16. 块图 Block-Beta
 
 ```mermaid
 block-beta
@@ -681,9 +561,7 @@ block-beta
 
 ---
 
-## 18. 数据包图 Packet-Beta
-
-> ⚠️ 需要 Mermaid ≥ 11.0
+## 17. 数据包图 Packet-Beta
 
 ```mermaid
 packet-beta
@@ -702,7 +580,7 @@ packet-beta
 
 ---
 
-## 19. C4 架构图 C4Context
+## 18. C4 架构图 C4Context
 
 ```mermaid
 C4Context
@@ -728,9 +606,9 @@ C4Context
 
 ---
 
-## 20. 综合场景
+## 19. 综合场景
 
-### 20.1 微服务调用链路
+### 19.1 微服务调用链路
 
 ```mermaid
 flowchart TB
@@ -781,7 +659,7 @@ flowchart TB
     class MySQL,Redis,ES,OSS db
 ```
 
-### 20.2 发布流程时序
+### 19.2 发布流程时序
 
 ```mermaid
 sequenceDiagram

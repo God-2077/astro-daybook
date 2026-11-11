@@ -1,13 +1,13 @@
 ---
-title: Markdown 扩展完整测试
+title: Markdown 扩展演示
 date: 2026-11-11 10:00:00
-description: 按 docs/markdown.md 逐项验证脚注、Mermaid、指令、Alert、折叠、嵌入、播放器与行内文本指令。
+description: 这是一篇用于演示 Daybook 正文管线全部扩展语法的文章。
 categories: [文章]
 tags: [Markdown, 测试]
 keywords: [Markdown, 扩展, 测试]
 ---
 
-~~这是一篇用于验~~证 Daybook 正文管线全部扩展语法的测试文章。包含基础用法、边界写法与多种嵌套组合。
+这是一篇用于验证 Daybook 正文管线全部扩展语法的测试文章。包含基础用法、边界写法与多种嵌套组合。
 
 ## 脚注
 
@@ -239,12 +239,3 @@ flowchart LR
 ```
 
 在 `.mdx` 中也可以继续使用 `meting.player()`、`Figure`、`Timeline` 等构建期组件；两套写法可以混用，但不要把组件写进 `:::music` 的 YAML 内容里。
-
-## 安全与外部请求
-
-- `::github`、`::youtube`、`::bilibili`、`::meting` 与 `:::music` 会在浏览器访问第三方域名；站点本身不代理这些请求。
-- 隐藏文字只是阅读层的遮挡，**不是安全边界**：原文仍在 HTML、RSS 和 Pagefind 搜索索引中，敏感信息不要使用。
-
----
-
-测试结束。若以上各段均正常渲染，说明脚注、Mermaid、三类指令、五种 Alert、折叠块、仓库卡片、视频嵌入、两种音乐播放器、行内指令与 `::hr` 均已生效。
