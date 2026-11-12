@@ -110,7 +110,7 @@ if (exists('page/2/index.html')) {
 }
 
 const home = read('index.html');
-assert.match(home, /<html[^>]*data-theme-mode="system"/, 'html 应输出主题模式');
+assert.match(home, /<html[^>]*data-theme-mode="light"/, 'html 应输出主题模式');
 assert.match(home, /id="a-loadbar"/, '应输出站内导航进度条');
 assert.match(home, /<title>日记/, '首页标题应使用 labels.diary');
 assert.match(home, /<section class="a-day-group">/, '首页应按天分组');
