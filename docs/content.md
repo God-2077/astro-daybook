@@ -137,45 +137,28 @@ title: MDX 示例
 date: 2026-10-24 10:00:00
 ---
 
-import { Timeline, TimelineItem } from '@ui';
+import { Figure } from '@ui';
+import myImage from './1.jpg';
 
-## 时间线
+## 插图
 
-<Timeline>
-  <TimelineItem date="2026-10-24" title="接入 MDX">
-    正文可以写 **Markdown**、表达式 {1 + 1}，也可以 import 组件。
-  </TimelineItem>
-</Timeline>
+<Figure src={myImage} alt="山脊上的日落" caption="图注可选" />
 ```
 
 规则：
 
 - MDX 默认继承 `astro.config.ts` 的 `markdown.processor`，因此标题 ✦、`a-h2-anchor`、图片 figure/懒加载、表格包裹、脚注样式与 `.md` 完全一致。
+- 脚注方括号、Mermaid、GitHub Alert、折叠块、嵌入指令与行内指令在 `.md` / `.mdx` 中同样可用；完整语法与构建期错误行为见 [`markdown.md`](./markdown.md)。
 - 组件 children 里也可以写 Markdown（记得用空行分隔段落）；插件会递归 `mdxJsxFlowElement` / `mdxJsxTextElement`，组件内的图片与表格同样得到站点结构。
-- 相对路径按 MDX 文件自身位置解析（文章在 `src/content/post/` 时是 `../../components/...`）；推荐直接用 `@ui` 别名具名导入：`import { Timeline, TimelineItem } from '@ui'`。别名在 `tsconfig.json` 的 `paths` 里指向 `src/components/index.ts`，文件移动时不用改 import，编辑器的跳转/补全也走同一份配置。
+- 相对路径按 MDX 文件自身位置解析（文章在 `src/content/post/` 时是 `../../components/...`）；推荐直接用 `@ui` 别名具名导入：`import { Figure } from '@ui'`。别名在 `tsconfig.json` 的 `paths` 里指向 `src/components/index.ts`，文件移动时不用改 import，编辑器的跳转/补全也走同一份配置。
 - **MDX 暂不支持 `password`**：构建期加密需要 HTML 字符串，遇到 `password` 会直接报错。需要加密的内容请继续用 `.md`。
 - `siteConfig.rss.fullText: true` 时，MDX 文章回退为摘要并在构建期输出一次警告；默认 `fullText: false` 不受影响。
 - 自动摘要与阅读时长会先剥离 MDX 的 ESM 与 `{表达式}`，结果仍是近似值。
 - 需要构建期拉取 Meting 音乐信息或直接渲染播放器时，用 `@mdx` 别名：`import { meting } from '@mdx'`。接口、参数与配置见 [`meting.md`](./meting.md)。
 
-### 时间线组件
+### 时间线
 
-`src/components/content/Timeline.astro` 与 `TimelineItem.astro` 是本站的 MDX 时间线容器，视觉沿用日记条目的日期刻度：左侧日期栏、1px 细线、`✦` 节点。没有 `type` / `icon` 变体，也不引入 Firefly 的彩色圆点或图标包。
-
-```mdx
-import { Timeline, TimelineItem } from '@ui';
-
-<Timeline>
-  <TimelineItem date="2026-10-24" title="标题（可选）">
-    正文（可选），支持 Markdown。
-  </TimelineItem>
-</Timeline>
-```
-
-- `Timeline` 无 props，渲染为 `<ol class="a-mdx-timeline">`。
-- `TimelineItem` 接受可选的 `date`、`title`；`date` 是 ISO 日期时渲染为 `<time datetime>`，否则为 `<span>`。
-- 正文通过默认 slot 传入；日期在左侧栏，标题在正文列顶部，节点固定在细线上。
-- 样式只写在 `src/styles/daybook.css` 的 `.a-mdx-timeline*`，≤767 收窄日期栏。
+时间线不再由 MDX 组件提供，改用 `::::timeline` + `:::event` 指令；`date` 必填、`title` 可选。完整语法、校验与响应式行为见 [`markdown.md`](./markdown.md#时间线)。
 
 ### 插图组件
 

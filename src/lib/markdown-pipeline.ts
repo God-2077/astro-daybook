@@ -3,7 +3,13 @@ import type { MarkdownHeading } from 'astro';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
+import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
+
+import type { SiteLang } from '../i18n/languages';
+import { translate } from '../i18n/translate';
+import { remarkAlerts } from './markdown-alerts';
+import { rehypeFootnoteRefs, remarkDirectives, remarkMermaid } from './markdown-directives';
 
 import { isExternalUrl } from './site';
 
@@ -94,6 +100,10 @@ function toFigure(img: HastNode, alt: string): HastNode {
 /** 正文图片统一懒加载 + 异步解码，并挂 `a-img` 便于骨架屏样式定位。 */
 function decorateImage(img: HastNode): void {
   const names = classNames(img);
+  // 指令生成的封面/头像/播放器图片有各自的比例与可见性，不套正文图片骨架。
+  if (names.some((name) => name === 'a-md-github-avatar-img' || name === 'a-md-embed-poster' || name === 'a-music-cover-img')) {
+    return;
+  }
   if (!names.includes('a-img')) names.push('a-img');
   const properties = img.properties ?? {};
   img.properties = {
@@ -295,35 +305,83 @@ export function rehypeArticleProse() {
   };
 }
 
+/** 代码块右上角的复制按钮；按钮由客户端解除 hidden 后才可交互。 */
+function codeCopyButton(lang: SiteLang): HastNode {
+  const copy = translate(lang, 'markdown.copyCode');
+  return element(
+    'button',
+    {
+      type: 'button',
+      className: ['a-code-copy'],
+      'data-code-copy': '',
+      hidden: true,
+      ariaLabel: copy,
+      title: copy,
+      'data-label-copy': copy,
+      'data-label-copied': translate(lang, 'markdown.copied'),
+      'data-label-failed': translate(lang, 'markdown.copyFailed'),
+    },
+    [element('svg', { className: ['a-ico'], ariaHidden: 'true', focusable: 'false' }, [element('use', { href: '#i-copy' })])],
+  );
+}
+
+/** 把 Shiki 生成的 pre 包进 a-code-block，右上角留出复制按钮的位置。 */
+function wrapCodeBlocks(node: HastNode, lang: SiteLang): void {
+  const parentIsBlock = isElement(node) && hasClass(node, 'a-code-block');
+  const children = node.children ?? [];
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index];
+    if (!parentIsBlock && isElement(child) && child.tagName === 'pre' && !hasClass(child, 'a-mermaid-source')) {
+      children[index] = element('div', { className: ['a-code-block'] }, [codeCopyButton(lang), child]);
+      continue;
+    }
+    wrapCodeBlocks(child, lang);
+  }
+}
+
+export function rehypeCodeBlocks(lang: SiteLang) {
+  return (tree: HastNode): void => {
+    wrapCodeBlocks(tree, lang);
+  };
+}
+
 export function rehypeExternalLinks() {
   return (tree: HastNode): void => {
     markExternalLinks(tree);
   };
 }
 
-export const remarkPlugins: RemarkPlugins = [remarkMath];
-
-export const rehypePlugins: RehypePlugins = [
-  [rehypeSlug, { prefix: 'h-' }],
-  rehypeKatex,
-  [
-    rehypeAutolinkHeadings,
-    {
-      behavior: 'append',
-      properties: { className: ['a-h2-anchor'], ariaLabel: '本节链接' },
-      // 原型：h2 末尾追加 `<a class="a-h2-anchor"><svg class="a-ico"><use href="#i-link"/></svg></a>`
-      content: {
-        type: 'element',
-        tagName: 'svg',
-        properties: { className: ['a-ico'], ariaHidden: 'true', focusable: 'false' },
-        children: [{ type: 'element', tagName: 'use', properties: { href: '#i-link' }, children: [] }],
-      },
-      test: (heading: { tagName?: string }) => heading.tagName === 'h2',
-    },
-  ],
-  rehypeArticleProse,
-  rehypeExternalLinks,
-];
+export function createMarkdownPipeline(lang: SiteLang): {
+  remarkPlugins: RemarkPlugins;
+  rehypePlugins: RehypePlugins;
+} {
+  return {
+    remarkPlugins: [remarkDirective, [remarkDirectives, lang], [remarkAlerts, lang], [remarkMermaid, lang], remarkMath],
+    rehypePlugins: [
+      [rehypeSlug, { prefix: 'h-' }],
+      rehypeKatex,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'append',
+          properties: { className: ['a-h2-anchor'], ariaLabel: '本节链接' },
+          // 原型：h2 末尾追加 `<a class="a-h2-anchor"><svg class="a-ico"><use href="#i-link"/></svg></a>`
+          content: {
+            type: 'element',
+            tagName: 'svg',
+            properties: { className: ['a-ico'], ariaHidden: 'true', focusable: 'false' },
+            children: [{ type: 'element', tagName: 'use', properties: { href: '#i-link' }, children: [] }],
+          },
+          test: (heading: { tagName?: string }) => heading.tagName === 'h2',
+        },
+      ],
+      [rehypeFootnoteRefs, lang],
+      [rehypeCodeBlocks, lang],
+      rehypeArticleProse,
+      rehypeExternalLinks,
+    ],
+  };
+}
 
 export const SHIKI_CONFIG = {
   themes: {

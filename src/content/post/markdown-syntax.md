@@ -1,18 +1,15 @@
 ---
-title: Markdown 语法测试文件
+title: Markdown 语法演示
 date: 2026-09-20 09:00:00
-description: 标题、列表、引用、代码、表格、脚注与公式——一份用来检查渲染管线的语法测试样本，也顺手记下 A 方向的排版取值。
+description: Markdown 基础的语法演示
 categories: [文章]
 tags: [Markdown, 排版]
 keywords: [Markdown, 排版, 测试]
-hideFrom: [tag, category]
 ---
 
-> 本文件用于测试 Markdown 渲染器的各项语法支持情况。
+> 本文件用于演示 Markdown 基础的语法。
 
 ---
-
-![Alice in Cradle](https://k-pan.edgeone.ksable.top/blog/post/note/%E4%BE%BF%E7%AC%BA-Alice-in-Cradle-%E7%88%B1%E4%B8%BD%E4%B8%9D%E7%9A%84%E6%91%87%E7%AF%AE%E6%9B%B2-%E5%8F%8D%E7%BC%96%E8%AF%91%E5%8E%BB%E7%A0%81/1.png)
 
 ## 1. 标题
 
@@ -192,37 +189,3 @@ $$
    | 名称 | 值 |
    | --- | --- |
    | a | 1 |
-
----
-
-*文件结束*
-
-## 排版说明
-
-下表是这篇文章逐条落地的排版取值。字体为本地分片的寒蝉全圆体，正文色为 `--foreground`，强调色只取玫瑰色与灰阶，没有引入额外色相。
-
-<table class="a-md-typo-table">
-  <thead>
-    <tr><th>项目</th><th>取值</th><th>说明</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>正文</td><td>17px / 1.9</td><td>375 宽改 16.5px / 1.85；行宽 34em（约 578px）</td></tr>
-    <tr><td>段落</td><td>间距 1.15em</td><td>无首行缩进，段间留白呼吸</td></tr>
-    <tr><td>H2</td><td>23px / 700 + ✦</td><td>上 2.4em 下 .8em，hover 出现锚点线稿</td></tr>
-    <tr><td>H3 / H4</td><td>18px / 16.5px</td><td>H5 15.5px，H6 14.5px muted</td></tr>
-    <tr><td>行内代码</td><td>mono .84em</td><td>muted 底，2px 圆角，不加边框</td></tr>
-    <tr><td>列表</td><td>左缩进 1.4em</td><td>条目间距 .45em，标记色 muted</td></tr>
-    <tr><td>任务列表</td><td>16px 方框</td><td>手绘 check 用边框画出，不用 emoji</td></tr>
-    <tr><td>引用</td><td>1px 左边线</td><td>文字 muted，嵌套引用同样收进 20px</td></tr>
-    <tr><td>代码块</td><td>13px mono / 横向滚动</td><td>纸面卡：1px 边框 + muted 底；Shiki github-light / github-dark token</td></tr>
-    <tr><td>表格</td><td>15px</td><td>表头 12.5px 加字距，单元格下边线分隔</td></tr>
-    <tr><td>图片</td><td>1px 框</td><td>11.5px 说明；原型用 SVG 线稿代替远程占位图</td></tr>
-    <tr><td>脚注</td><td>13px</td><td>点线分隔，编号可跳转并回跳</td></tr>
-    <tr><td>公式</td><td>Cambria Math 等宽排印</td><td>真实站点由 rehype-katex 输出 KaTeX HTML</td></tr>
-    <tr><td>分割线</td><td>1px dashed</td><td>— / *** / ___ 同一渲染结果</td></tr>
-    <tr><td>定义列表</td><td>未启用</td><td>当前管线不支持，已在第 10 节注明</td></tr>
-    <tr><td>移动 TOC</td><td>箭头 180° 旋转</td><td>默认向下，展开 .16s；reduced-motion 关闭</td></tr>
-    <tr><td>摘要</td><td>details 折叠面板</td><td>默认展开，保留左侧 1px 线</td></tr>
-    <tr><td>深色图标</td><td>rose</td><td>H2 ✦ / 评论 ✦ / 导航与 TOC chevron 统一</td></tr>
-  </tbody>
-</table>

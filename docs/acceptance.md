@@ -39,14 +39,14 @@
 
 ## MDX
 
-- [ ] `.mdx` 文章（`/post/mdx-syntax`）正常渲染 import、表达式、时间线、单图与 h2 ✦。
+- [ ] `.mdx` 文章（`/post/mdx-syntax`）正常渲染表达式、单图与 h2 ✦。
 - [ ] `.mdx` 日记（`/daily/2026-10-20-redesign`）详情与首页流正常渲染。
 - [ ] `src/content/pages/` 的独立页（`/music`）由 `src/pages/[...page].astro` 套 `PageLayout`，日期与标题正常，h2 带 ✦。
 - [ ] 页面 HTML 不含泄漏的 `import` / `export` 语句。
 - [ ] 给 `.mdx` 加 `password` 时构建报错，错误信息说明 MDX 暂不支持密码。
 - [ ] `rss.fullText: true` 时 MDX 回退摘要并输出一次警告；恢复默认后无警告。
-- [ ] 时间线日期、标题、正文在浅/深色与 375/768/1024/1440 宽度下正常；≤767 日期栏收窄。
-- [ ] Pagefind 索引为 27 页（与 `tests/build/assert-dist.ts` 的断言一致）。
+- [ ] `::::timeline` 的日期、标题、正文在浅/深色与 375/768/1024/1440 宽度下正常；≤767 日期栏收窄。
+- [ ] Pagefind 索引为 31 页（与 `tests/build/assert-dist.ts` 的断言一致）。
 
 ## 路由与分页
 

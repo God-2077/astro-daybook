@@ -42,6 +42,8 @@ function setTitle(root: HTMLElement, title: string): void {
   if (titleEl) titleEl.textContent = title;
   const artistEl = root.querySelector<HTMLElement>('[data-music-artist]');
   if (artistEl) artistEl.textContent = '';
+  const separator = root.querySelector<HTMLElement>('.a-music-sep');
+  if (separator) separator.hidden = true;
 }
 
 function createTrackItem(track: MetingTrack, index: number, unknownArtist: string): HTMLLIElement {
@@ -111,12 +113,37 @@ function fillPlayer(root: HTMLElement, tracks: MetingTrack[]): void {
   }
 
   const artistEl = root.querySelector<HTMLElement>('[data-music-artist]');
-  if (artistEl && !root.querySelector('.a-music-sep')) {
-    const separator = document.createElement('span');
-    separator.className = 'a-music-sep';
-    separator.setAttribute('aria-hidden', 'true');
-    separator.textContent = '-';
-    artistEl.before(separator);
+  const separator = root.querySelector<HTMLElement>('.a-music-sep');
+  if (artistEl && !separator) {
+    const created = document.createElement('span');
+    created.className = 'a-music-sep';
+    created.setAttribute('aria-hidden', 'true');
+    created.textContent = '-';
+    artistEl.before(created);
+  }
+
+  const first = tracks[0];
+  if (first) {
+    setTitle(root, first.name);
+    if (artistEl) artistEl.textContent = first.artist || unknownArtist;
+    const currentSeparator = root.querySelector<HTMLElement>('.a-music-sep');
+    if (currentSeparator) currentSeparator.hidden = false;
+
+    const audio = root.querySelector<HTMLAudioElement>('[data-music-audio]');
+    if (audio) audio.src = first.url;
+
+    const cover = root.querySelector<HTMLImageElement>('.a-music-cover-img');
+    const fallback = root.querySelector<HTMLElement>('.a-music-cover-fallback');
+    if (cover) {
+      if (first.cover) {
+        cover.src = first.cover;
+        cover.hidden = false;
+      } else {
+        cover.removeAttribute('src');
+        cover.hidden = true;
+      }
+    }
+    if (fallback) fallback.hidden = Boolean(first.cover);
   }
 
   for (const button of root.querySelectorAll<HTMLButtonElement>(

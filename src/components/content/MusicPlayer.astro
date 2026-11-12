@@ -1,11 +1,11 @@
 ---
 import { t } from '../../i18n/current';
 import type { MetingClientSource } from '../../lib/meting-core';
-import { type MusicTrack, normalizePlaylist } from '../../lib/music';
-import Icon from '../common/Icon.astro';
+import type { MusicTrack } from '../../lib/music';
+import { renderMusicPlayerHtml } from '../../lib/music-player-html';
 
 /**
- * 可放进 MDX 的歌单播放器。
+ * 可放进 MDX 的歌单播放器，也是 Markdown `:::music` 与 `::meting` 指令的共享骨架。
  *
  * 用法：
  * <MusicPlayer
@@ -14,8 +14,8 @@ import Icon from '../common/Icon.astro';
  *   playlistExpand
  * />
  *
- * 样式在 src/styles/daybook.css 的「音乐播放器」段；脚本由 src/scripts/client.ts
- * 在页面出现 [data-music] 时按需加载，ClientRouter 换页后也能重新初始化。
+ * DOM 由 src/lib/music-player-html.ts 统一生成，Markdown 指令与 Astro 组件因此产出同一套
+ * [data-music] 结构；脚本仍由 src/scripts/client.ts 在页面出现 [data-music] 时按需加载。
  *
  * 单曲（playlist 只有一首）时列表区在样式层隐藏，但曲目 DOM 仍保留：
  * 交互脚本依赖 [data-music-track] 初始化播放器，删掉会让整张卡片无法播放。
@@ -32,162 +32,7 @@ interface Props {
   playlistExpand?: boolean;
 }
 
-const { playlist, metingSource, autoPlayNext = false, playlistExpand = false } = Astro.props;
-
-const tracks = playlist ? normalizePlaylist(playlist) : [];
-const pending = Boolean(metingSource);
-if (!pending && tracks.length === 0) throw new Error('[daybook:music] playlist is empty');
-
-const [first] = tracks;
-const panelId = `music-list-${crypto.randomUUID()}`;
-const unknownArtist = t('music.unknownArtist');
-const loadingLabel = t('music.loading');
-const loadErrorLabel = t('music.loadError');
-const playlistLabelTemplate = t('music.playlistCount', { count: '{count}' });
-const playlistLabel = pending ? loadingLabel : t('music.playlistCount', { count: tracks.length });
-const title = first?.name ?? loadingLabel;
-const artist = first ? first.artist || unknownArtist : '';
-const cover = first?.cover;
+const html = renderMusicPlayerHtml(Astro.props, t);
 ---
 
-<section
-  class="a-music"
-  aria-label={t('music.player')}
-  data-music
-  data-playing="false"
-  data-open={playlistExpand ? 'true' : 'false'}
-  data-auto-next={autoPlayNext ? 'true' : 'false'}
-  data-single={!pending && tracks.length === 1 ? 'true' : 'false'}
-  data-meting-source={metingSource ? JSON.stringify(metingSource) : undefined}
-  data-meting-pending={pending ? 'true' : undefined}
-  aria-busy={pending ? 'true' : undefined}
-  data-label-play={t('music.play')}
-  data-label-pause={t('music.pause')}
-  data-label-error={t('music.error')}
-  data-label-loading={loadingLabel}
-  data-label-load-error={loadErrorLabel}
-  data-label-playlist={playlistLabelTemplate}
-  data-label-unknown-artist={unknownArtist}
->
-  <audio data-music-audio preload="metadata" src={first?.url} hidden></audio>
-
-  <div class="a-music-main">
-    <div class="a-music-cover">
-      <img
-        class="a-music-cover-img"
-        src={cover}
-        alt=""
-        width="120"
-        height="120"
-        decoding="async"
-        hidden={!cover}
-      />
-      <span class="a-music-cover-fallback" hidden={Boolean(cover)} aria-hidden="true">
-        <Icon name="i-music" className="a-ico a-music-cover-ico" />
-      </span>
-    </div>
-
-    <div class="a-music-info">
-      <div class="a-music-titles">
-        <div class="a-music-heading">
-          <span class="a-music-title" data-music-title>{title}</span>
-          {artist && <span class="a-music-sep" aria-hidden="true">-</span>}
-          <span class="a-music-artist" data-music-artist>{artist}</span>
-        </div>
-
-        <div class="a-music-lyric" data-music-lyric data-empty="true">
-          <span class="a-music-lyric-track" data-music-lyric-track>
-            <span class="a-music-lyric-line" data-music-lyric-line></span>
-            <span class="a-music-lyric-line" data-music-lyric-line aria-hidden="true"></span>
-          </span>
-        </div>
-      </div>
-
-      <div class="a-music-progress-block">
-        <div
-          class="a-music-progress"
-          data-music-progress
-          role="slider"
-          tabindex={pending ? -1 : 0}
-          aria-label={t('music.progress')}
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="0"
-          aria-valuetext="00:00 / --:--"
-          aria-disabled={pending ? 'true' : undefined}
-        >
-          <span class="a-music-progress-rail">
-            <span class="a-music-progress-fill" data-music-fill></span>
-          </span>
-        </div>
-
-        <div class="a-music-times">
-          <span data-music-current>00:00</span>
-          <span data-music-duration>--:--</span>
-        </div>
-
-        <p class="a-music-status" data-music-status role="status" aria-live="polite" hidden></p>
-      </div>
-    </div>
-
-    <div class="a-music-controls">
-      <button class="a-music-btn" type="button" data-music-prev aria-label={t('music.previous')} disabled={pending}>
-        <Icon name="i-prev" />
-      </button>
-      <button class="a-music-play" type="button" data-music-play aria-label={t('music.play')} disabled={pending}>
-        <Icon name="i-play" className="a-ico a-music-ico-play" />
-        <Icon name="i-pause" className="a-ico a-music-ico-pause" />
-      </button>
-      <button class="a-music-btn" type="button" data-music-next aria-label={t('music.next')} disabled={pending}>
-        <Icon name="i-next" />
-      </button>
-    </div>
-  </div>
-
-  <div class="a-music-list">
-    <button
-      class="a-music-toggle"
-      type="button"
-      data-music-toggle
-      aria-expanded={playlistExpand}
-      aria-controls={panelId}
-      disabled={pending}
-    >
-      <span class="a-music-toggle-label">
-        <Icon name="i-music" className="a-ico a-music-toggle-ico" />
-        <span data-music-playlist-count>{playlistLabel}</span>
-      </span>
-      <Icon name="i-chevron-down" className="a-ico a-music-chev" />
-    </button>
-
-    <div class="a-music-panel" data-music-panel id={panelId} inert={!playlistExpand}>
-      <div class="a-music-panel-inner">
-        <ol class="a-music-tracks">
-          {tracks.map((track, index) => (
-            <li>
-              <button
-                class:list={['a-music-track', { 'is-current': index === 0 }]}
-                type="button"
-                data-music-track
-                data-url={track.url}
-                data-cover={track.cover}
-                data-lrc={track.lrc}
-                aria-current={index === 0 ? 'true' : undefined}
-              >
-                <span class="a-music-track-index" aria-hidden="true">
-                  <span class="a-music-track-num">{String(index + 1).padStart(2, '0')}</span>
-                  <span class="a-music-eq" aria-hidden="true"><i></i><i></i><i></i></span>
-                </span>
-                <span class="a-music-track-text">
-                  <span class="a-music-track-name">{track.name}</span>
-                  <span class="a-music-track-artist">{track.artist || unknownArtist}</span>
-                </span>
-                <span class="a-music-track-time" data-music-track-time>--:--</span>
-              </button>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
-  </div>
-</section>
+<Fragment set:html={html} />
