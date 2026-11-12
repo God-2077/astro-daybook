@@ -319,3 +319,32 @@ pnpm lint
 pnpm exec astro dev stop
 pnpm exec astro preview stop
 ```
+
+---
+
+## 4. 一键修复脚本
+
+上面的步骤已经整理成独立脚本 `scripts/fix-termux.mjs`，不需要手动 `pnpm patch`：
+
+```bash
+pnpm fix:termux                # 写入配置与补丁、安装依赖并验证
+pnpm fix:termux -- --dry-run   # 只打印将要做的修改与补丁内容
+pnpm fix:termux -- --build     # 修复后直接跑一次 pnpm build
+```
+
+脚本是幂等的，重复执行只会补齐缺失的部分。它会：
+
+1. 在 `pnpm-workspace.yaml` 写入 `supportedArchitectures` 与 `patchedDependencies`；
+2. 生成 `patches/` 下 Sätteri WASI（preopen）与 Pagefind（平台映射）两个补丁；
+3. 把 `@bruits/satteri-wasm32-wasi` 与 `@img/sharp-wasm32` 写进 devDependencies
+   （`supportedArchitectures` 收紧平台后，sharp 在 Android 上没有可用的原生包，Astro 的图片优化需要 wasm 回退）；
+4. 执行 `pnpm install` 应用补丁，并验证 Sätteri、Pagefind 与 sharp 都能加载。
+
+注意：
+
+- 安装会额外拉取 Linux arm64 的可选包，`node_modules` 约 700MB；不要用 `pnpm install --force`。
+- pnpm 的 `optimisticRepeatInstall` 会跳过「只改了工作区配置」的安装，脚本执行 `pnpm install` 时会显式加上
+  `--config.optimistic-repeat-install=false`。
+- 补丁没有落盘时脚本会直接改写 `node_modules` 中的文件并给出提示；要彻底重装用
+  `pnpm fix:termux -- --reinstall`。
+- 脚本默认只在 Android 上运行；需要在其他平台预先写入这些配置时加 `--force`。
