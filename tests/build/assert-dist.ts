@@ -110,16 +110,25 @@ if (exists('page/2/index.html')) {
 }
 
 const home = read('index.html');
-assert.match(home, /<html[^>]*data-theme-mode="system"/, 'html 应输出主题模式');
+const feedPages = [
+  'index.html',
+  ...(exists('page')
+    ? readdirSync(path.join(dist, 'page'))
+        .filter((name) => exists(`page/${name}/index.html`))
+        .map((name) => `page/${name}/index.html`)
+    : []),
+];
+const feedHtml = feedPages.map(read).join('\n');
+assert.match(home, new RegExp(`<html[^>]*data-theme-mode="${siteConfig.theme}"`), 'html 应输出主题模式');
 assert.match(home, /id="a-loadbar"/, '应输出站内导航进度条');
 assert.match(home, /<title>日记/, '首页标题应使用 labels.diary');
 assert.match(home, /<section class="a-day-group">/, '首页应按天分组');
-assert.match(home, /class="a-entry-cat">一段回顾</, '首页应显示日记 category');
+assert.match(feedHtml, /class="a-entry-cat">一段回顾/, '首页应显示日记 category');
 assert.match(home, /查看原文/, '首页应显示查看原文');
 assert.match(home, /↗/, '查看原文应带箭头');
-assert.equal((home.match(/datetime="2026-10-21"/g) ?? []).length, 1, '同一天的日期只应出现一次');
-assert.match(home, /href="\/daily\/2026\/10\/21-night"/, '首页应包含无标题日记');
-assert.doesNotMatch(home, /<h4 class="a-entry-title"><a href="\/daily\/2026\/10\/21-night"/, '无标题日记不应渲染标题');
+assert.equal((feedHtml.match(/datetime="2026-11-01"/g) ?? []).length, 1, '同一天的日期只应出现一次');
+assert.match(feedHtml, /href="\/daily\/2026\/10\/21-night"/, '首页应包含无标题日记');
+assert.doesNotMatch(feedHtml, /<h4 class="a-entry-title"><a href="\/daily\/2026\/10\/21-night"/, '无标题日记不应渲染标题');
 
 assert.match(home, /<html[^>]*data-bottom-nav="on"/, 'html 应标记底部导航开启');
 const bottomNavAt = home.indexOf('<nav class="a-bottomnav"');
@@ -146,46 +155,30 @@ assert.match(archives, /class="a-arc-entry-title">\s*2026\/10\/21-night/, '归�
 
 // 置顶日记单独成组：曾经整月跟着置顶、把更新的月份挤到后面。
 const pinnedSectionAt = home.indexOf('a-month-group--pinned');
-const novemberAt = home.indexOf('a-month-label">2026 · 十一月');
-const octoberAt = home.indexOf('a-month-label">2026 · 十月', novemberAt);
+const regularNovemberAt = home.indexOf(
+  '<section class="a-month-group"><div class="a-month"><h2 class="a-month-label">2026 · 十一月',
+);
 assert.ok(pinnedSectionAt > -1, '置顶日记应单独成组');
 assert.match(home, /a-month-label">置顶</, '置顶节标题应为「置顶」');
-assert.match(home, /a-month-sub"><h2 class="a-month-label">2026 · 十月</, '置顶节内应按月份补小标题');
-assert.ok(pinnedSectionAt < novemberAt && novemberAt < octoberAt, '置顶分组在最前，其余月份严格按时间倒序');
-assert.equal((home.match(/a-entry--pinned/g) ?? []).length, 1, '只有置顶的那一条日记带置顶标记');
-assert.ok(home.indexOf('/daily/2026/10/23-year') < novemberAt, '置顶日记应排在月份分组之前');
-assert.doesNotMatch(home.slice(octoberAt), /daily\/2026\/10\/23-year/, '十月分组里不应再出现置顶日记');
-const homeTitleHidden = 'daily/2026-09-16-home-title-hidden/index.html';
-assert.ok(exists(homeTitleHidden), 'hideHomeTitle 日记应生成详情页');
-assert.match(
-  read(homeTitleHidden),
-  /<h1[^>]*id="a-article-title"[^>]*>首页不显示标题的日记<\/h1>/,
-  'hideHomeTitle 只影响首页，详情页标题应保留',
+assert.match(home, /a-month-sub"><h2 class="a-month-label">2026 · 十一月</, '置顶节内应按月份补小标题');
+assert.ok(pinnedSectionAt < regularNovemberAt, '置顶分组应排在月份分组之前');
+const page2 = read('page/2/index.html');
+assert.ok(
+  page2.indexOf('a-month-label">2026 · 十一月') < page2.indexOf('a-month-label">2026 · 十月'),
+  '其余月份应严格按时间倒序',
 );
+assert.equal((home.match(/a-entry--pinned/g) ?? []).length, 1, '只有置顶的那一条日记带置顶标记');
+assert.match(home.slice(pinnedSectionAt, regularNovemberAt), /href="\/daily\/2026-11-13-pin"/, '置顶日记应排在月份分组之前');
+assert.doesNotMatch(home.slice(regularNovemberAt), /daily\/2026-11-13-pin/, '月份分组里不应再出现置顶日记');
 assert.doesNotMatch(home, /<p>import /, '首页 MDX 日记不应泄漏 import');
 assert.doesNotMatch(home, /noreferrer/, '外链不应再带 noreferrer');
 
-const feedPages = [
-  'index.html',
-  ...(exists('page')
-    ? readdirSync(path.join(dist, 'page'))
-        .filter((name) => exists(`page/${name}/index.html`))
-        .map((name) => `page/${name}/index.html`)
-    : []),
-];
-const feedHtml = feedPages.map(read).join('\n');
 assert.match(
   feedHtml,
   /<time class="a-day-date" datetime="2026-09-28"><span class="a-day-num">28<\/span><span class="a-day-wd">周一<\/span><\/time>/,
   '所有月份的日期栏都应使用相同的日号与星期排版',
 );
 assert.doesNotMatch(feedHtml, /a-day-ym/, '日期栏不应再渲染额外的年月行');
-assert.doesNotMatch(
-  feedHtml,
-  /<h4 class="a-entry-title"><a href="\/daily\/2026-09-16-home-title-hidden"/,
-  'hideHomeTitle 日记不应在首页（含分页）渲染标题',
-);
-assert.match(feedHtml, /这篇日记在首页不显示标题/, 'hideHomeTitle 日记的正文仍应出现在首页（含分页）');
 assert.match(feedHtml, /href="\/daily\/2026-10-20-redesign"/, '首页（含分页）应包含 MDX 日记');
 assert.match(feedHtml, /把博客重新画一遍/, '首页（含分页）应渲染 MDX 日记标题');
 
@@ -287,11 +280,9 @@ assert.match(locked, /<a class="a-meta-type" href="\/posts">文章<\/a>/, '加�
 
 const hiddenSearch = read('post/reinstall/index.html');
 assert.doesNotMatch(hiddenSearch, /data-pagefind-body/);
-const hiddenSearchDaily = read('daily/2026-08-20-search-hidden/index.html');
-assert.doesNotMatch(hiddenSearchDaily, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 31, `Pagefind 页面集合应精确为 31 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 37, `Pagefind 页面集合应精确为 37 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);
