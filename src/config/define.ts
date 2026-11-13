@@ -428,7 +428,7 @@ function validateLinks(input: LinksConfig, file: string): void {
 /**
  * 定义并校验友链配置（`src/config/links.ts` 的入口）。
  *
- * `groups` 可省略，默认空数组；分组与组内链接都允许为空数组（空分组在页面上会被过滤）。
+ * `groups` 必填，但允许为空数组；分组与组内链接都允许为空数组（空分组在页面上会被过滤）。
  */
 export function defineLinksConfig(input: LinksConfigInput, file = 'src/config/links.ts'): LinksConfig {
   const parsed = parseLinks(input, file);

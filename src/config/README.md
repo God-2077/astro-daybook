@@ -4,7 +4,7 @@
 写错字段会让 `astro dev` / `astro build` 直接失败，并指出具体文件与字段路径。
 
 - 面向使用者的完整字段表、默认值与示例见 [`docs/configuration.md`](../../docs/configuration.md)。
-- 本文件面向维护者，说明配置层的文件分工、解析链路与常见错误。
+- 本文件面向维护者，说明配置层的文件分工、解析链路与常见错误；文档索引见 [`docs/README.md`](../../docs/README.md)，实现取舍见 [`docs/developers/reference.md`](../../docs/developers/reference.md)。
 
 ## 文件职责
 
@@ -27,7 +27,7 @@
 
 ```text
 site.ts ──defineSiteConfig()──▶ parse (schema.ts / Zod) ──▶ resolve (defaults.ts 合并默认值) ──▶ validate (define.ts 语义校验) ──▶ 只读配置对象
-links.ts ──defineLinksConfig()──▶ parse ──▶ resolve（补空数组） ──▶ validate ──▶ linksConfig
+links.ts ──defineLinksConfig()──▶ parse ──▶ resolve（groups 必填、允许空数组；分组与链接原样拷贝） ──▶ validate ──▶ linksConfig
 ```
 
 关于页的正文不在这里：它属于内容，放在当前内容根的 `spec/about.mdx`（主题模式为 `src/content/spec/about.mdx`），由页面用 `getEntry('specCollection', 'about')` 读取。
@@ -44,7 +44,23 @@ links.ts ──defineLinksConfig()──▶ parse ──▶ resolve（补空数�
 3. 在 [`defaults.ts`](./defaults.ts) 增加默认值（若与语言相关，放进 `LOCALE_DEFAULTS`）；
 4. 在 [`define.ts`](./define.ts) 的 `resolveSite()` 中合并，并在需要时补 `validateSite()` 校验；
 5. 如果新增的是主题 UI 文案，先在 [`src/i18n/locales/zh-CN.ts`](../i18n/locales/zh-CN.ts) 加 key，再同步 `en.ts` / `ja.ts` / `zh-TW.ts`；
-6. 同步更新 [`docs/configuration.md`](../../docs/configuration.md) 与本文件。
+6. 同步更新 [`docs/configuration.md`](../../docs/configuration.md) 与本文件；影响写作或部署行为时，再更新 [`docs/writing.md`](../../docs/writing.md) / [`docs/deployment.md`](../../docs/deployment.md)。
+
+## 配置层与内容层的校验分工
+
+配置层只回答「配置本身是否合法」；构建能否通过，还取决于内容层在构建期的交叉检查。报错前缀能区分两者：
+
+| 检查 | 位置 | 报错前缀 | 例子 |
+| --- | --- | --- | --- |
+| 字段名、类型、枚举、必填 | `parse`（Zod strict） | `[daybook:config]` | `Unrecognized key: "foo"` |
+| URL、时区、`since` 范围、分页、`rss.limit`、taxonomy slug | `validate` | `[daybook:config]` | `timezone 不是有效的 IANA 时区` |
+| 导航内链是否有对应路由 | 内容层 `entries.ts` | `[daybook:project]` | `导航链接 /music（音乐）没有对应路由` |
+| 分类/标签名能否生成 URL | 内容层 `entries.ts` | `[daybook:content]` | 名称含 `/`、`?`、`#` |
+| 内容 URL、permalink、独立页面路由冲突 | 内容层 `entries.ts` / `pages.ts` | `[daybook:content]` | 与固定路由或另一篇内容相同 |
+| `about.mdx` 缺失、MDX + `password` | 内容层 | `[daybook:content]` | 见 [写作指引](../../docs/writing.md) |
+| Markdown 指令形态、属性、ID 白名单 | `src/lib/markdown-*.ts` | `[daybook:markdown]` | 见 [Markdown 增强](../../docs/markdown.md) |
+
+因此配置层不做路由存在性检查；导航内链在构建期由内容层统一校验，独立页面不在白名单里。
 
 ## 导航配置怎么写
 
@@ -73,9 +89,9 @@ nav: [
 - 分组必须带非空 `items`，且只能有一层；不支持三级菜单。
 - 站内链接必须以 `/` 开头，例如 `/posts`、`/archives`；不要写 `posts`。
 - 外链必须以 `http://` 或 `https://` 开头，且不能带查询参数或 hash。
-- `footerNav` 只接受一级链接 `{ title, link }[]`，规则同上；不写时按 `lang` 使用内置的归档、友链两项。页脚不会自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
+- `footerNav` 只接受一级链接 `{ title, link }[]`，规则同上；省略时按 `lang` 使用内置的归档、友链与 RSS 三项；显式配置后不会被翻译，也不会自动追加 RSS。
 - 移动端底部导航默认首页、文章、友链、关于四项；用 `bottomNav.enabled` 控制显示，`bottomNav.items` 整体替换入口。标题优先取 `bottomNav.items[].title`，其次取 `nav` 中对应路径的一级链接或分组标题（`navLabelFor`，见 `src/lib/nav.ts`），未配置时回退到当前语言的内置文案。
-- 内部链接是否命中真实路由需要自行保证（配置层只校验格式，不做路由存在性检查）；`bottomNav.items` 的站内链接例外，会在构建期检查路由。
+- 内链是否存在对应路由由构建期内容层检查（`nav`、`footerNav`、`bottomNav.items` 都检查），配置层只校验格式。检查范围是固定路由、日记/文章 URL、分类/标签页与分页；独立页面（`pages/` 集合，例如 `/music`）不在其中，写进导航会报 `[daybook:project] 导航链接 /music 没有对应路由`，只能从正文或关于页链接它。
 
 ## 底部导航与归档默认类型
 
@@ -96,7 +112,7 @@ archive: {
 ```
 
 - `bottomNav` 默认开启四项；`enabled: false` 关闭底栏并取消页面底部为它预留的空白。
-- `items` 至少一项，整体替换默认入口；`title`、`icon` 可省略，`icon` 必须是 `src/assets/sprite.html` 中的 `i-*` id。
+- `items` 至少一项，整体替换默认入口；`title`、`icon` 可省略。`icon` 必须是 `src/assets/sprite.html` 中的 `i-*` id：格式必须匹配 `^i-[a-z0-9-]+$`，否则构建失败；格式合法但 sprite 中没有该 id 时图标为空。
 - `archive.defaultType` 只接受 `'articles'` 或 `'diary'`，默认 `'articles'`；设为 `'diary'` 时日记按钮在前且默认选中。
 
 ## 无标题日记的标题回退
@@ -115,7 +131,7 @@ dailyTitleFallback: {
 - 位置：`detail`（详情页）、`archive`（归档列表）、`feed`（RSS）。
 - 值：`'date'`、`'slug'`、`'untitled'`（当前语言「未命名」），或 `{ template: '...' }`。
 - 模板占位符：`{date}`、`{slug}`、`{diary}`（`labels.diary`）、`{untitled}`；未知占位符会以 `dailyTitleFallback.<位置>.template` 报错，空模板会被 schema 拒绝。
-- 默认值保持旧行为：详情/RSS 用日期，归档用 slug；详情页无标题 H1 仍视觉隐藏。
+- 默认：`detail` 与 `feed` 用日期，`archive` 用 slug；详情页无标题 H1 仍视觉隐藏。
 
 ## 内容称呼怎么写
 
@@ -254,10 +270,17 @@ comments: {
 - `Unrecognized key` 通常是把字段拼错或写到了错误的配置文件（例如把 `about` 的字段写进 `site.ts`）。
 - 时区、`since`、URL、分页数量等报错都属于 `validate` 阶段，字段本身类型没错，但取值不合法。
 - 评论 provider 不支持只是警告，不会出现在 `ConfigError` 中。
+- 前缀不是 `[daybook:config]` 时，说明已经进入内容层或构建期检查，按前缀去找对应实现（见上一节的「校验分工」）。
 
-## 与 `docs/configuration.md` 的关系
+## 与文档的关系
 
-- [`docs/configuration.md`](../../docs/configuration.md)：面向使用者的配置手册——每个字段的类型、可选值、默认值、示例与注意事项。
-- 本文件：面向维护者的实现导读——文件分工、解析链路、扩展步骤与错误排查。
+| 文档 | 读者 | 内容 |
+| --- | --- | --- |
+| [`docs/README.md`](../../docs/README.md) | 所有人 | 文档索引、术语与阅读路径 |
+| [`docs/configuration.md`](../../docs/configuration.md) | 使用者 | 每个字段的类型、可选值、默认值、示例与注意事项 |
+| [`docs/writing.md`](../../docs/writing.md) | 使用者 | frontmatter、可见性、图片与 MDX |
+| [`docs/deployment.md`](../../docs/deployment.md) | 使用者 | 静态托管与构建命令 |
+| [`docs/developers/reference.md`](../../docs/developers/reference.md) | 维护者 | 关键取舍与内容模式实现 |
+| 本文件 | 维护者 | 配置层分工、解析链路、扩展步骤与错误排查 |
 
-两者应同步维护：新增或修改字段时，同时更新 `docs/configuration.md` 与本文件中的相关说明。
+新增或修改字段时，同步更新 `docs/configuration.md` 与本文件；若改变了使用者可见行为，再检查 `docs/writing.md` / `docs/deployment.md` 是否需要补一句。
