@@ -1,7 +1,7 @@
 ---
-title: Markdown 扩展演示
+title: Markdown 扩展
 date: 2026-11-11 10:00:00
-description: 这是一篇用于演示 Daybook 正文管线全部扩展语法的文章。
+description: Daybook 正文管线全部扩展语法的文章。
 categories: [文章]
 tags: [Markdown, 测试]
 keywords: [Markdown, 扩展, 测试]
@@ -18,6 +18,14 @@ keywords: [Markdown, 扩展, 测试]
 
 ## Mermaid
 
+```plaintext
+sequenceDiagram
+    participant A
+    participant B
+    A->>B: 你好
+    B->>A: 你好
+```
+
 ```mermaid
 sequenceDiagram
     participant A
@@ -27,6 +35,15 @@ sequenceDiagram
 ```
 
 再放一个流程图，验证不同图类型：
+
+```plaintext
+flowchart TD
+    A[开始] --> B{是否渲染成功}
+    B -->|是| C[展示图表]
+    B -->|否| D[保留源码与错误提示]
+    C --> E[结束]
+    D --> E
+```
 
 ```mermaid
 flowchart TD
@@ -38,6 +55,24 @@ flowchart TD
 ```
 
 ## GitHub Alert
+
+```markdown
+
+> [!NOTE]
+> Useful information that users should know.
+
+> [!TIP]
+> 一条提示，带脚注引用[^alert-note]。
+
+> [!IMPORTANT]
+> 重要信息。
+
+> [!WARNING]
+> Urgent info that needs immediate user attention.
+
+> [!CAUTION]
+> 需要谨慎操作的内容。
+```
 
 > [!NOTE]
 > Useful information that users should know.
@@ -56,11 +91,27 @@ flowchart TD
 
 [^alert-note]: 位于 Alert 内部的脚注，用来测试跨块的脚注解析。
 
-使用容器指令并自定义标题：
+或者使用容器指令并自定义标题：
 
 ```markdown
 :::note[说明]
 默认标题为“说明”，这一段是内容。
+:::
+
+:::tip[自定义 **标题**]
+容器标题保留行内 Markdown，例如 :kbd[Ctrl] + :kbd[S]。
+:::
+
+:::important
+也可以省略标题，使用默认标题。
+:::
+
+:::warning
+带 `:abbr` 的警告：:abbr[HTML]{title="HyperText Markup Language"}。
+:::
+
+:::caution
+最后一种语义色。
 :::
 ```
 
@@ -86,21 +137,24 @@ flowchart TD
 最后一种语义色。
 :::
 
-## 指令的三种形态
-
-| 形态 | 写法 | 用途 |
-| --- | --- | --- |
-| 文本指令 | `:name[内容]{属性}` | 行内元素，如 :kbd[Ctrl] |
-| 叶子指令 | `::name{属性}` | 独立块，如 `::github{repo="owner/repo"}` |
-| 容器指令 | `:::name[标题]` … `:::` | 包住一段正文，如 `:::note` |
-
 ## 折叠块
+
+```markdown
+:::fold[使用提示]
+如果需要添加并非所有读者都会感兴趣的内容，可以将其放在折叠块中。
+:::
+```
 
 :::fold[使用提示]
 如果需要添加并非所有读者都会感兴趣的内容，可以将其放在折叠块中。
 :::
 
 标题支持行内 Markdown 与行内指令：
+
+```markdown
+:::fold[**快捷键** 与 :kbd[Ctrl] + :kbd[C]]
+折叠块内部可以放任意正文，例如列表：
+```
 
 :::fold[**快捷键** 与 :kbd[Ctrl] + :kbd[C]]
 折叠块内部可以放任意正文，例如列表：
@@ -113,36 +167,57 @@ flowchart TD
 
 ### GitHub 仓库
 
+```markdown
+::github{repo="God-2077/astro-daybook"}
+::github{repo="withastro/astro"}
+```
+
 ::github{repo="God-2077/astro-daybook"}
 
 ::github{repo="withastro/astro"}
 
-### YouTube 与 Bilibili
+### YouTube 与 Bilibili 视频
+
+```markdown
+::youtube{id="R401j1QAvEg"}
+::bilibili{id="BV1sK4y1Z7KG"}
+```
 
 ::youtube{id="R401j1QAvEg"}
-
 ::bilibili{id="BV1sK4y1Z7KG"}
 
 默认会在页面脚本加载后立即把封面替换成播放器 iframe；加上 `autoload="false"` 会保留封面，等到点击才创建：
 
+```markdown
 ::youtube{id="R401j1QAvEg" autoload="false"}
-
-## 代码块
-
-代码块右上角会在脚本加载后出现复制按钮：
-
-```js
-const greeting = 'Hello, Daybook';
-console.log(greeting);
 ```
+
+::youtube{id="R401j1QAvEg" autoload="false"}
 
 ## 音乐播放器
 
 ### Meting
 
+```markdown
+::meting{id="8900628861" server="netease" type="playlist" autoPlayNext="true" playlistExpand="false"}
+```
+
 ::meting{id="8900628861" server="netease" type="playlist" autoPlayNext="true" playlistExpand="false"}
 
 ### 本地 YAML 歌单
+
+```markdown
+:::music
+- name: 光るなら
+  artist: Goose house
+  url: https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.mp3
+  cover: https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.jpg
+  lrc: https://k-pan.edgeone.ksable.top/public/astro-daybook/music/hikarunara.lrc
+- name: トリカゴ
+  artist: Goose house
+  url: https://k-pan.edgeone.ksable.top/public/astro-daybook/music/torikago.mp3
+:::
+```
 
 :::music
 - name: 光るなら
@@ -173,13 +248,17 @@ console.log(greeting);
 > [!TIP]
 > Alert 内也可以使用行内指令：按 :kbd[Esc] 退出，或按住 :kbd[Shift] 多选。
 
-## `::hr`
+## 水平线
+
+```markdown
+::hr
+::hr{.red}
+```
 
 ::hr
-
 ::hr{.red}
 
-## 嵌套综合测试
+## 嵌套
 
 ### 折叠块 → Alert
 
@@ -230,6 +309,24 @@ flowchart LR
 
 外层用 4 个冒号，内层事件用 3 个；`date` 必填，`title` 可省略。
 
+```markdown
+::::timeline
+
+:::event{date="2026-11-01" title="新的一天"}
+早上起来，天气很好。把阳台的椅子搬到光里，读了几页书。
+:::
+
+:::event{date="2026-11-03" title="完成主题设计"}
+终于把首页的布局调整好了。日期栏、细线和留白都回到了该在的位置。
+:::
+
+:::event{date="2026-11-08"}
+旧组件退场，新的指令接管。写起来更轻，读起来也更安静。
+:::
+
+::::
+```
+
 ::::timeline
 
 :::event{date="2026-11-01" title="新的一天"}
@@ -250,7 +347,7 @@ flowchart LR
 
 以下仅作语法展示，本文档本身为 `.md`：
 
-```mdx
+```markdown
 :::note[MDX 也支持]
 指令会在构建期转换成普通元素。
 :::

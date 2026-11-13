@@ -2,7 +2,7 @@
 title: 加密文章示例：一封没寄出的信
 date: 2026-10-22 21:00:00
 password: paper2026
-description: 这篇设了密码。关于一封没寄出的信，以及为什么有些话要晚一点再读。
+description: 这篇设了密码。关于一封没寄出的信，以及为什么有些话要晚一点再读。（密码：paper2026）
 categories: [便笺]
 tags: [加密, 随笔]
 ---

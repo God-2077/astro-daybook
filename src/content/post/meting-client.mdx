@@ -26,7 +26,7 @@ import { meting } from '@mdx';
 | `lrc` | `string` | 歌词地址 |
 | `raw` | `object` | 接口返回的原始字段 |
 
-```mdx
+```jsx
 import { meting } from '@mdx';
 
 export const song = await meting.fetchMusic({
@@ -43,7 +43,7 @@ export const song = await meting.fetchMusic({
 
 `type: 'lrc'` 返回纯文本，不是 JSON；取到后可以直接放进 `<pre>`：
 
-```mdx
+```jsx
 export const lyrics = await meting.fetchMusic({
   server: 'netease',
   type: 'lrc',
@@ -57,7 +57,7 @@ export const lyrics = await meting.fetchMusic({
 
 `meting.player()` 会把查询渲染成 `MusicPlayer`，参数与 `fetchMusic` 一致，另加播放器选项；下面的例子显式传 `client: false`，在构建期取数：
 
-```mdx
+```jsx
 {await meting.player({
   server: 'netease',
   type: 'song',
@@ -74,7 +74,7 @@ export const lyrics = await meting.fetchMusic({
 
 `client` 默认为 `true`，构建期不再请求接口，改由浏览器取数据；下面的写法与省略 `client` 一致：
 
-```mdx
+```jsx
 {await meting.player({
   server: 'netease',
   type: 'playlist',
