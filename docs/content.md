@@ -207,6 +207,7 @@ import myImage from './1.jpg';
 - 详情页输出 `<meta name="robots" content="noindex">`；默认不进 sitemap，可由 `siteConfig.sitemap.includeProtected` 打开。
 - 密码页的 Pagefind body 只包裹标题与描述区域，不包含密文正文。
 - 解锁后当前页面展开；不写 sessionStorage/localStorage，刷新或离开即重新锁定。
+- 正文的 Markdown 扩展与普通文章一致：解密后浏览器会补做客户端增强（代码复制、Mermaid、GitHub 卡片、嵌入、音乐播放器、`:hidden` 等）。
 
 > 威胁模型：密文随静态 HTML 公开分发，只能防「随手查看」，不能防有决心的离线攻击。真正敏感的内容应使用服务端鉴权。
 

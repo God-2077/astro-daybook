@@ -504,18 +504,13 @@ function initArchive(): void {
   syncArcAnchors();
 }
 
-function initPage(): void {
-  syncThemeControls();
-  closeMenus();
-  document.body.classList.remove('a-drawer-open');
-  const drawer = document.querySelector<HTMLElement>('#a-drawer');
-  if (drawer && !drawer.hidden) drawer.hidden = true;
-  const drawerToggle = document.querySelector<HTMLButtonElement>('#a-drawer-toggle');
-  drawerToggle?.setAttribute('aria-expanded', 'false');
-  setupToc();
-  setupImages();
-  setupGallery();
-  initArchive();
+/**
+ * 正文扩展的客户端增强：按 DOM 中的标记按需加载对应模块。
+ *
+ * 加密正文在解锁前不在 DOM 里，页面加载时这些条件全部不成立；解锁后必须再调用一次，
+ * 否则 Mermaid、GitHub 卡片、嵌入、播放器、复制按钮与 :hidden 都不会初始化。
+ */
+function setupContentEnhancements(): void {
   if (document.querySelector('[data-music]')) {
     void import('./music-player').then(({ initMusicPlayers }) => {
       initMusicPlayers();
@@ -551,6 +546,21 @@ function initPage(): void {
       initHiddenText();
     });
   }
+}
+
+function initPage(): void {
+  syncThemeControls();
+  closeMenus();
+  document.body.classList.remove('a-drawer-open');
+  const drawer = document.querySelector<HTMLElement>('#a-drawer');
+  if (drawer && !drawer.hidden) drawer.hidden = true;
+  const drawerToggle = document.querySelector<HTMLButtonElement>('#a-drawer-toggle');
+  drawerToggle?.setAttribute('aria-expanded', 'false');
+  setupToc();
+  setupImages();
+  setupGallery();
+  initArchive();
+  setupContentEnhancements();
 }
 
 function onClick(event: MouseEvent): void {
@@ -689,6 +699,7 @@ function boot(): void {
       setupToc();
       setupImages();
       setupGallery();
+      setupContentEnhancements();
     });
     setupThemeWatcher();
   }
