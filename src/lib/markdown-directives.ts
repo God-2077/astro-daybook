@@ -318,7 +318,7 @@ function githubCard(node: MutableDirective, file: VFile, tr: Translator): void {
       'data-github-repo': repo,
       href,
       target: '_blank',
-      rel: 'noopener noreferrer',
+      rel: 'noopener',
       'aria-label': label,
     }) +
     '>' +
@@ -368,7 +368,7 @@ function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provide
       'data-embed-facade': true,
       href,
       target: '_blank',
-      rel: 'noopener noreferrer',
+      rel: 'noopener',
       'aria-label': play,
     }) +
     '>' +

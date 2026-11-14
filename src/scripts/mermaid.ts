@@ -16,6 +16,8 @@ type Gesture = {
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 3;
 const SCALE_STEP = 0.2;
+/** 与 setView 的三位小数取整匹配：超过 100% 才算“已放大”。 */
+const ZOOMED_THRESHOLD = 1.001;
 
 let mermaidPromise: Promise<Mermaid> | null = null;
 let initializedTheme: string | null = null;
@@ -129,6 +131,20 @@ function readView(figure: HTMLElement): View {
   };
 }
 
+function isZoomed(figure: HTMLElement): boolean {
+  return readView(figure).scale > ZOOMED_THRESHOLD;
+}
+
+function canDrag(figure: HTMLElement): boolean {
+  return isZoomed(figure) || isFullscreen(figure);
+}
+
+/** 把“是否放大”写进 DOM，CSS 据此切换 touch-action 与光标。 */
+function syncInteractionState(figure: HTMLElement): void {
+  if (isZoomed(figure)) figure.dataset.mermaidZoomed = 'true';
+  else delete figure.dataset.mermaidZoomed;
+}
+
 /**
  * 统一应用平移与缩放。
  *
@@ -153,6 +169,7 @@ function setView(figure: HTMLElement, next: View): void {
   figure.dataset.mermaidPanY = String(Math.round(y * 100) / 100);
   canvas.style.transform = `translate3d(${Math.round(x * 100) / 100}px, ${Math.round(y * 100) / 100}px, 0) scale(${scale})`;
   syncZoomButtons(figure);
+  syncInteractionState(figure);
 }
 
 function resetView(figure: HTMLElement): void {
@@ -162,6 +179,7 @@ function resetView(figure: HTMLElement): void {
   figure.dataset.mermaidPanX = '0';
   figure.dataset.mermaidPanY = '0';
   syncZoomButtons(figure);
+  syncInteractionState(figure);
 }
 
 function syncZoomButtons(figure: HTMLElement): void {
@@ -321,14 +339,21 @@ function bindViewport(figure: HTMLElement): void {
 
   viewport.addEventListener('pointerdown', (event: PointerEvent) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    // 未放大时鼠标拖动不平移，也不捕获指针，避免鼠标移出 viewport 后留下未释放的指针状态。
+    if (event.pointerType === 'mouse' && !canDrag(figure)) return;
     if (!gesture) gesture = startGesture();
     if (gesture.pointers.size >= 2) return;
     const point = localPoint(viewport, event);
     gesture.pointers.set(event.pointerId, point);
-    try {
-      viewport.setPointerCapture(event.pointerId);
-    } catch {
-      // 某些浏览器/输入设备不支持隐式指针捕获；事件仍可在 viewport 上继续冒泡。
+    // 未放大时单指留给页面滚动；双指捏合与放大后的拖动才接管指针。
+    if (canDrag(figure) || gesture.pointers.size >= 2) {
+      for (const pointerId of gesture.pointers.keys()) {
+        try {
+          viewport.setPointerCapture(pointerId);
+        } catch {
+          // 某些浏览器/输入设备不支持隐式指针捕获；事件仍可在 viewport 上继续冒泡。
+        }
+      }
     }
     if (gesture.pointers.size === 1) {
       gesture.startView = readView(figure);
@@ -351,6 +376,7 @@ function bindViewport(figure: HTMLElement): void {
     gesture.pointers.set(event.pointerId, point);
 
     if (gesture.pointers.size === 1) {
+      if (!canDrag(figure)) return;
       const dx = point.x - gesture.startPoint.x;
       const dy = point.y - gesture.startPoint.y;
       if (!gesture.dragging && Math.hypot(dx, dy) < 3) return;
@@ -408,12 +434,28 @@ function bindViewport(figure: HTMLElement): void {
     'wheel',
     (event: WheelEvent) => {
       if (figure.dataset.mermaidState !== 'done') return;
+      const fullscreen = isFullscreen(figure);
+      const modifier = event.ctrlKey || event.altKey;
+      // 未放大时普通滚轮 / 触控板交给页面滚动；全屏、Ctrl / Alt+滚轮或放大后才缩放图表。
+      if (!fullscreen && !modifier && !isZoomed(figure)) return;
       event.preventDefault();
       let delta = event.deltaY;
       if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
       else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= 100;
       const current = readView(figure);
-      zoomAround(figure, current.scale * Math.exp(-delta * 0.0015), localPoint(viewport, event));
+      // 普通滚轮在放大态最低回到 100%，继续滚动就交还页面；Ctrl / Alt 与全屏保留完整 50%–300%。
+      const minScale = fullscreen || modifier ? MIN_SCALE : 1;
+      const target = clamp(current.scale * Math.exp(-delta * 0.0015), minScale, MAX_SCALE);
+      zoomAround(figure, target, localPoint(viewport, event));
+    },
+    { passive: false },
+  );
+  // 未放大时浏览器会把双指捏合当成页面手势；双指落下时阻止默认行为，交给 pointer 捏合逻辑。
+  viewport.addEventListener(
+    'touchstart',
+    (event: TouchEvent) => {
+      if (figure.dataset.mermaidState !== 'done') return;
+      if (event.touches.length >= 2 && !canDrag(figure)) event.preventDefault();
     },
     { passive: false },
   );
