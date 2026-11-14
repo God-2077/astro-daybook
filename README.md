@@ -101,6 +101,7 @@ date: 2026-11-14 21:30:00
 | 用 Vercel + 内容仓库自动发布 | [部署到 Vercel](./docs/deployment-vercel.md) |
 | 主题与内容分仓 | [双仓库](./docs/dual-repo.md) |
 | 构建失败、搜索没结果 | [排错](./docs/troubleshooting.md) |
+| 接入 PR-Agent 代码审查 | [PR-Agent](./docs/developers/pr-agent.md) |
 | 全部文档与维护者文档 | [文档索引](./docs/README.md) |
 
 ## 写日记更省事（可选）

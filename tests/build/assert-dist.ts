@@ -93,6 +93,10 @@ for (const page of ['friends/index.html', 'about/index.html']) {
 }
 
 const about = read('about/index.html');
+assert.match(about, /data-pagefind-body/, '关于页应进入 Pagefind 索引');
+assert.match(about, /data-pagefind-meta="type:page"/, '关于页搜索结果应归入页面');
+assert.match(about, /data-pagefind-filter="type:page"/, '关于页应支持类型筛选');
+assert.match(about, /data-pagefind-meta="title:关于"/, '关于页搜索结果标题应为页面标题');
 assert.match(about, /<img class="a-stamp-avatar" src="\/avatar\.svg"/, '关于页应渲染 site.ts 配置的头像');
 assert.match(about, /<h2 id="h-关于我"[^>]*><svg class="a-h2-star"/, '关于页正文应来自 MDX 并复用 ✦ 标题管线');
 assert.doesNotMatch(about, /class="a-find"|class="a-timeline"/, '关于页不再渲染联系人与时间线');
@@ -217,8 +221,9 @@ assert.match(
 );
 
 const mdxSyntax = read('post/mdx-syntax/index.html');
-assert.match(mdxSyntax, /例如今天是 2026 年/, 'MDX 表达式应在构建期求值');
-assert.match(mdxSyntax, /<h2 id="h-表达式与图片"><svg class="a-h2-star"/, 'MDX 标题应复用 h2 ✦ 管线');
+assert.match(mdxSyntax, /渲染出来是：这篇文档构建于 2026/, 'MDX 表达式应在构建期求值');
+assert.match(mdxSyntax, /<h2 id="h-表达式"><svg class="a-h2-star"/, 'MDX 标题应复用 h2 ✦ 管线');
+assert.match(mdxSyntax, /<astro-island[^>]*client="load"/, 'MDX 组件应按 client:load 水合');
 assert.match(mdxSyntax, /<figure class="a-figure"><div class="a-frame">/, 'MDX 单图应转 figure');
 assert.match(mdxSyntax, /class="a-img"[^>]*loading="lazy"/, 'MDX 图片应懒加载');
 assert.doesNotMatch(mdxSyntax, /<p>import /, 'MDX import 不应泄漏到正文');
@@ -282,7 +287,7 @@ const hiddenSearch = read('post/reinstall/index.html');
 assert.doesNotMatch(hiddenSearch, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 37, `Pagefind 页面集合应精确为 37 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 38, `Pagefind 页面集合应精确为 38 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);

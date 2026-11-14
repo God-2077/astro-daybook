@@ -31,6 +31,7 @@ Daybook 是一个以日记为主的静态博客主题：用 Markdown 写内容�
 | [Termux 构建](./developers/termux.md) | 在 Termux / Android 上修复 Sätteri、Pagefind、sharp 的构建问题 | 操作指南 |
 | [实现取舍](./developers/reference.md) | 维护者视角：参考项目、关键取舍与内容模式实现 | 解释 |
 | [验收清单](./developers/acceptance.md) | 发版前逐项核对构建、可见性、路由与 i18n | 检查清单 |
+| [PR-Agent](./developers/pr-agent.md) | 用 GitHub Actions 接入 DeepSeek 代码审查、描述与问答 | 操作指南 |
 
 ## 术语
 

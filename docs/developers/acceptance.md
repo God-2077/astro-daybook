@@ -10,7 +10,7 @@
 - [ ] `pnpm build` 成功，`postbuild` 生成 `dist/pagefind/`。
 - [ ] `pnpm lint` 通过。
 - [ ] `pnpm test` 通过（单元断言 + 构建产物断言）。
-- [ ] `pnpm test:build` 最后一行是 `build assertions passed: N indexed pages, M default RSS items`，且 `N` 与 `tests/build/assert-dist.ts` 的断言一致（当前断言 31 个 `data-pagefind-body` 页面，内容变动时同步改断言）。
+- [ ] `pnpm test:build` 最后一行是 `build assertions passed: N indexed pages, M default RSS items`，且 `N` 与 `tests/build/assert-dist.ts` 的断言一致（当前断言 38 个 `data-pagefind-body` 页面，内容变动时同步改断言）。
 
 ## 日期
 
@@ -49,7 +49,7 @@
 - [ ] 给 `.mdx` 加 `password` 时构建报错，错误信息说明 MDX 暂不支持密码。
 - [ ] `rss.fullText: true` 时 MDX 回退摘要并输出一次警告；恢复默认后无警告。
 - [ ] `::::timeline` 的日期、标题、正文在浅/深色与 375/768/1024/1440 宽度下正常；≤767 日期栏收窄。
-- [ ] Pagefind 索引为 31 页（与 `tests/build/assert-dist.ts` 的 `data-pagefind-body` 页面断言一致）。
+- [ ] Pagefind 索引为 38 页（与 `tests/build/assert-dist.ts` 的 `data-pagefind-body` 页面断言一致）。
 
 ## 路由与分页
 

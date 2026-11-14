@@ -258,9 +258,18 @@ function closeDrawer(): void {
   toggle?.focus();
 }
 
+/** TOC 观察带：视口上方 12%–30% 之间视为「正在阅读」，与 rootMargin 保持一致。 */
+const TOC_BAND_TOP = 12;
+const TOC_BAND_BOTTOM = 30;
+/** 点击 / 带 hash 跳转后短暂忽略观察器回调：标题会停在 scroll-margin-top 处，下方很近的下一节不该抢走高亮。 */
+const TOC_FOCUS_GRACE = 400;
+
 let tocObserver: IntersectionObserver | null = null;
+let tocCleanup: (() => void) | null = null;
 
 function setupToc(): void {
+  tocCleanup?.();
+  tocCleanup = null;
   tocObserver?.disconnect();
   tocObserver = null;
 
@@ -280,7 +289,10 @@ function setupToc(): void {
     .filter((heading): heading is HTMLElement => Boolean(heading));
   if (headings.length === 0) return;
 
+  let activeId = '';
   const activate = (id: string) => {
+    if (id === activeId) return;
+    activeId = id;
     links.forEach((link) => {
       link.removeAttribute('aria-current');
     });
@@ -289,21 +301,86 @@ function setupToc(): void {
     });
   };
 
-  tocObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting);
-      if (visible.length === 0) return;
-      visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      const first = visible[0];
-      if (first) activate((first.target as HTMLElement).id);
-    },
-    { rootMargin: '-12% 0px -70% 0px', threshold: [0, 1] },
-  );
+  // 按阅读带计算当前条目：首屏（带 hash / 恢复的滚动位置）、滚动与 resize 重算都走这里。
+  const headingAtReadingBand = (): string => {
+    const bandTop = (window.innerHeight * TOC_BAND_TOP) / 100;
+    const bandBottom = (window.innerHeight * TOC_BAND_BOTTOM) / 100;
+    let above = headings[0]?.id ?? '';
+    let inBand = '';
+    for (const heading of headings) {
+      const top = heading.getBoundingClientRect().top;
+      if (top < bandTop) above = heading.id;
+      else if (top <= bandBottom) {
+        inBand = heading.id;
+        break;
+      } else break;
+    }
+    // 页面到底时最后一节滚不到阅读带里，直接点亮最后一条。
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+      return headings[headings.length - 1]?.id ?? above;
+    }
+    return inBand || above;
+  };
+
+  let ignoreUntil = 0;
+  let frame = 0;
+  /** 按当前位置重算高亮；rAF 节流，滚动与 resize 共用。 */
+  const sync = () => {
+    frame = 0;
+    // 点击 / hash 跳转后的短暂窗口内不重算：标题落在 scroll-margin-top 处，
+    // 下方很近的下一节不该立刻抢走高亮。
+    if (performance.now() < ignoreUntil) return;
+    activate(headingAtReadingBand());
+  };
+  const scheduleSync = () => {
+    if (!frame) frame = window.requestAnimationFrame(sync);
+  };
+
+  const focus = (id: string) => {
+    if (!byId.has(id)) return;
+    ignoreUntil = performance.now() + TOC_FOCUS_GRACE;
+    activate(id);
+  };
+  const onTocClick = (event: MouseEvent) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('.a-toc a[href^="#"], .a-toc-m a[href^="#"]');
+    if (!link) return;
+    focus(decodeURIComponent(link.hash.slice(1)));
+  };
+  const onHashChange = () => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (id) focus(id);
+  };
+
+  // 观察器只负责布局变化（图片、折叠块展开等）触发重算；滚动位置由 rAF 节流的 scroll 监听处理。
+  // 观察器本身会漏掉「标题直接跳过观察带」的跳转（PageDown、Home/End、点击目录），
+  // 这类跳转没有 intersection 变化，aria-current 会一直停在旧条目上。
+  tocObserver = new IntersectionObserver(scheduleSync, {
+    rootMargin: `-${TOC_BAND_TOP}% 0px -${100 - TOC_BAND_BOTTOM}% 0px`,
+    threshold: [0, 1],
+  });
 
   headings.forEach((heading) => {
     tocObserver?.observe(heading);
   });
-  activate(headings[0]?.id ?? '');
+  window.addEventListener('scroll', scheduleSync, { passive: true });
+  window.addEventListener('resize', scheduleSync);
+  document.addEventListener('click', onTocClick);
+  window.addEventListener('hashchange', onHashChange);
+  activate(headingAtReadingBand());
+
+  tocCleanup = () => {
+    tocObserver?.disconnect();
+    tocObserver = null;
+    window.removeEventListener('scroll', scheduleSync);
+    window.removeEventListener('resize', scheduleSync);
+    document.removeEventListener('click', onTocClick);
+    window.removeEventListener('hashchange', onHashChange);
+    if (frame) {
+      window.cancelAnimationFrame(frame);
+      frame = 0;
+    }
+  };
 }
 
 /**
@@ -427,18 +504,13 @@ function initArchive(): void {
   syncArcAnchors();
 }
 
-function initPage(): void {
-  syncThemeControls();
-  closeMenus();
-  document.body.classList.remove('a-drawer-open');
-  const drawer = document.querySelector<HTMLElement>('#a-drawer');
-  if (drawer && !drawer.hidden) drawer.hidden = true;
-  const drawerToggle = document.querySelector<HTMLButtonElement>('#a-drawer-toggle');
-  drawerToggle?.setAttribute('aria-expanded', 'false');
-  setupToc();
-  setupImages();
-  setupGallery();
-  initArchive();
+/**
+ * 正文扩展的客户端增强：按 DOM 中的标记按需加载对应模块。
+ *
+ * 加密正文在解锁前不在 DOM 里，页面加载时这些条件全部不成立；解锁后必须再调用一次，
+ * 否则 Mermaid、GitHub 卡片、嵌入、播放器、复制按钮与 :hidden 都不会初始化。
+ */
+function setupContentEnhancements(): void {
   if (document.querySelector('[data-music]')) {
     void import('./music-player').then(({ initMusicPlayers }) => {
       initMusicPlayers();
@@ -474,6 +546,21 @@ function initPage(): void {
       initHiddenText();
     });
   }
+}
+
+function initPage(): void {
+  syncThemeControls();
+  closeMenus();
+  document.body.classList.remove('a-drawer-open');
+  const drawer = document.querySelector<HTMLElement>('#a-drawer');
+  if (drawer && !drawer.hidden) drawer.hidden = true;
+  const drawerToggle = document.querySelector<HTMLButtonElement>('#a-drawer-toggle');
+  drawerToggle?.setAttribute('aria-expanded', 'false');
+  setupToc();
+  setupImages();
+  setupGallery();
+  initArchive();
+  setupContentEnhancements();
 }
 
 function onClick(event: MouseEvent): void {
@@ -612,6 +699,7 @@ function boot(): void {
       setupToc();
       setupImages();
       setupGallery();
+      setupContentEnhancements();
     });
     setupThemeWatcher();
   }

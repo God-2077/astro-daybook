@@ -139,21 +139,31 @@ body.a-search-open .a-bottomnav {
   appearance: none;
 }
 
-/* 计数：始终占位，避免结果出现时输入条抖动 */
+/* 计数：固定槽宽（始终占位），避免加载 / 结果切换时输入条抖动。
+   宽度按本语言最长的计数文案预留：zh / zh-TW / ja 的「18 条」≈29px，
+   en 的「18 results」≈57px（11px 字号）；留出居中余量。
+   加载中只显示紧凑的「…」，不再用「搜索中…」撑宽槽位。 */
 .a-search-count {
   flex: none;
-  min-width: 42px;
+  width: 4.5em;
   margin-left: 2px;
   color: hsl(var(--muted-foreground));
   font-size: 11px;
   line-height: 1;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:lang(en) .a-search-count {
+  width: 6.4em;
 }
 
 .a-search-clear {
+  position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -177,6 +187,18 @@ body.a-search-open .a-bottomnav {
 .a-search-clear .a-ico {
   width: 13px;
   height: 13px;
+}
+
+/* 计数与清除按钮之间的一条 1px 分隔线：只在计数槽有内容（加载中 / 有结果）时出现 */
+.a-search-clear.is-separated::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -6px; /* clear 与 count 的 10px gap + count 2px margin 的中点 */
+  width: 1px;
+  height: 14px;
+  background: hsl(var(--border));
+  transform: translateY(-50%);
 }
 
 /* 关闭：桌面是「键帽」，移动端退化为图标按钮 */
@@ -631,8 +653,11 @@ body.a-search-open .a-bottomnav {
   }
 
   .a-search-count {
-    min-width: 36px;
     font-size: 10.5px;
+  }
+
+  .a-search-clear.is-separated::after {
+    right: -5px; /* 移动端 gap 8px + count 2px margin 的中点 */
   }
 
   .a-search-close {

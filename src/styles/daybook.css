@@ -489,12 +489,14 @@ ul, ol { padding: 0; }
   color: hsl(var(--card-foreground));
   text-wrap: balance;
 }
-/* 手作元素 #2（全站唯一手绘笔触）：日记页头标题下的粉色荧光笔划痕；与 ✦ 合计 2 种装饰 */
+/* 手作元素 #2（全站唯一手绘笔触）：日记页头标题下的粉色荧光笔划痕；与 ✦ 合计 2 种装饰。
+   注意：全局 img, svg { max-width: 100% } 会把 140% 的外扩压回 100%，只剩下负 left 的偏移；
+   笔触必须用 left: 0 + width: 100% 与标题盒对齐，不要再写负 left。 */
 .a-ink {
   position: absolute;
-  left: -20%;
+  left: 0;
   bottom: -13px;
-  width: 140%;
+  width: 100%;
   height: auto;
   color: hsl(var(--pink-decor));
   pointer-events: none;

@@ -230,6 +230,7 @@ keywords: [静态博客, Pagefind]
 - 列表、归档、分类/标签、RSS 与搜索只使用标题与 `description`；正文不会以明文出现在 HTML 里。
 - 详情页输出 `<meta name="robots" content="noindex, nofollow">`；默认不进 sitemap，可由 `siteConfig.sitemap.includeProtected` 打开；`robots.txt` 会把密码页加入 `Disallow`。
 - 密码错误时提示「密码错误，请再试一次」；解锁状态不写入浏览器存储，刷新或离开页面后重新锁定。
+- 正文的 Markdown 扩展与普通文章一致：解密后浏览器会补做客户端增强（代码复制、Mermaid、GitHub 卡片、嵌入、音乐播放器、`:hidden` 等）。
 - 密码内容的评论区在解锁后才加载。
 - 密码保护是静态分发下的遮挡，不是服务端鉴权：密文随 HTML 公开，可以离线爆破；真正敏感的内容不要放进来。完整边界见[配置说明的安全边界](./configuration.md#安全边界)。
 
