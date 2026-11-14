@@ -93,6 +93,10 @@ for (const page of ['friends/index.html', 'about/index.html']) {
 }
 
 const about = read('about/index.html');
+assert.match(about, /data-pagefind-body/, '关于页应进入 Pagefind 索引');
+assert.match(about, /data-pagefind-meta="type:page"/, '关于页搜索结果应归入页面');
+assert.match(about, /data-pagefind-filter="type:page"/, '关于页应支持类型筛选');
+assert.match(about, /data-pagefind-meta="title:关于"/, '关于页搜索结果标题应为页面标题');
 assert.match(about, /<img class="a-stamp-avatar" src="\/avatar\.svg"/, '关于页应渲染 site.ts 配置的头像');
 assert.match(about, /<h2 id="h-关于我"[^>]*><svg class="a-h2-star"/, '关于页正文应来自 MDX 并复用 ✦ 标题管线');
 assert.doesNotMatch(about, /class="a-find"|class="a-timeline"/, '关于页不再渲染联系人与时间线');
@@ -291,7 +295,7 @@ const hiddenSearchDaily = read('daily/2026-08-20-search-hidden/index.html');
 assert.doesNotMatch(hiddenSearchDaily, /data-pagefind-body/);
 
 const indexed = htmlFiles(dist).filter((file) => /<[^>]*\sdata-pagefind-body(?:\s|=|>)/.test(readFileSync(file, 'utf8')));
-assert.equal(indexed.length, 31, `Pagefind 页面集合应精确为 31 个，实际 ${indexed.length}`);
+assert.equal(indexed.length, 32, `Pagefind 页面集合应精确为 32 个，实际 ${indexed.length}`);
 
 const feed = rssItems('feed.xml');
 assert.ok(feed.length > 0 && feed.length <= 20);

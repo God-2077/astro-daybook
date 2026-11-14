@@ -61,7 +61,13 @@ const { Content } = await render(aboutEntry);
           <p class="a-stamp-caption">{siteConfig.author}<br />est. {siteConfig.since}</p>
         </aside>
 
-        <div class="a-about-main">
+        <div
+          class="a-about-main"
+          data-pagefind-body
+          data-pagefind-meta="type:page"
+          data-pagefind-filter="type:page"
+        >
+          <span class="a-sr" data-pagefind-meta={`title:${t('about.title')}`} />
           <h1 id="a-about-name">{siteConfig.author}</h1>
           <p class="a-about-line">{siteConfig.subtitle || siteConfig.description}</p>
           <div class="a-about-rule"></div>
