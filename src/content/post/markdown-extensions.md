@@ -1,5 +1,5 @@
 ---
-title: Markdown 扩展
+title: Markdown 扩展功能
 date: 2026-11-11 10:00:00
 description: Daybook 正文管线全部扩展语法的文章。
 categories: [文章]
