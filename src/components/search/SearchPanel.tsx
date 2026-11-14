@@ -321,7 +321,7 @@ export default function SearchPanel({ messages }: SearchPanelProps) {
             {hasQuery && (
               <button
                 type="button"
-                className="a-search-clear"
+                className={countText ? 'a-search-clear is-separated' : 'a-search-clear'}
                 aria-label={messages.clearAria}
                 onClick={() => {
                   setQuery('');
@@ -334,7 +334,15 @@ export default function SearchPanel({ messages }: SearchPanelProps) {
               </button>
             )}
             <span className="a-search-count" id="a-search-count" aria-live="polite">
-              {countText}
+              {loading ? (
+                <>
+                  {/* 固定槽宽放不下「搜索中…」，改为紧凑的省略号；完整文案留给读屏 */}
+                  <span aria-hidden="true">…</span>
+                  <span className="a-sr">{messages.loading}</span>
+                </>
+              ) : (
+                countText
+              )}
             </span>
             <button
               type="button"
