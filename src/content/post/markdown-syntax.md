@@ -1,7 +1,8 @@
 ---
-title: Markdown 语法演示
+title: Markdown 语法
 date: 2026-09-20 09:00:00
-description: Markdown 基础的语法演示
+updated: 2026-11-14 12:02:16
+description: Markdown 基础的语法
 categories: [文章]
 tags: [Markdown, 排版]
 keywords: [Markdown, 排版, 测试]

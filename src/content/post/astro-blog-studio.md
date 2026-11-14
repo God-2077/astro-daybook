@@ -41,6 +41,8 @@ const response = await fetch('https://api.github.com/repos/owner/repo/contents/p
 
 GitHub Contents API 更新文件时必须带 `sha`，否则会得到 409。空仓库没有默认分支，第一次写入前要先创建 README。
 
-## 下一步
+## 项目地址
 
-把图片上传也接进来，再补一个草稿队列。工具本身不复杂，难的是克制——不要把一个编辑器做成 CMS。
+Demo: https://sakura.ksable.top/
+
+::github{repo="God-2077/astro-blog-studio"}

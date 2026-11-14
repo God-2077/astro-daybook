@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Termux / Android 构建兼容性修复（对应 docs/termux.md）。
+ * Termux / Android 构建兼容性修复（对应 docs/developers/termux.md）。
  *
  * Astro 7 的配置 schema 会在加载阶段 import `@astrojs/markdown-satteri`，即使项目
  * 使用 unified()，也会触发 satteri 的原生绑定加载；satteri 没有 Android 原生包，
@@ -100,7 +100,7 @@ function printHelp() {
   --force       不在 Android 上也写入修复（补丁本身跨平台安全）
   -h, --help    显示本帮助
 
-对应文档：docs/termux.md`);
+对应文档：docs/developers/termux.md`);
 }
 
 /* ------------------------------------------------------------------ */
@@ -838,7 +838,7 @@ function main() {
     info('依赖与补丁均已就绪，跳过 pnpm install。');
   }
 
-  // 6. pnpm 偶尔不会重新落盘补丁（见 docs/termux.md 的注意事项），这里兜底改写已安装文件。
+  // 6. pnpm 偶尔不会重新落盘补丁（见 docs/developers/termux.md 的注意事项），这里兜底改写已安装文件。
   for (const target of targets) {
     const { written, found, patchedDirs } = applyPatchToModules(target);
     if (found === 0) fail(`安装后仍找不到 ${target.name}@${target.version}，请执行 pnpm install 后重试。`);

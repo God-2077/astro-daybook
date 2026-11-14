@@ -1,7 +1,8 @@
 ---
-title: Mermaid 渲染演示
+title: Markdown Mermaid
 date: 2026-11-11 13:34:24
-description: Mermaid 渲染演示
+updated: 2026-11-14 12:01:37
+description: Mermaid 渲染
 categories: [文章]
 tags: [Mermaid, 测试]
 keywords: [Mermaid, 渲染, 测试]

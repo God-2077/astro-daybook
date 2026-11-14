@@ -160,8 +160,8 @@ export const siteConfig = defineSiteConfig({
    * 页脚导航（可选）。
    *
    * - 可选值：`{ title, link }[]`，只支持一级链接，规则与 `nav` 相同。
-   * - 默认：按 `lang` 使用内置「归档 / 友链」；显式配置后不会被翻译。
-   * - 注意：页脚不再自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
+   * - 默认：按 `lang` 使用内置「归档 / 友链 / RSS」三项；显式配置后不会被翻译。
+   * - 注意：显式配置 `footerNav` 后不会自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
    */
   //   footerNav: [
   //     { title: '归档', link: '/archives' },

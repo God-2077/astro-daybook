@@ -2,7 +2,7 @@
 
 本文件是本仓库的协作规则，供 AI Agent 与人类贡献者共用。
 
-配套文档：[README.md](./README.md)（安装、写作与配置入口）、[docs/configuration.md](./docs/configuration.md)（配置字段、部署、安全边界）、[docs/content.md](./docs/content.md)（内容目录、frontmatter、可见性）、[docs/dual-repo.md](./docs/dual-repo.md)（主题与内容分仓、clone/pull）。
+配套文档：[README.md](./README.md)（安装、写作与配置入口）、[docs/README.md](./docs/README.md)（文档索引）、[docs/configuration.md](./docs/configuration.md)（配置字段、校验与安全边界）、[docs/writing.md](./docs/writing.md)（内容目录、frontmatter、可见性）、[docs/deployment.md](./docs/deployment.md)（部署）、[docs/dual-repo.md](./docs/dual-repo.md)（主题与内容分仓、clone/pull）。
 
 ---
 
@@ -55,7 +55,8 @@ src/
 content/         可选独立内容仓库：post/、daily/、pages/、spec/、public/、config/；默认被 .gitignore 忽略
 public/         主题 public（仅主题模式）：favicon、头像、寒蝉全圆体分片、音乐、og 图；
                 内容模式改用 <内容根>/public，可由 pnpm og:content 生成 og 图
-docs/            配置、内容、音乐、部署与安全边界等文档
+docs/            用户文档（快速开始、配置、写作、Markdown、部署、双仓库、排错）
+docs/developers/ 维护者文档（Meting API、Termux、实现取舍、验收清单）
 scripts/         make-og-image.ts、astro.mjs（Astro 包装器：模式参数与内容缓存切换）、site-context.ts、
                  read-content-config.ts、content-repo.ts / content-repo-lib.ts（clone/pull）
 tests/           单元断言与构建产物断言

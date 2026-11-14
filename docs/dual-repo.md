@@ -1,8 +1,30 @@
 # 双仓库：主题与内容分离
 
-Daybook 默认把示例内容放在主题仓库的 `src/content/`，适合只想跑起来看看、或者内容不多的站点。如果希望**主题代码与写作内容各自独立提交**，可以把内容放进一个单独的 Git 仓库，主题通过 `CONTENT_REPO` 指向它。
+Daybook 默认把内容放在主题仓库的 `src/content/`。这页解释另一种组织方式：把写作内容与站点配置放进独立的 Git 仓库（内容仓库），主题通过 `CONTENT_REPO` 指向它；并带你完成第一次配置、日常更新，以及从主题模式迁移。
 
-这不是 Git submodule：内容仓库是一个嵌套在主题目录里的独立仓库，主题仓库的 `.gitignore` 会忽略它。
+需要先有：已按[快速开始](./quick-start.md)跑通主题模式；会基本的 Git 操作（clone、commit、push）；一个可用的内容仓库远端，或准备新建一个。
+
+## 什么时候用双仓库
+
+适合这些情况：
+
+- 想让写作提交与主题升级互不干扰：主题仓库只放代码与文档，内容仓库只有内容。
+- 想给内容单独配权限，或把内容仓库设成私有、主题仓库保持公开。
+- 多台设备或多个人写内容，内容仓库可以单独 clone 与 pull。
+- 想从官方内容仓库 <https://github.com/God-2077/astro-daybook-content/> 起步。
+
+这些情况不需要双仓库：
+
+- 只有一个站点，不介意写作提交与主题提交在同一个仓库：用默认的主题模式，内容放 `src/content/`。
+- 只是试用主题：主题模式少一个 clone 步骤。
+
+代价：
+
+- 每次写作前后多一个 `pnpm content:pull` 与 push 的动作。
+- 构建、预览与检查要用 `:content` 脚本，不能再用 `pnpm build` 得到内容站点。
+- 内容根必须与主题仓库在同一盘符（见[路径与模式限制](#路径与模式限制)）。
+- 站点配置移到了内容仓库，主题仓库的 `src/config/site.ts` 在内容模式下不再生效。
+- 部署时构建机要能访问内容仓库（见[部署指南](./deployment.md)）。
 
 ## 两种模式
 
@@ -11,86 +33,55 @@ Daybook 默认把示例内容放在主题仓库的 `src/content/`，适合只想
 | 主题模式（默认） | `pnpm dev` / `pnpm build` | `src/content/` | `public/` | `src/config/site.ts`、`src/config/links.ts` |
 | 内容模式 | `pnpm dev:content` / `pnpm build:content` | `CONTENT_REPO` 指向的目录，默认 `content/` | `<内容根>/public/` | `<内容根>/config/site.ts`、`<内容根>/config/links.ts` |
 
-两种模式共用同一套路由、组件、frontmatter schema 与配置校验；区别是内容目录、publicDir 和站点配置从哪里加载。内容模式不读取主题的 `public/`，两套静态资源互不影响。
+两种模式共用同一套路由、组件、frontmatter schema 与配置校验；区别只有内容根、`publicDir` 与站点配置从哪里加载。内容模式不读取主题的 `src/content/` 与 `public/`，主题模式也不读取 `content/`，两套内容不要同时修改。
 
 ```bash
-pnpm dev              # 主题模式，读 src/content/
-pnpm dev:content      # 内容模式，读 content/
-pnpm build            # 主题模式构建
-pnpm build:content    # 内容模式构建，并生成 Pagefind 索引
+pnpm dev              # 主题模式：内容读 src/content/，配置读 src/config/
+pnpm build            # 主题模式构建，postbuild 生成 Pagefind 索引
+pnpm dev:content      # 内容模式：内容读内容根，配置读 <内容根>/config/
+pnpm build:content    # 内容模式构建，末尾生成 Pagefind 索引
 ```
+
+`content/` 不是 Git submodule：它只是被主题仓库 `.gitignore` 忽略的目录，里面可以是独立的 Git 仓库。
 
 ## 内容仓库结构
 
-默认目录名为 `content/`，也可以由 `CONTENT_REPO_DIR` 改成别的名字：
-
 ```text
-content/
-├── post/       文章（Markdown / MDX）
-├── daily/      日记
-├── pages/      独立页面
-├── spec/       关于页正文（about.mdx）
-├── public/     静态资源（favicon、头像、图片、OG 图等）
-├── cache/      Meting-API 构建缓存（可用于加速 Vercel 部署等）
-└── config/
-    ├── site.ts 站点配置
-    └── links.ts 友链配置
+content/                                默认目录名，可用 CONTENT_REPO_DIR 改
+├─ post/                                文章（Markdown / MDX）
+├─ daily/                               日记
+├─ pages/                               独立页面
+├─ spec/                                关于页正文（about.mdx）
+├─ public/                              静态资源（favicon、头像、图片、OG 图等）
+├─ cache/                               Meting 构建缓存，首次写入时自动创建，不属于内容
+├─ config/
+│  ├─ site.ts                           站点配置
+│  └─ links.ts                          友链配置
+├─ tsconfig.json                        内容仓库单独做类型检查用
+└─ .github/workflows/deploy-vercel.yml  可选：推送内容后触发 Vercel 重建
 ```
 
-四个内容目录与主题模式下的 `src/content/{post,daily,pages,spec}` 结构完全相同，frontmatter 规则见 [`content.md`](./content.md)。`config/` 只放配置，不参与内容集合。
+- 四个集合目录与主题模式的 `src/content/{post,daily,pages,spec}` 结构相同，frontmatter 规则见[写作指引](./writing.md)。
+- `post/`、`daily/`、`pages/` 可以为空；`spec/about.mdx` 必须存在（关于页正文），缺失时构建失败并给出路径。
+- `public/` 是内容模式的 `publicDir`，站内仍用 `/` 开头的路径引用：`<内容根>/public/images/photo.jpg` 对应 `/images/photo.jpg`。
+- `config/` 只放站点配置，不参与内容集合。
+- `cache/meting-api-data.json` 是 Meting API 的构建缓存，不属于内容；内容仓库应把 `cache/` 加进自己的 `.gitignore`。
+- `.github/workflows/deploy-vercel.yml` 是可选的部署 workflow，作用见[部署到 Vercel](./deployment-vercel.md)；本地开发不需要它。
 
-`cache/meting-api-data.json` 是 Meting 构建缓存，由 `pnpm build:content` / `pnpm dev:content` 自动生成。它不属于内容，内容仓库应把 `cache/` 加入自己的 `.gitignore`；主题模式的缓存则在 `.cache/meting-api-data.json`，已被主题仓库忽略。
+## 第一次配置
 
-## 静态资源与 publicDir
+**1. 准备内容仓库**
 
-内容模式下 Astro 的 `publicDir` 指向 `<内容根>/public`，主题仓库的 `public/` 不参与内容模式的开发与构建。两套资源完全隔离，站内引用仍以 `/` 开头：
+- 已经有远端内容仓库：在主题仓库里直接 clone，目标目录必须不存在或为空。
+- 没有内容仓库：从官方内容仓库 <https://github.com/God-2077/astro-daybook-content/> 起步，或新建一个仓库，把 `daily/`、`post/`、`pages/`、`spec/`、`public/`、`config/` 放进去。
+- 不打算用 clone：手动把内容仓库目录放到主题仓库的 `content/`（或 `CONTENT_REPO_DIR` 指定的位置）也可以。
 
-```text
-<内容根>/public/favicon.svg      → /favicon.svg
-<内容根>/public/images/photo.jpg → /images/photo.jpg
-```
+**2. 配置 `.env`**
 
-迁移或升级内容仓库时，把主题 `public/` 里仍然需要的资源复制到 `<内容根>/public/`。示例骨架已包含 `favicon.svg`、`avatar.svg` 与 `og-default.png`，可以直接替换成自己的版本。
-
-OG 图按当前模式生成：
-
-```bash
-pnpm og            # 主题模式：写入 public/og-default.png
-pnpm og:content    # 内容模式：写入 <内容根>/public/og-default.png
-```
-
-`pnpm og:content` 会读取内容仓库的 `config/site.ts`，目录顺序为 `--content-repo`、`CONTENT_REPO_DIR`、最后回退到 `content`。修改站点标题、作者或 `since` 后重新生成，并把图片提交到内容仓库。
-
-## 快速开始
-
-### 1. 准备内容仓库
-
-如果你已经有内容仓库，直接看第 2 步。当前工作区里的 `content/` 只是示例骨架；要把它变成真正的内容仓库：
-
-```bash
-cd content
-git init
-git add .
-git commit -m "init content"
-git remote add origin <你的内容仓库地址>
-git push -u origin main
-```
-
-然后回到主题目录。若要克隆一个已经有内容远端仓库：
-
-```bash
-# content/ 需要不存在或为空；示例骨架会挡住 clone
-pnpm content:clone
-```
-
-`content:clone` 不会自动 `git init`，也不会提交或推送。目标目录非空且不是 Git 仓库时会直接报错；已有 Git 仓库时会提示已存在并跳过。
-
-### 2. 配置 `.env`
-
-在主题仓库根目录从 `.env.example` 复制 `.env`，填写：
+在主题仓库根目录从 `.env.example` 复制一份 `.env`，填写：
 
 ```dotenv
-# HTTP(S)：token 可以直接内联在 URL 里
+# HTTP(S)：token 可以内联在 URL 里
 CONTENT_REPO_URL=https://oauth2:YOUR_TOKEN@example.com/you/daybook-content.git
 
 # 或者 SSH：私钥路径必填
@@ -98,44 +89,83 @@ CONTENT_REPO_URL=https://oauth2:YOUR_TOKEN@example.com/you/daybook-content.git
 # CONTENT_REPO_SSH_KEY=~/.ssh/id_ed25519
 
 CONTENT_REPO_DIR=content
-# 可选；不填时使用远端默认分支
 CONTENT_REPO_BRANCH=main
 ```
 
 | 变量 | 必填 | 说明 |
 | --- | --- | --- |
-| `CONTENT_REPO_URL` | `content:clone` / `content:pull` 必填 | http(s) 或 ssh 地址；HTTP token 可内联在 URL 中 |
+| `CONTENT_REPO_URL` | `content:clone` / `content:pull` 必填 | http(s) 或 ssh 地址；HTTP(S) 可以把 token 内联在 URL 里 |
 | `CONTENT_REPO_DIR` | 否 | 内容仓库目录，默认 `content`；相对主题仓库根目录 |
-| `CONTENT_REPO_BRANCH` | 否 | 克隆与拉取的分支；不填时用远端默认分支 |
-| `CONTENT_REPO_SSH_KEY` | SSH 地址必填 | 私钥文件路径，支持 `~`；脚本用 `GIT_SSH_COMMAND` 指定它 |
+| `CONTENT_REPO_BRANCH` | 否 | 克隆与拉取的分支；不填时使用远端默认分支 |
+| `CONTENT_REPO_SSH_KEY` | SSH 地址必填 | 私钥文件路径，支持 `~`；脚本通过 `GIT_SSH_COMMAND` 指定它 |
 
-`.env` 不要提交。克隆、拉取失败时脚本会脱敏 URL 中的账号、token 与常见 query 参数；但不要把带密钥的完整命令贴到公开 issue。
+`.env` 不要提交：`.gitignore` 忽略 `.env` 与 `.env.*`，只保留 `.env.example`。
 
-`content:clone` / `content:pull` 以非交互方式运行 Git：脚本会禁用 credential helper 并设置 `GIT_TERMINAL_PROMPT=0`，不会弹出账号密码输入。因此 HTTP(S) 远端要么是公开仓库，要么把 token 内联在 URL 里；SSH 远端必须提供 `CONTENT_REPO_SSH_KEY`。凭据缺失时会立即失败，而不是挂起等待输入。
+`content:clone` / `content:pull` 以非交互方式运行 Git：禁用 credential helper、设置 `GIT_TERMINAL_PROMPT=0`、SSH 使用 `BatchMode=yes`。因此 HTTP(S) 远端要么公开，要么把 token 内联在 URL 里；SSH 远端必须提供 `CONTENT_REPO_SSH_KEY`。凭据缺失时会立即失败，不会挂起等待输入。
 
-### 3. 运行内容模式
-
-```bash
-pnpm content:clone    # 首次
-pnpm dev:content      # 开发服务器
-pnpm check:content    # 类型与内容 schema
-pnpm build:content    # 静态构建 + Pagefind
-pnpm preview:content  # 预览 dist/
-```
-
-修改内容后更新：
+**3. 克隆内容仓库**
 
 ```bash
-pnpm content:pull     # git pull --ff-only
+pnpm content:clone
 ```
 
-`content:pull` 不会自动 commit、merge 或 stash；只做快进拉取。远端历史与本地分叉时会失败并保留现场，按常规 Git 流程处理后再拉取。
+预期输出：
+
+```text
+[daybook:content] 正在克隆内容仓库到 content …
+[daybook:content] 内容仓库已就绪。开发：pnpm dev:content；构建：pnpm build:content。
+```
+
+`content:clone` 按目标目录的状态分四种情况：
+
+| 目标目录 | 行为 |
+| --- | --- |
+| 不存在 | 创建父目录后 clone |
+| 存在且为空 | clone |
+| 存在且已是 Git 仓库 | 打印「内容仓库已存在：content，跳过克隆。」并直接跳过，不校验远端、不 pull |
+| 存在、非空、不是 Git 仓库 | 报错并提示换 `CONTENT_REPO_DIR` 或清理目录 |
+
+**4. 补内容仓库配置**
+
+内容模式要求内容仓库里存在 `config/site.ts` 与 `config/links.ts`，缺失时构建在配置阶段失败。写法见[内容仓库配置](#内容仓库配置)。
+
+**5. 验证**
+
+```bash
+pnpm dev:content
+```
+
+预期：终端打印 `[daybook] 内容仓库模式：content`；打开开发服务器地址（默认 `http://localhost:4321`）后看到的是内容仓库里的内容，而不是 `src/content/` 里的示例。
+
+## 日常写作与更新
+
+写内容本身在内容仓库里进行；下面的命令都在主题仓库根目录执行：
+
+```bash
+pnpm content:pull     # 拉取内容仓库更新（git pull --ff-only）
+pnpm check:content    # 类型、模板与内容 schema
+pnpm build:content    # 静态构建，末尾生成 Pagefind 索引
+pnpm preview:content  # 本地预览 dist/
+pnpm og:content       # 按内容仓库配置重新生成 public/og-default.png
+```
+
+- 写内容：直接改内容仓库的 `post/`、`daily/`、`pages/`、`spec/`。`pnpm dev:content` 运行期间保存文件会自动重载，不需要重启。
+- 改配置：`<内容根>/config/site.ts` 与 `links.ts` 修改后，开发服务器会自动重启并重新读取配置，不需要手动停止再启动。
+- `pnpm content:pull` 只做 `git pull --ff-only`，不会自动 commit、merge 或 stash；远端与本地分叉时会失败并保留现场。
+- 提交与推送由你自己在内容仓库里做，主题仓库不会自动提交内容。
+- 部署见[部署指南](./deployment.md)；Vercel 自动发布见[部署到 Vercel](./deployment-vercel.md)。
 
 ## 内容仓库配置
 
-`content/config/site.ts` 默认导出普通对象，并通过 `import type` 复用主题的**输入类型**；运行时没有主题依赖：
+内容模式下，站点配置与友链配置来自内容仓库，主题仓库的 `src/config/site.ts` 不再生效。两个文件都必须存在：
+
+- `config/site.ts`：站点配置。
+- `config/links.ts`：友链配置。
+
+用 `import type` 复用主题的输入类型，用 `satisfies` 检查字段拼写与类型，默认导出配置对象：
 
 ```ts
+// content/config/site.ts
 import type { SiteConfigInput } from '../../src/types/config';
 
 const siteConfig = {
@@ -147,13 +177,8 @@ const siteConfig = {
 export default siteConfig;
 ```
 
-`SiteConfigInput` 是 `src/types/config.ts` 里的「用户输入类型」，字段大多可省略；`satisfies` 会检查字段拼写和类型，同时保留字面量。不要改用解析后的 `SiteConfig`，它包含默认值补全后的必填字段。
-
-主题会用 `src/config/define.ts` 的 `defineSiteConfig()` 校验并补全默认值，因此只写需要覆盖的字段即可。字段全集见 [`configuration.md`](./configuration.md)。
-
-`content/config/links.ts` 同理：
-
 ```ts
+// content/config/links.ts
 import type { LinksConfigInput } from '../../src/types/config';
 
 const linksConfig = {
@@ -163,102 +188,125 @@ const linksConfig = {
 export default linksConfig;
 ```
 
-类型只参与 TypeScript 检查，`tsx` 读取配置时会擦除，所以内容仓库不需要安装主题依赖。默认的 `content/config` 用 `../../src` 指向主题根；内容仓库单独 clone 到主题目录之外时，运行时仍可加载，但编辑器 / `tsc` 会找不到这个相对路径（TS2307），需要把类型抽成共享包，或临时把内容仓库放在主题目录内做类型检查。
+规则：
 
-类型检查方式：
+- 只写需要覆盖的字段即可：主题用同一套 Zod schema 做结构校验、补全默认值并做语义校验；字段全集见[配置说明](./configuration.md)。
+- 默认导出配置对象；也接受导出名为 `siteConfig` / `linksConfig` 的对象。
+- 用输入类型 `SiteConfigInput` / `LinksConfigInput`，不要用补全默认值后的 `SiteConfig` / `LinksConfig`。
+- `config/links.ts` 的 `groups` 必填，可以是空数组。
+- 示例里的 `../../src/types/config` 假设内容仓库位于主题仓库的 `content/`。内容仓库在别处时运行时仍可读取（`import type` 会被擦除），但编辑器与 `tsc` 找不到这个类型；需要独立类型检查时，把类型抽成共享包。
+- 字段写错时构建失败，错误路径显示为 `content/config/site.ts` 或 `content/config/links.ts`（随实际目录变化）。
+- 内容仓库不需要安装主题依赖。
 
-- 根 `tsconfig.json` 已 include `content/config/**/*.ts`，内容仓库在主题目录内时 `pnpm check` 会一起检查。
-- `content/tsconfig.json` 供内容仓库单独执行 `pnpm exec tsc -p content/tsconfig.json --noEmit`。该命令在主题目录内运行时，内容仓库需位于默认的 `content/`。
+类型检查：
 
-配置读取流程：
+- 内容仓库位于默认的 `content/` 时，主题根目录的 `pnpm check` 会一起检查 `content/config/**/*.ts`（根 `tsconfig.json` 的 `include`）。
+- 内容仓库自带 `tsconfig.json`，也可以在主题目录内单独运行 `pnpm exec tsc -p content/tsconfig.json --noEmit`。
 
-1. `scripts/site-context.ts` 在构建配置阶段解析 `CONTENT_REPO`；
-2. 内容模式下用 Node + tsx 读取内容仓库的两个 TS 配置文件，输出 JSON；
-3. 主题用同一套 Zod schema 与语义校验，错误路径显示为 `content/config/site.ts` 或 `content/config/links.ts`；
-4. 通过一个只作用于主题 `src/config/site.ts` / `links.ts` 的 Vite 插件注入解析后的配置，页面代码无需改动。
-5. 内容配置同时加入 Astro dev 的 watchFiles；开发时修改配置会触发自动重启并重新读取。
+## 静态资源与 OG 图
 
-因此内容仓库的配置会经过与主题配置完全相同的校验，不需要在内容仓库安装依赖，也不需要复制一份 Zod schema。
+内容模式使用 `<内容根>/public` 作为 `publicDir`，主题仓库的 `public/` 不参与内容模式的开发与构建。两套资源完全隔离，站内引用仍以 `/` 开头：
+
+```text
+<内容根>/public/favicon.svg       → /favicon.svg
+<内容根>/public/images/photo.jpg  → /images/photo.jpg
+```
+
+从主题模式迁移或升级内容仓库时，把主题 `public/` 里仍然需要的资源复制到 `<内容根>/public/`。官方内容仓库示例已经包含 `favicon.svg`、`avatar.svg` 与 `og-default.png`，可以直接替换成自己的版本。
+
+OG 图按当前模式生成：
+
+```bash
+pnpm og            # 主题模式：写入 public/og-default.png
+pnpm og:content    # 内容模式：写入 <内容根>/public/og-default.png
+```
+
+- `pnpm og:content` 读取内容仓库 `config/site.ts` 的 `title`、`subtitle`、`author`、`since` 生成图片；改这些字段后重新生成，并把图片提交到内容仓库。
+- 内容目录优先顺序：`--content-repo` > `CONTENT_REPO_DIR` > `content`。
+- `pnpm og:content` 只写内容仓库的 `public/og-default.png`，不改主题仓库的 `public/og-default.png`。
 
 ## 命令行参数
 
-内容模式除了使用 package scripts，也可以显式指定目录：
+除了使用 `:content` 脚本，也可以显式指定内容目录：
 
 ```bash
 pnpm dev:content --content-repo=../daybook-content
 pnpm dev:content --content-repo ../daybook-content
 ```
 
-- `--content`：进入内容模式，目录取 `--content-repo` 的值、`CONTENT_REPO_DIR`，最后回退到 `content`。
-- `--content-repo=DIR` / `--content-repo DIR`：指定内容目录，通常会同时进入内容模式。
-- `--theme` / `--no-content`：回到主题模式。
-- `--` 后面的参数原样交给 Astro。
+| 参数 | 作用 |
+| --- | --- |
+| `--content` | 进入内容模式；目录取 `--content-repo`，其次 `CONTENT_REPO_DIR`，最后回退到 `content` |
+| `--content=DIR` | 进入内容模式并指定目录 |
+| `--content-repo DIR` / `--content-repo=DIR` | 指定内容目录，同时进入内容模式 |
+| `--theme` / `--no-content` | 回到主题模式，并清除环境里的 `CONTENT_REPO` |
+| `--` | 后面的参数原样交给 Astro |
 
-这些参数由 `scripts/astro.mjs` 包装器转换成 `CONTENT_REPO` 环境变量后再启动 Astro。所有 package scripts（`dev` / `build` / `preview` / `check` 及其 `:content` 变体）都经过这个包装器；直接运行 `astro dev` 不会解析这些自定义参数，也不会自动处理下面的内容缓存切换。
+说明：
+
+- 这些参数由 `scripts/astro.mjs` 包装器转换成 `CONTENT_REPO` 环境变量后再启动 Astro。`pnpm dev`、`build`、`preview`、`check` 及其 `:content` 变体都经过这个包装器；直接运行 `astro dev` 不会解析这些参数。
+- 不带模式参数的命令会保留调用方环境里的 `CONTENT_REPO`，包括 `.env` 与 shell 变量。显式回到主题模式请加 `--theme`。
+- `CONTENT_REPO` 的停用值：空字符串、`0`、`false`、`off`、`no`（大小写不敏感），命中任一个都使用主题模式。
+- 构建时用 `CONTENT_REPO_DIR` 指定内容目录更稳妥：`build:content` 脚本由 `&&` 连接 Astro 构建与 `pagefind` 两步。
 
 ## 路径与模式限制
 
-- 内容根必须与主题仓库在**同一盘符**：Astro 的 glob base 需要能表示为相对项目根的路径，跨盘符路径会报错；`<内容根>/public` 也受同一限制。
-- 内容根不能是主题仓库根目录本身。
-- 内容模式下必须存在 `config/site.ts` 与 `config/links.ts`；缺失时构建配置阶段就会失败并给出路径。
-- 内容模式默认读取 `<内容根>/{post,daily,pages,spec}`；这些目录可以暂时为空，但建议与骨架保持一致。
-- 内容模式只使用 `<内容根>/public` 作为 `publicDir`，主题 `public/` 的资源不会复制进 `dist/`；需要时自行复制到内容仓库。
-- 内容模式下 `src/content/` 不参与构建；主题模式也完全不会读取 `content/`。两套内容不要同时修改。
-- 内容仓库不是 submodule，主题的 `pnpm install` 不会安装内容仓库，也不需要在内容仓库里安装依赖。
-
-## 开发时的更新
-
-- Markdown / MDX：Astro content layer 监听 `<内容根>/{post,daily,pages,spec}`，保存后增量重载，不需要重启。
-- `config/site.ts` / `config/links.ts`：这两个文件被加入 Astro dev 的 watchFiles；修改后开发服务器会自动打印 `Configuration file updated. Restarting...`，重新加载配置并恢复浏览器连接，不需要手动重启。
-- 在 dev 运行时执行 `content:pull`：普通的文件写入和重命名会被 watcher 捕获；配置变化会触发上述自动重启。
-
-如果终端没有出现 reload / restart 日志，通常是保存方式没有触发文件事件，再保存一次即可。
-
-## 缓存
-
-内容模式构建使用独立的 `node_modules/.astro-content`，避免和主题构建共用内容层缓存。
-
-Astro 的 content layer 在 dev / check 下始终读写 `.astro/`，`cacheDir` 只隔离 build。如果主题与内容仓库共用这份缓存，集合基址不同会让两边的条目混在一起，典型症状是：
-
-```text
-[glob-loader] specCollection contains multiple entries with the same slug: about
-```
-
-包装器会在 `.astro/daybook-content-mode` 记录上次的内容来源（主题，或某个具体内容仓库路径）。切换来源时，它会自动删除 `.astro/data-store.json`、`.astro/content-modules.mjs` 与 `.astro/content-assets.mjs`，再启动 Astro，所以正常切换模式不需要手动清缓存。
-
-如果从旧版本升级后仍遇到重复 slug，或缓存被外部工具改坏，可以手动清理后重启：
-
-```bash
-rm -rf .astro node_modules/.astro-content
-```
-
-这些目录都是构建产物，不在 Git 中。
-
-Meting-API 的响应缓存与 Astro 内容缓存相互独立：主题模式在 `.cache/meting-api-data.json`，内容模式在 `<内容根>/cache/meting-api-data.json`。TTL 与开关由 `siteConfig.mdx.meting.cache` 控制，详见 [`meting.md`](./meting.md#服务端缓存)。
+- 内容根必须与主题仓库在同一盘符：Astro 的 glob base 必须是相对项目根的路径，跨盘符会报错 `内容仓库必须与主题仓库在同一盘符：<路径>`。
+- 内容根不能等于主题仓库根目录，否则报错 `内容仓库不能是主题仓库根目录；请把 CONTENT_REPO 指向一个子目录或独立的内容目录。`
+- 内容模式必须存在 `config/site.ts` 与 `config/links.ts`，缺失时构建在配置阶段失败并提示路径。
+- `spec/about.mdx` 必须存在，缺失时报 `[daybook:content] <内容根>/spec/about.mdx`，并提示新建该文件。
+- 内容模式只读取 `<内容根>/{post,daily,pages,spec}` 与 `<内容根>/public`；`src/content/` 与主题 `public/` 不参与构建。
+- 内容仓库不是 submodule：主题仓库的 `pnpm install` 不会安装内容仓库，内容仓库也不需要安装依赖。
+- 主题仓库的 `.gitignore` 对内容目录只忽略了根目录的 `/content/`。用别的名字做 `CONTENT_REPO_DIR` 并放在主题仓库内部时，它不会被忽略，记得自己加进 `.gitignore`，否则内容会被主题仓库的 `git status` 当成新文件。
+- 主题模式的 Meting 缓存在 `.cache/meting-api-data.json`。`.gitignore` 在 `.cache/*` 之后又写了 `!.cache/meting-api-data.json`，所以这个文件实际没有被忽略，不要提交它。内容模式的缓存在 `<内容根>/cache/meting-api-data.json`，内容仓库应把 `cache/` 加进 `.gitignore`。
 
 ## 迁移现有内容
 
-1. 先在主题仓库外创建内容仓库（或复制当前 `content/` 骨架）；
-2. 把 `src/content/{post,daily,pages,spec}` 里的文件按同名目录移动到内容仓库；
-3. 把主题 `public/` 里站内仍在引用的资源复制到 `<内容根>/public/`（至少 favicon、头像与 OG 图）；
-4. 把 `src/config/site.ts` 与 `links.ts` 的**实际配置值**写成 `content/config/site.ts` / `links.ts` 的默认导出对象（不要复制 `defineSiteConfig(...)` 调用）；
-5. 在主题 `.env` 填写 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取（或直接把目录放到 `content/`）；
-6. 运行 `pnpm og:content` 生成内容仓库的 `public/og-default.png`；
-7. 运行 `pnpm check:content` 与 `pnpm build:content`，逐页核对首页、文章、独立页面、关于页、RSS、搜索与静态资源；
-8. 确认无误后再考虑删除 `src/content/` 里的示例内容。主题模式与内容模式是两套独立内容，删除前先确认部署仍使用 `build:content`。
+1. 在主题仓库外创建内容仓库，或复制官方内容仓库作为起点。
+2. 把 `src/content/{post,daily,pages,spec}` 里的文件按同名目录移动到内容仓库。
+3. 把主题 `public/` 里站内仍在引用的资源复制到 `<内容根>/public/`（至少 favicon、头像与 OG 图）。
+4. 把 `src/config/site.ts` 与 `src/config/links.ts` 里的实际配置值改写成内容仓库的 `config/site.ts` 与 `config/links.ts`：写普通对象加 `satisfies` 输入类型，不要复制 `defineSiteConfig(...)` / `defineLinksConfig(...)` 调用。
+5. 在主题仓库 `.env` 填 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取，或直接把目录放到 `content/`。
+6. 运行 `pnpm og:content` 生成内容仓库的 `public/og-default.png`。
+7. 运行 `pnpm check:content` 与 `pnpm build:content`，逐页核对首页、文章、独立页面、关于页、RSS、搜索与静态资源。
+8. 确认无误后再删除 `src/content/` 里的示例内容。主题模式与内容模式是两套独立内容，删除前先确认部署仍使用 `build:content`（见[部署指南](./deployment.md)）。
+
+## 排错
+
+| 现象 | 原因 | 解决 |
+| --- | --- | --- |
+| `内容仓库缺少 config/site.ts：<路径>` | `CONTENT_REPO` / `CONTENT_REPO_DIR` 没有指向内容仓库根目录，或内容仓库还没建 `config/` | 检查 `.env` 与 `--content-repo`；在内容仓库根创建 `config/site.ts` 与 `config/links.ts` |
+| `内容仓库必须与主题仓库在同一盘符：<路径>` | 内容目录在另一个盘符 | 把内容仓库放到与主题仓库同盘符的位置 |
+| `内容仓库不能是主题仓库根目录；……` | `CONTENT_REPO` 指向了 `.` | 指向子目录或独立的内容目录 |
+| `目标目录非空且不是 Git 仓库：content；……` | `content/` 里有文件但不是 Git 仓库（例如手动放进去的内容） | 清空该目录、换 `CONTENT_REPO_DIR`，或把目录改为 Git 仓库 |
+| `内容仓库已存在：content，跳过克隆。` | 目标目录已经是 Git 仓库，`content:clone` 不会更新它 | 这是正常提示；更新内容用 `pnpm content:pull` |
+| `缺少 CONTENT_REPO_URL；……` | `.env` 没有配置克隆地址 | 按「第一次配置」填写 `CONTENT_REPO_URL` |
+| `SSH 地址需要配置 CONTENT_REPO_SSH_KEY；……` | 用了 SSH 地址但没有给私钥路径 | 填写 `CONTENT_REPO_SSH_KEY`，或改用带 token 的 HTTPS 地址 |
+| `内容仓库不存在：content。请先运行 pnpm content:clone。` | 对非 Git 仓库目录执行了 `content:pull` | 先 `pnpm content:clone`，或确认内容目录是 Git 仓库 |
+| `[glob-loader] specCollection contains multiple entries with the same slug: about` | 切换过模式或内容来源后，Astro 内容层缓存里混进了两套内容 | 删除 `.astro/` 与 `node_modules/.astro-content/` 后重启 |
+| `pnpm dev` 没有进入内容模式 | 环境里的 `CONTENT_REPO` 为空或为停用值，或者用的是主题模式命令 | 用 `pnpm dev:content`，或在命令前设置 `CONTENT_REPO` |
+| clone / pull 失败，日志里的地址被打码 | 脚本会脱敏失败日志中的账号、token 与常见 query 参数 | 这是预期行为；不要把完整命令贴进公开 issue |
+
+更多构建与配置问题见[排错](./troubleshooting.md)。
 
 ## 限制
 
 - 内容仓库的 `config/*.ts` 由 Node 子进程读取，适合放纯 TS 配置对象；不承诺在其中 import 主题运行时组件。
-- 内容 MDX 可以写标准 Markdown/MDX，但主题没有为内容仓库提供稳定的组件导入 API；需要导入主题组件时请自行评估路径与构建边界。
+- 内容 MDX 可以写标准 Markdown / MDX，但主题没有为内容仓库提供稳定的组件导入 API；需要导入主题组件时自行评估路径与构建边界。
 - 主题的 `tests/build/assert-dist.ts` 只断言主题示例内容；内容模式的页面需要手动冒烟，或另写一份针对自己内容仓库的断言。
-- 内容仓库的 Git 历史与主题仓库完全独立；主题不会自动提交内容变更。
+- 内容仓库的 Git 历史与主题仓库完全独立，主题不会自动提交内容变更。
+- 内容模式的构建依赖本地内容仓库，不并入默认的 `pnpm test`。
+- 配置注入、缓存标记与路径 helper 等实现细节见[实现取舍](./developers/reference.md)。
 
 ## 验证清单
 
-- `pnpm test:unit`：路径解析与 Git 辅助函数的单元测试。
-- `pnpm lint`、`pnpm check`、`pnpm build`、`pnpm test`：主题模式必须全绿。
-- `pnpm check:content`、`pnpm build:content`：内容模式必须能读到内容仓库配置与示例内容，`dist/` 中出现 `daily/...`、`post/...`、`pages` 对应的路由，以及内容仓库 `public/` 里的 `favicon.svg`、`avatar.svg`、`og-default.png`。
-- `pnpm og:content`：确认输出到 `<内容根>/public/og-default.png`，且主题 `public/og-default.png` 不被修改。
-- 用临时远端仓库验证 `content:clone` 与 `content:pull`；确认失败日志不包含 token/私钥。
-- 启动 `pnpm dev:content`，在浏览器检查首页、文章列表、独立页面、关于页、静态资源与搜索索引。
+- [ ] `pnpm test:unit` 通过（包含内容路径与 Git 辅助函数的单元测试）。
+- [ ] `pnpm content:clone` 成功；目标目录已是 Git 仓库时打印跳过并以 0 退出。
+- [ ] `pnpm check:content` 通过。
+- [ ] `pnpm build:content` 生成 `dist/`，包含 `dist/pagefind/`、`dist/feed.xml` 等产物，以及内容仓库 `public/` 里的资源。
+- [ ] `pnpm preview:content` 打开后，首页、文章、独立页面、关于页与搜索都正常。
+- [ ] `pnpm og:content` 写入 `<内容根>/public/og-default.png`，主题 `public/og-default.png` 没有被改动。
+- [ ] 用一个临时远端仓库验证 `content:clone` 与 `content:pull`，失败日志里没有 token 或私钥。
+- [ ] 部署使用 `build:content`（见[部署指南](./deployment.md)）。
+
+相关页面：[快速开始](./quick-start.md)、[写作指引](./writing.md)、[配置说明](./configuration.md)、[部署指南](./deployment.md)、[部署到 Vercel](./deployment-vercel.md)、[排错](./troubleshooting.md)、[文档索引](./README.md)。
