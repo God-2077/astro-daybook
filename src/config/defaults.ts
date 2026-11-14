@@ -15,7 +15,18 @@
  */
 
 import type { SiteLang } from '../i18n/languages';
-import type { ArchiveConfig, BottomNavItem, HomeConfig, LabelsConfig, NavItem, NavLinkItem, ThemeMode } from '../types/config';
+import type {
+  ArchiveConfig,
+  BottomNavItem,
+  DailyTitleFallbackConfig,
+  DailyTitleFallbackPosition,
+  DailyTitleFallbackStrategy,
+  HomeConfig,
+  LabelsConfig,
+  NavItem,
+  NavLinkItem,
+  ThemeMode,
+} from '../types/config';
 
 /**
  * 受支持的评论系统 provider 白名单。
@@ -174,6 +185,30 @@ export function defaultBottomNav(): BottomNavItem[] {
 /** 归档页默认展示内容类型。 */
 export const DEFAULT_ARCHIVE: ArchiveConfig = { defaultType: 'articles' };
 
+/** 无标题日记允许的内置回退策略。 */
+export const DAILY_TITLE_FALLBACK_STRATEGIES = [
+  'date',
+  'slug',
+  'untitled',
+] as const satisfies readonly DailyTitleFallbackStrategy[];
+
+/** 自定义回退模板支持的占位符。 */
+export const DAILY_TITLE_FALLBACK_PLACEHOLDERS = ['date', 'slug', 'diary', 'untitled'] as const;
+
+/** 无标题日记出现的位置。 */
+export const DAILY_TITLE_FALLBACK_POSITIONS = [
+  'detail',
+  'archive',
+  'feed',
+] as const satisfies readonly DailyTitleFallbackPosition[];
+
+/** 无标题日记的默认回退：详情与 RSS 用日期，归档用 slug。 */
+export const DEFAULT_DAILY_TITLE_FALLBACK: DailyTitleFallbackConfig = {
+  detail: 'date',
+  archive: 'slug',
+  feed: 'date',
+};
+
 /**
  * 默认主题偏好。
  *
@@ -187,15 +222,15 @@ export const DEFAULT_THEME: ThemeMode = 'system';
 /**
  * MDX 增强的默认值。
  *
- * - 用途：`site.ts` 未配置 `mdx.meting` 时，MDX 里的 `meting.fetchMusic()` /
- *   `meting.player()` 使用这里的 Meting-API 地址与请求超时。
+ * - 用途：`site.ts` 未配置 `mdx.meting` 时，MDX 里的 `meting.fetchMusic()` 或
+ *   `meting.player({ client: false })` 使用这里的 Meting-API 地址与请求超时。
  * - 字段：
  *   - `api`：Meting-API 基础地址，默认 `'https://163.hyc.moe/'`；自部署时替换成自己的地址。
  *   - `timeout`：单次请求超时时间（毫秒），默认 `5000`。
  *   - `cache.enabled`：服务端缓存开关，默认 `true`。
  *   - `cache.ttl.playlist` / `search`：短缓存，默认 1 天（`86400000`）。
  *   - `cache.ttl.default`：其它类型的长缓存，默认 30 天（`2592000000`）。
- * - 注意：服务端缓存只影响构建/开发时请求；浏览器端 `client: true` 不读该缓存。
+ * - 注意：服务端缓存只影响构建/开发时请求；`meting.player()` 默认在浏览器端取数（`client` 默认 `true`），不读该缓存。
  */
 export const DEFAULT_MDX = {
   meting: {

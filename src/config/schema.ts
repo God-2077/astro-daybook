@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { SITE_LANGS } from '../i18n/languages';
+import { DAILY_TITLE_FALLBACK_STRATEGIES } from './defaults';
 
 /**
  * 配置层的 Zod schema（只做「结构与类型」校验）。
@@ -60,6 +61,25 @@ const bottomNavSchema = z.strictObject({
 const archiveSchema = z.strictObject({
   /** 默认展示内容类型：articles 或 diary；默认 articles。 */
   defaultType: z.enum(['articles', 'diary']).optional(),
+});
+
+/** 单个位置的无标题日记回退：内置策略或自定义模板。 */
+const dailyTitleFallbackValueSchema = z.union([
+  z.enum(DAILY_TITLE_FALLBACK_STRATEGIES),
+  z.strictObject({
+    /** 模板不能为空；可用占位符由 validate 阶段检查。 */
+    template: z.string().trim().min(1),
+  }),
+]);
+
+/** 无标题日记在详情页、归档与 RSS 中的回退配置。 */
+const dailyTitleFallbackSchema = z.strictObject({
+  /** 详情页回退；默认 date。 */
+  detail: dailyTitleFallbackValueSchema.optional(),
+  /** 归档列表回退；默认 slug。 */
+  archive: dailyTitleFallbackValueSchema.optional(),
+  /** RSS 回退；默认 date。 */
+  feed: dailyTitleFallbackValueSchema.optional(),
 });
 
 /** 备案信息项：`{ text, link? }`。 */
@@ -297,6 +317,8 @@ export const siteConfigSchema = z.strictObject({
   pagination: paginationSchema.optional(),
   /** 归档页默认展示类型。 */
   archive: archiveSchema.optional(),
+  /** 无标题日记的回退标题。 */
+  dailyTitleFallback: dailyTitleFallbackSchema.optional(),
   /** RSS 配置。 */
   rss: rssSchema.optional(),
   /** 评论配置。 */

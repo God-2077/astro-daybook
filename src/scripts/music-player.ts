@@ -333,6 +333,8 @@ function initPlayer(root: HTMLElement): void {
 
     titleEl.textContent = track.name;
     artistEl.textContent = track.artist || labels.unknownArtist;
+    const separator = root.querySelector<HTMLElement>('.a-music-sep');
+    if (separator) separator.hidden = false;
 
     if (track.cover && coverImg) {
       coverImg.src = track.cover;

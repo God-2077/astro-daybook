@@ -35,7 +35,7 @@ const kind = entry.collection === 'post' ? 'post' : 'daily';
 const isPost = kind === 'post';
 const post = isPost ? (entry as PostEntry) : undefined;
 const isLocked = Boolean(entry.data.password);
-const title = getEntryTitle(entry);
+const title = getEntryTitle(entry, 'detail');
 const hasTitle = entry.data.title.trim().length > 0;
 const description = getDescription(entry, siteConfig.labels.diary);
 const dateIso = formatContentDate(entry.data.date, siteConfig.timezone, 'yyyy-MM-dd');

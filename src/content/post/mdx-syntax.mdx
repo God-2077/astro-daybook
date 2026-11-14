@@ -1,48 +1,69 @@
 ---
-title: MDX 语法与时间线
+title: MDX 语法指南
 date: 2026-09-22 10:00:00
-description: 用 MDX 写文章：组件、表达式、图片与时间线，都与 .md 共用同一条正文管线。
+updated: 2026-11-14 12:23:14
+description: 用 MDX 写文章：组件、表达式与图片，最终都落在与 .md 相同的正文管线里。
 categories: [文章]
 tags: [Markdown, 排版]
-keywords: [MDX, 时间线, Markdown]
+keywords: [MDX, 组件, Markdown]
 ---
 
-import { Timeline, TimelineItem } from '@ui';
+import CurrentDate from './CurrentDate';
 
-这篇文章本身就是 `.mdx`：它和普通文章共用 frontmatter、列表页与 RSS，只是正文多了一点组件能力。
+MDX 可以理解为 Markdown 加上 JSX。这篇文章本身就是 `.mdx`，和普通文章共用 frontmatter、列表页、RSS 与搜索，只是正文可以写 JSX、导入组件。
 
-## 时间线
+## 表达式
 
-<Timeline>
-  <TimelineItem date="2026-09-20" title="先统一 Markdown 管线">
-    标题的 ✦、图片的 figure、宽表格的横向滚动，仍然由同一组 rehype 插件生成。
-  </TimelineItem>
-  <TimelineItem date="2026-10-24" title="再接入 MDX">
-    正文可以 `import` Astro 组件，也可以写表达式；下面这个数字来自 MDX：{1 + 1}。
-  </TimelineItem>
-  <TimelineItem date="2026-10-28" title="保持纸页语言">
-    时间线只复用日期刻度、1px 细线与 ✦ 节点，没有新增颜色、圆角或阴影。
-  </TimelineItem>
-</Timeline>
+`{...}` 在构建期求值：
 
-## 表达式与图片
+```mdx
+这篇文档构建于 {new Date().toLocaleDateString('zh-CN')}。
+```
 
-MDX 表达式会在构建期求值，例如今天是 {new Date('2026-10-28T00:00:00+08:00').getFullYear()} 年。
+渲染出来是：这篇文档构建于 {new Date().toLocaleDateString('zh-CN')}。
+
+它不会随访客的时钟变化，也不能直接访问 `window`；需要交互时用客户端组件。
+
+## 图片
+
+图片仍用 Markdown 语法，规则与 `.md` 一致：
 
 ![MDX 示例图片](/images/demo/diary-line.svg)
 
-> 组件、表达式和普通 Markdown 可以混排；渲染结果仍然落在 `.a-prose` 的纸页排版里。
-
-## 使用方式
-
-在 `src/content/post/` 或 `src/content/daily/` 下新建 `.mdx` 文件即可；独立页面放在 `src/content/pages/`，由 `src/pages/[...page].astro` 自动套 `PageLayout`，不需要写 `layout`。
+需要显式图注或构建期优化时，用 `@ui` 的 `Figure`：
 
 ```mdx
-import { Timeline, TimelineItem } from '@ui';
+import { Figure } from '@ui';
+import cover from './cover.jpg';
 
-<Timeline>
-  <TimelineItem date="2026-10-24" title="标题">
-    正文支持 **Markdown**。
-  </TimelineItem>
-</Timeline>
+<Figure src={cover} alt="山脊上的日落" caption="图注可选" />
 ```
+
+## 组件与水合
+
+把 `CurrentDate.tsx`（每秒更新时间的 React 组件）放在文章旁边，然后在 `.mdx` 里导入：
+
+```mdx guide.mdx
+import CurrentDate from './CurrentDate';
+
+现在是 <CurrentDate client:load />。
+```
+
+常用指令：`client:load`（立即）、`client:idle`（空闲时）、`client:visible`（进入视口时）、`client:only="react"`（仅浏览器）。不写指令时只有静态 HTML，没有交互。
+
+实际效果：现在是 <CurrentDate client:load />。
+
+## 文件位置
+
+文章放 `src/content/post/`，日记放 `src/content/daily/`，独立页面放 `src/content/pages/`（由 `src/pages/[...page].astro` 自动套 `PageLayout`，不需要 `layout`）。子目录会保留在 slug 里。
+
+## 与 `.md` 的边界
+
+| 能力 | `.md` | `.mdx` |
+| --- | --- | --- |
+| frontmatter、列表、RSS、搜索 | 支持 | 支持 |
+| 指令、图片、脚注等扩展 | 支持 | 支持 |
+| 组件、JSX、表达式 | 不支持 | 支持 |
+| `password` 加密 | 支持 | 不支持 |
+
+`.mdx` 写了 `password` 会构建报错；需要加密请改用 `.md`。`rss.fullText` 为 `true` 时，MDX 文章在 RSS 里回退为摘要。

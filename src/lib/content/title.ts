@@ -1,21 +1,47 @@
 import { siteConfig } from '../../config/site';
 import { t } from '../../i18n/current';
+import type { DailyTitleFallbackPosition } from '../../types/config';
 import type { AnyEntry } from '../../types/content';
 import { formatDisplayDate } from './date';
 
-interface TitleOptions {
-  /** 无标题日记的回退值：默认用日期，归档列表用 slug。 */
-  dailyFallback?: 'date' | 'slug';
+interface DailyTitleFallbackValues extends Record<string, string> {
+  date: string;
+  slug: string;
+  diary: string;
+  untitled: string;
 }
 
 /**
- * 内容标题回退：日记允许不写标题，默认用站点时区下的日期作为机器可读标题，
- * 归档列表可改用 slug。
+ * 用日记上下文替换自定义回退模板中的占位符。
+ *
+ * 占位符白名单由配置层校验；这里对未知占位符保持原样，避免渲染阶段抛错。
+ */
+export function renderDailyTitleFallback(template: string, values: DailyTitleFallbackValues): string {
+  return template.replace(/\{([^{}]*)\}/g, (match, name: string) =>
+    Object.hasOwn(values, name) ? (values[name] as string) : match,
+  );
+}
+
+/**
+ * 内容标题回退：日记允许不写标题，按 `siteConfig.dailyTitleFallback[position]`
+ * 选择日期、slug、内置「未命名」文案或自定义模板。
  * 文章 schema 仍要求非空标题，这里的兜底只防御异常数据。
  */
-export function getEntryTitle(entry: AnyEntry, options: TitleOptions = {}): string {
+export function getEntryTitle(entry: AnyEntry, position: DailyTitleFallbackPosition): string {
   const title = entry.data.title.trim();
   if (title) return title;
   if (entry.collection !== 'daily') return t('common.untitled');
-  return options.dailyFallback === 'slug' ? entry.slug : formatDisplayDate(entry.data.date, siteConfig.timezone);
+
+  const fallback = siteConfig.dailyTitleFallback[position];
+  if (fallback === 'date') return formatDisplayDate(entry.data.date, siteConfig.timezone);
+  if (fallback === 'slug') return entry.slug;
+  if (fallback === 'untitled') return t('common.untitled');
+
+  const values: DailyTitleFallbackValues = {
+    date: formatDisplayDate(entry.data.date, siteConfig.timezone),
+    slug: entry.slug,
+    diary: siteConfig.labels.diary,
+    untitled: t('common.untitled'),
+  };
+  return renderDailyTitleFallback(fallback.template, values);
 }

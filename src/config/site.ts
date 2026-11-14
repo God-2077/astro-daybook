@@ -110,7 +110,7 @@ export const siteConfig = defineSiteConfig({
    * - 注意：这里只作为首次访问的默认值；用户在抽屉里手动选择后会写入
    *   `localStorage['daybook-theme']` 并优先于该配置。
    */
-  theme: 'system',
+  theme: 'light',
 
   /**
    * 首页大标题、副标题与标题显示开关（可选）。
@@ -119,7 +119,7 @@ export const siteConfig = defineSiteConfig({
    * - 默认：按 `lang` 使用内置文案（`zh_CN` 为「日记 / 一篇一篇，日子就有了形状。」）。
    * - 注意：`subtitle` 为空时页面会回退到站点副标题/描述。
    * - 标题：`title` 只控制首页大标题；站内「日记」类内容的称呼见 `labels.diary`。
-   * - `showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍有自己的标题回退。
+   * - `showTitles: false` 只关闭首页日记条目的标题；详情/归档/RSS 的回退标题见 `dailyTitleFallback`。
    */
   //   home: {
   //     title: '日记',
@@ -160,8 +160,8 @@ export const siteConfig = defineSiteConfig({
    * 页脚导航（可选）。
    *
    * - 可选值：`{ title, link }[]`，只支持一级链接，规则与 `nav` 相同。
-   * - 默认：按 `lang` 使用内置「归档 / 友链」；显式配置后不会被翻译。
-   * - 注意：页脚不再自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
+   * - 默认：按 `lang` 使用内置「归档 / 友链 / RSS」三项；显式配置后不会被翻译。
+   * - 注意：显式配置 `footerNav` 后不会自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
    */
   //   footerNav: [
   //     { title: '归档', link: '/archives' },
@@ -208,6 +208,22 @@ export const siteConfig = defineSiteConfig({
    */
   // archive: {
   //   defaultType: 'diary',
+  // },
+
+  /**
+   * 无标题日记的回退标题（可选）。
+   *
+   * - `detail`：详情页标题（隐藏 H1 的文本、浏览器标题、面包屑、结构化数据与 Pagefind），默认 `'date'`。
+   * - `archive`：归档列表标题，默认 `'slug'`。
+   * - `feed`：RSS 条目标题，默认 `'date'`。
+   * - 每项可为 `'date'`、`'slug'`、`'untitled'`（当前语言的内置「未命名」文案），
+   *   或 `{ template: '...' }`；可用占位符为 `{date}`、`{slug}`、`{diary}`、`{untitled}`。
+   * - 只影响没有 `title` 的日记；文章标题仍必填。无标题日记的详情页 H1 保持视觉隐藏。
+   */
+  // dailyTitleFallback: {
+  //   detail: 'date',
+  //   archive: 'slug',
+  //   feed: 'date',
   // },
 
   /**
@@ -264,9 +280,9 @@ export const siteConfig = defineSiteConfig({
    * - `mdx.meting.cache`：服务端请求缓存；默认开启。
    *   - `ttl.playlist` / `ttl.search`：短缓存，默认 1 天。
    *   - `ttl.default`：其它类型的长缓存，默认 30 天。
-   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` /
-   *   `meting.player()` 时，构建期请求使用的地址、超时与缓存。
-   * - 注意：`meting.player({ client: true })` 不读这个缓存，浏览器会直接请求 API。
+   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` 或
+   *   `meting.player({ client: false })` 时，构建期请求使用的地址、超时与缓存。
+   * - 注意：`meting.player()` 默认在浏览器端取数（`client` 默认 `true`），不读这个缓存，浏览器会直接请求 API。
    */
   mdx: {
     meting: {

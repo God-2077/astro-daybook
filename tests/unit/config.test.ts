@@ -92,6 +92,40 @@ test('invalid bottom nav and archive config fail at config load', () => {
   assert.throws(() => defineSiteConfig({ ...base, archive: { defaultType: 'posts' } as never }), /archive|defaultType|Invalid/);
 });
 
+test('daily title fallback resolves its defaults and accepts strategies or templates', () => {
+  const config = defineSiteConfig(base);
+  assert.deepEqual(config.dailyTitleFallback, { detail: 'date', archive: 'slug', feed: 'date' });
+
+  const custom = defineSiteConfig({
+    ...base,
+    dailyTitleFallback: {
+      detail: 'untitled',
+      archive: { template: '{diary} · {date}' },
+      feed: 'slug',
+    },
+  });
+  assert.deepEqual(custom.dailyTitleFallback, {
+    detail: 'untitled',
+    archive: { template: '{diary} · {date}' },
+    feed: 'slug',
+  });
+});
+
+test('invalid daily title fallback fails at config load', () => {
+  assert.throws(
+    () => defineSiteConfig({ ...base, dailyTitleFallback: { detail: { template: '{unknown}' } } }),
+    /dailyTitleFallback\.detail\.template|未知占位符/,
+  );
+  assert.throws(
+    () => defineSiteConfig({ ...base, dailyTitleFallback: { archive: { template: '   ' } } }),
+    /dailyTitleFallback\.archive\.template|Too small|at least 1/,
+  );
+  assert.throws(
+    () => defineSiteConfig({ ...base, dailyTitleFallback: { feed: 'posts' } as never }),
+    /dailyTitleFallback|feed|Invalid/,
+  );
+});
+
 test('site config resolves language-specific defaults and derived locales', () => {
   const zh = defineSiteConfig(base);
   assert.equal(zh.lang, 'zh_CN');

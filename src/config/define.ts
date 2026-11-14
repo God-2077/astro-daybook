@@ -33,8 +33,11 @@ import type {
   SiteConfigInput,
 } from '../types/config';
 import {
+  DAILY_TITLE_FALLBACK_PLACEHOLDERS,
+  DAILY_TITLE_FALLBACK_POSITIONS,
   DEFAULT_ARCHIVE,
   DEFAULT_COMMENTS,
+  DEFAULT_DAILY_TITLE_FALLBACK,
   DEFAULT_INJECT,
   DEFAULT_MDX,
   DEFAULT_ROBOTS,
@@ -146,6 +149,25 @@ function validateNavLink(link: { title?: string; link: string }, file: string, b
 }
 
 /**
+ * 校验无标题日记的自定义回退模板：只允许白名单内的占位符。
+ *
+ * 模板本身在 schema 层已保证非空；内置策略不进入占位符检查。
+ */
+function validateDailyTitleFallback(input: SiteConfig, file: string): void {
+  for (const position of DAILY_TITLE_FALLBACK_POSITIONS) {
+    const fallback = input.dailyTitleFallback[position];
+    if (typeof fallback === 'string') continue;
+    for (const match of fallback.template.matchAll(/\{([^{}]*)\}/g)) {
+      const name = match[1] ?? '';
+      if (!DAILY_TITLE_FALLBACK_PLACEHOLDERS.some((placeholder) => placeholder === name)) {
+        const available = DAILY_TITLE_FALLBACK_PLACEHOLDERS.map((placeholder) => `{${placeholder}}`).join('、');
+        fail(file, `dailyTitleFallback.${position}.template`, `未知占位符 {${name}}（可用：${available}）`);
+      }
+    }
+  }
+}
+
+/**
  * 对补全默认值后的站点配置做语义校验。
  *
  * 校验项包括：IANA 时区、站点 URL 协议与 query/hash、`since` 年份范围、
@@ -174,6 +196,8 @@ function validateSite(input: SiteConfig, file: string): void {
   if (input.since > currentYear + 1 || input.since < 1900) {
     fail(file, 'since', `since 必须在 1900..${currentYear + 1} 之间`);
   }
+
+  validateDailyTitleFallback(input, file);
 
   input.nav.forEach((item, index) => {
     validateNavItem(item, file, `nav[${index}]`);
@@ -284,6 +308,11 @@ function resolveSite(parsed: SiteConfigInput, file: string): SiteConfig {
     },
     archive: {
       defaultType: parsed.archive?.defaultType ?? DEFAULT_ARCHIVE.defaultType,
+    },
+    dailyTitleFallback: {
+      detail: parsed.dailyTitleFallback?.detail ?? DEFAULT_DAILY_TITLE_FALLBACK.detail,
+      archive: parsed.dailyTitleFallback?.archive ?? DEFAULT_DAILY_TITLE_FALLBACK.archive,
+      feed: parsed.dailyTitleFallback?.feed ?? DEFAULT_DAILY_TITLE_FALLBACK.feed,
     },
     rss: {
       enabled: parsed.rss?.enabled ?? DEFAULT_RSS.enabled,
@@ -399,7 +428,7 @@ function validateLinks(input: LinksConfig, file: string): void {
 /**
  * 定义并校验友链配置（`src/config/links.ts` 的入口）。
  *
- * `groups` 可省略，默认空数组；分组与组内链接都允许为空数组（空分组在页面上会被过滤）。
+ * `groups` 必填，但允许为空数组；分组与组内链接都允许为空数组（空分组在页面上会被过滤）。
  */
 export function defineLinksConfig(input: LinksConfigInput, file = 'src/config/links.ts'): LinksConfig {
   const parsed = parseLinks(input, file);

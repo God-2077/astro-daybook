@@ -32,25 +32,18 @@ A diary site made for slow reading — a static blog theme built on Astro. Write
 
 ## Features
 
-- **Diaries first**: one entry a day, grouped by month automatically, with a date rail on the left that makes the timeline easy to scan
-- **Articles kept apart**: when you need to write something long, put it in the articles folder — categories, tags and keywords come built in
-- **A quiet design**: paper-white background, hairline dividers, soft pink accents — no cards, no outlines, no shadows
-- **Dark mode**: follows the system, or switch it by hand; no white flash when toggling
-- **Full-text search**: the index is built at build time, results appear as you type, and you can filter by Diaries, Articles and Pages
-- **Pinned and drafts**: pinned diaries get a group of their own; drafts only show up while developing locally
-- **Long entries fold away**: the home feed shows just the opening — hit “Read more” when you want the rest
-- **Richer reading**: a table of contents in the margin, syntax highlighting, math formulas, click-to-zoom images, footnotes
-- **Password protection**: keep a single entry to yourself with one password
-- **Comments**: hook up Twikoo, Waline or Artalk whenever you like
-- **Archive and heatmap**: look back over everything by year and month; the writing heatmap shows which days left words behind
-- **Feeds and sharing**: three RSS feeds, a sitemap, robots, plus link preview images
-- **Music page**: play a playlist you love right inside the site
-- **Multilingual**: each build outputs one interface language — Simplified Chinese, Traditional Chinese, English or Japanese
-- **Mobile friendly**: navigation tucks away on small screens, with a bottom nav for quick switching
+- **Diaries first, articles kept apart**: one entry a day, grouped by month; long pieces live in the articles folder with categories, tags and keywords.
+- **Quiet paper pages and dark mode**: paper-white background, hairline rules, soft pink accents — no cards and no shadows; dark mode follows the system or switches by hand.
+- **Search, archive and heatmap**: the search index is built at build time; look back by year and month, and see which days left words behind on the writing heatmap.
+- **Writing extras**: footnotes, math, Mermaid, GitHub alerts, collapsible blocks, timelines, video and repository embeds; copyable code, click-to-zoom images and a table of contents beside the article.
+- **Visibility controls**: pin, drafts, password protection, and per-surface hiding (home, RSS, archive, search, tags, categories, sitemap).
+- **Comments and feeds**: Twikoo, Waline or Artalk; three RSS feeds, a sitemap, robots and share cards.
+- **Multilingual and mobile friendly**: each build outputs one interface language — Simplified Chinese, Traditional Chinese, English or Japanese; navigation folds away on small screens, with a configurable bottom bar.
+- **Theme and content in separate repositories (optional)**: clone and pull the content repository independently, so writing commits stay out of the theme history.
 
 ## Quick start
 
-You'll need Node.js **22.23.4** or newer and [pnpm](https://pnpm.io/).
+Requires Node.js **22.23.4** or newer and [pnpm](https://pnpm.io/) (see `engines` in `package.json`).
 
 ```bash
 git clone https://github.com/God-2077/astro-daybook.git
@@ -59,70 +52,62 @@ pnpm install
 pnpm dev        # open http://localhost:4321
 ```
 
-Once it's running:
+Once it is running:
 
-1. Open `src/config/site.ts` and change the title, subtitle, author and `url` (your real domain) to your own.
-2. Create a new `.md` file in `src/content/daily/` and write your first diary.
+1. Open `src/config/site.ts` and change `title`, `url` (your real domain) and `author` to your own.
+2. Create a `.md` file in `src/content/daily/` and write your first diary — only `date` is required.
 3. Run `pnpm build` to generate `dist/`, then upload that whole folder to any static host.
 
-Hosting platforms such as Vercel, Cloudflare Pages and Netlify can import the repository directly: set the build command to `pnpm build` and the output directory to `dist`. For the full walkthrough, see [Deployment](./docs/configuration.md#部署).
-
-## Faster Diary Writing (Optional)
-
-Tired of launching an IDE just to write a diary, manually creating files, and typing git commands step by step to commit your work?
-Give [Astro Blog Studio](https://github.com/God-2077/astro-blog-studio) a try. It connects directly to your repository right in the browser, lets you write entries in the same directory, preview changes in real time, and commit & push with one click.
-
-It will not alter your repository structure or build configuration. It simply moves the entire workflow — creating, editing, and committing — into your browser, making it incredibly convenient to jot down a few lines every day.
-
-## Frontmatter examples
-
-Diaries live in `src/content/daily/`, and only `date` is required:
+The smallest diary:
 
 ```yaml
 ---
 title: The First Cup of Tea in November
-date: 2026-11-01 21:30:00
-category: Daily life # label shown on the home feed, detail page and archive
-# updated: 2026-11-02 09:00:00
-# description: write a short summary by hand, used by RSS, search and share cards
-# slug:                          # generated from the file path by default
-# permalink: notes/first-tea     # overrides the full URL
-# draft: true                    # draft: only visible during development
-# pin: true                      # Pinned
-# password: paper2024            # encrypted: the body only opens with the password
-# hideFrom: [home, rss, archive, search, tag, category, sitemap]
-# comments: false
+date: 2026-11-14 21:30:00
 ---
 ```
 
-Articles live in `src/content/post/`; `title` and `date` are required, and categories and tags are also supported:
+See [Quick start](./docs/quick-start.md) for the full install, writing and build walkthrough.
 
-```yaml
----
-title: Building a diary site with Astro
-date: 2026-10-20 10:00:00
-categories: [Articles]
-tags: [Astro, Frontend]
-keywords: [static blog]
----
-```
+## Content repository (optional)
 
-See [`docs/content.md`](./docs/content.md) for the full field list, the visibility matrix and URL rules.
+By default `pnpm dev` and `pnpm build` use the theme's own `src/content/`. To keep writing in its own Git repository, put the content there, point `CONTENT_REPO_URL` in `.env` at it, pull it with `pnpm content:clone`, and build with `pnpm dev:content` / `pnpm build:content`. Official content repository example: <https://github.com/God-2077/astro-daybook-content/>.
+
+See [Theme and content in separate repositories](./docs/dual-repo.md) for the full steps and limits.
 
 ## Configuration
-
-Everything is configured in TypeScript files — refresh the dev server and the change is live; a mistyped field fails the build right away and points at the spot.
 
 | What you want to change | Where to look |
 | --- | --- |
 | Title, subtitle, author, domain, language, navigation, pagination, comments, SEO | `src/config/site.ts` |
-| Friend groups | `src/config/links.ts` |
+| Friend-link groups | `src/config/links.ts` |
 | Body of the About page | `src/content/spec/about.mdx` |
 | Playlist on the music page | `src/content/pages/music.mdx` |
+| Content repository URL, directory, branch, SSH key | `CONTENT_REPO_*` in `.env` |
+| Site config and friend links in content mode | `<content root>/config/site.ts`, `<content root>/config/links.ts` |
 
-- Every config field, comment setup, deployment and security boundary: [`docs/configuration.md`](./docs/configuration.md)
-- Content folders, frontmatter and visibility: [`docs/content.md`](./docs/content.md)
-- Playlists and the player: [`docs/music-player.md`](./docs/music-player.md)
+See [Configuration](./docs/configuration.md) for every field, its default and how validation failures are reported.
+
+## Documentation
+
+The documentation is written in Simplified Chinese.
+
+| I want to… | Read |
+| --- | --- |
+| Get it running for the first time | [Quick start](./docs/quick-start.md) |
+| Change config, navigation, comments, SEO | [Configuration](./docs/configuration.md) |
+| Write diaries and articles, frontmatter, password protection | [Writing guide](./docs/writing.md) |
+| Use footnotes, math, Mermaid, collapsible blocks | [Markdown extensions](./docs/markdown.md) |
+| Put a playlist on a page | [Music player](./docs/music-player.md) |
+| Deploy to a static host | [Deployment](./docs/deployment.md) |
+| Auto-publish with Vercel and a content repository | [Deploy to Vercel](./docs/deployment-vercel.md) |
+| Split theme and content | [Dual repository](./docs/dual-repo.md) |
+| Fix a failed build or missing search | [Troubleshooting](./docs/troubleshooting.md) |
+| Every page, including maintainer docs | [Documentation index](./docs/README.md) |
+
+## Faster diary writing (optional)
+
+Tired of launching an IDE, creating files by hand and typing git commands? Try [Astro Blog Studio](https://github.com/God-2077/astro-blog-studio): connect your repository in the browser, write entries in the same directory, preview changes live and commit with one click. It does not change your repository structure or build configuration.
 
 ## Credits
 
@@ -139,4 +124,4 @@ Thanks to these projects for the inspiration and reference they gave astro-daybo
 
 [GNU Affero General Public License version 3 (AGPL-3.0)](./LICENSE)
 
-Third-party resources: image zoom in articles uses [lightGallery](https://www.lightgalleryjs.com/) (GPLv3 / commercial dual license; see the [docs](./docs/configuration.md#图片放大) for licensing) and the font is a subset of ChillRoundF (OFL-1.1).
+Third-party resources: image zoom in articles uses [lightGallery](https://www.lightgalleryjs.com/) (GPLv3 / commercial dual license; see [“Image zoom” in Configuration](./docs/configuration.md#图片放大)) and the font is a subset of ChillRoundF (OFL-1.1).

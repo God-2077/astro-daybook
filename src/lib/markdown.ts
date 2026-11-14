@@ -1,7 +1,8 @@
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import type { MarkdownHeading } from 'astro';
 
-import { filterHeadings, rehypePlugins, remarkPlugins, SHIKI_CONFIG } from './markdown-pipeline';
+import { siteConfig } from '../config/site';
+import { createMarkdownPipeline, filterHeadings, SHIKI_CONFIG } from './markdown-pipeline';
 
 /**
  * 详情页正文的 Markdown 管线。
@@ -15,8 +16,7 @@ let processorPromise: ReturnType<typeof createMarkdownProcessor> | undefined;
 
 function getProcessor() {
   processorPromise ??= createMarkdownProcessor({
-    remarkPlugins,
-    rehypePlugins,
+    ...createMarkdownPipeline(siteConfig.lang),
     shikiConfig: SHIKI_CONFIG,
   });
   return processorPromise;

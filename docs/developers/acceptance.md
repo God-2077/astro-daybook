@@ -2,12 +2,15 @@
 
 > 本文件与 `tests/` 只用于开发阶段，交付后可整体删除，不参与构建。
 
+改完主题后按下面的分组逐项核对。涉及内容写法与配置的含义，分别看[写作指引](../writing.md)、[配置说明](../configuration.md)；部署前的环境检查看[部署指南](../deployment.md)。适用于仓库 `main` 分支当前代码（`package.json` 1.2.1）。
+
 ## 构建
 
 - [ ] `pnpm check` 0 errors。
-- [ ] `pnpm build` 成功，Pagefind 生成 `dist/pagefind/`。
+- [ ] `pnpm build` 成功，`postbuild` 生成 `dist/pagefind/`。
 - [ ] `pnpm lint` 通过。
 - [ ] `pnpm test` 通过（单元断言 + 构建产物断言）。
+- [ ] `pnpm test:build` 最后一行是 `build assertions passed: N indexed pages, M default RSS items`，且 `N` 与 `tests/build/assert-dist.ts` 的断言一致（当前断言 38 个 `data-pagefind-body` 页面，内容变动时同步改断言）。
 
 ## 日期
 
@@ -32,21 +35,21 @@
 | `hideFrom: sitemap` | 200 | 显示 | 显示 | 显示 | 有 | 索引 | 显示 | 无 | 200 |
 
 - [ ] 逐行核对 `dist/` 与开发服务器。
-- [ ] 密码页初始 HTML 不含明文；错误密码提示；正确密码 `paper2024` 解锁。
-- [ ] 解锁后布局/字号/行距/日期栏/TOC/endmark/评论区与普通详情一致，只多「已解锁」提示。
+- [ ] `post/locked-letter`（密码 `paper2026`）与 `daily/2026-09-28-locked`（密码 `paper2024`）：初始 HTML 不含明文；错误密码提示「密码错误，请再试一次」；正确密码能解锁。
+- [ ] 解锁后布局/字号/行距/日期栏/TOC/endmark/评论区与普通详情一致，只多「已解锁 · …」提示。
 - [ ] 分类/标签明细的锁图标正常显示。
 - [ ] 密码页 `noindex`，默认不在 sitemap，Pagefind 只索引标题+描述。
 
 ## MDX
 
-- [ ] `.mdx` 文章（`/post/mdx-syntax`）正常渲染 import、表达式、时间线、单图与 h2 ✦。
+- [ ] `.mdx` 文章（`/post/mdx-syntax`）正常渲染表达式、单图与 h2 ✦。
 - [ ] `.mdx` 日记（`/daily/2026-10-20-redesign`）详情与首页流正常渲染。
 - [ ] `src/content/pages/` 的独立页（`/music`）由 `src/pages/[...page].astro` 套 `PageLayout`，日期与标题正常，h2 带 ✦。
 - [ ] 页面 HTML 不含泄漏的 `import` / `export` 语句。
 - [ ] 给 `.mdx` 加 `password` 时构建报错，错误信息说明 MDX 暂不支持密码。
 - [ ] `rss.fullText: true` 时 MDX 回退摘要并输出一次警告；恢复默认后无警告。
-- [ ] 时间线日期、标题、正文在浅/深色与 375/768/1024/1440 宽度下正常；≤767 日期栏收窄。
-- [ ] Pagefind 索引为 27 页（与 `tests/build/assert-dist.ts` 的断言一致）。
+- [ ] `::::timeline` 的日期、标题、正文在浅/深色与 375/768/1024/1440 宽度下正常；≤767 日期栏收窄。
+- [ ] Pagefind 索引为 38 页（与 `tests/build/assert-dist.ts` 的 `data-pagefind-body` 页面断言一致）。
 
 ## 路由与分页
 
@@ -71,7 +74,7 @@
 ## 首页配置
 
 - [ ] 修改 `src/config/site.ts` 的 `home.title` 为「碎碎念」，首页 H1 改变。
-- [ ] 修改 `home.subtitle`，`.a-feedhead-sub` 改变；清空时回退站点副标题。
+- [ ] 修改 `home.subtitle`，`.a-feedhead-sub` 改变；清空时依次回退到 `siteConfig.subtitle`、`siteConfig.description`。
 - [ ] 给某篇日记加 `hideHomeTitle: true`，首页该条目无标题但正文正常；详情页/归档/RSS 标题不受影响。
 
 ## RSS / SEO
@@ -104,3 +107,5 @@
 - [ ] 390 宽：首页、详情、抽屉、底部导航。
 - [ ] 浅色/深色。
 - [ ] 以用户要求优先：去掉详情返回链接、meta 类型链接、搜索隐藏正文、解锁后同版式、首页标题配置、移动端 `✦`。
+
+相关文档：[写作指引](../writing.md)、[配置说明](../configuration.md)、[部署指南](../deployment.md)、[双仓库](../dual-repo.md)、[实现取舍](./reference.md)、[文档索引](../README.md)。
