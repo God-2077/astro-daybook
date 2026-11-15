@@ -26,7 +26,7 @@ export const siteConfig = defineSiteConfig({
    * - 用途：首页等页面在大标题下方的短句；也为 `home.subtitle` 缺省时的回退值。
    * - 可选值：任意字符串；默认 `''`。
    */
-  subtitle: '写点日记，也写点长文。',
+  subtitle: '日々のことを書き、長い文章も書く。',
 
   /**
    * 站点公开 URL（必填）。
@@ -35,7 +35,7 @@ export const siteConfig = defineSiteConfig({
    * - 可选值：带 `http://` 或 `https://` 的完整地址；不能带查询参数或 hash。
    * - 注意：末尾的 `/` 会被自动去掉；部署前必须改成真实域名（此处为示例域名）。
    */
-  url: 'https://daybook.demo.ksable.top',
+  url: 'https://pr-daybook.test.ksable.top/',
 
   /**
    * 作者名（必填）。
@@ -66,7 +66,7 @@ export const siteConfig = defineSiteConfig({
    *   也不生成 `/[lang]` 路由；切换语言需要修改这里后重新构建。
    * - 范围：正文、站点标题/描述、`src/content/spec/about.mdx`、`links.ts` 与分类/标签名称属于内容，不会被自动翻译。
    */
-  lang: 'zh_CN',
+  lang: 'ja',
 
   /**
    * 站点长描述（可选）。
@@ -75,7 +75,7 @@ export const siteConfig = defineSiteConfig({
    * - 可选值：任意字符串；默认 `''`。
    * - 注意：建议控制在 120 字以内，避免搜索结果被截断。
    */
-  description: 'Daybook：一个基于 Astro 构建的静态博客，以日记为主、技术文章为辅。',
+  description: 'Daybook：Astro で作られた静的ブログ。日記を中心に、技術記事も少しずつ。',
 
   /**
    * SEO 关键词（可选）。
@@ -83,7 +83,7 @@ export const siteConfig = defineSiteConfig({
    * - 用途：写入 `<meta name="keywords">`，对主流搜索引擎权重有限，仅作补充。
    * - 可选值：`string[]`；默认 `[]`。
    */
-  keywords: ['日记', '博客', 'Astro', '前端', '碎碎念', 'Daybook'],
+  keywords: ['日記', 'ブログ', 'Astro', 'フロントエンド', 'つぶやき', 'Daybook'],
 
   /**
    * IANA 时区（可选）。
@@ -92,7 +92,7 @@ export const siteConfig = defineSiteConfig({
    * - 可选值：合法 IANA 时区名，如 `'Asia/Shanghai'`、`'UTC'`；默认 `'Asia/Shanghai'`。
    * - 注意：与构建机器的本地时区无关；非法值会直接报错。
    */
-  timezone: 'Asia/Shanghai',
+  timezone: 'Asia/Tokyo',
 
   /**
    * 建站年份（可选）。
@@ -122,15 +122,12 @@ export const siteConfig = defineSiteConfig({
    * - `showTitles: false` 只关闭首页日记条目的标题，详情/归档/RSS 仍有自己的标题回退。
    */
   //   home: {
-  //     title: '日记',
-  //     subtitle: '一篇一篇，日子就有了形状。',
+  //     title: '日記',
+  //     subtitle: '一篇ずつ、日々がかたちになる。',
   //     showTitles: true,
   //   },
 
   // 站内内容称呼 `labels.diary` 省略时按 `lang` 使用内置值（当前 `zh_CN` 为「日记」）。
-  //   labels: {
-  //     diary: '日记',
-  //   },
 
   /**
    * 顶部导航（可选）。
@@ -142,18 +139,18 @@ export const siteConfig = defineSiteConfig({
    *   `bottomNav.items[].title` 显式配置时优先于这里的推导。
    */
   //   nav: [
-  //     { title: '日记', link: '/' },
+  //     { title: '日記', link: '/' },
   //     {
-  //       title: '文章',
+  //       title: '記事',
   //       items: [
-  //         { title: '全部文章', link: '/posts' },
-  //         { title: '分类', link: '/categories' },
-  //         { title: '标签', link: '/tags' },
-  //         { title: '归档', link: '/archives' },
+  //         { title: 'すべての記事', link: '/posts' },
+  //         { title: 'カテゴリー', link: '/categories' },
+  //         { title: 'タグ', link: '/tags' },
+  //         { title: 'アーカイブ', link: '/archives' },
   //       ],
   //     },
-  //     { title: '友链', link: '/friends' },
-  //     { title: '关于', link: '/about' },
+  //     { title: '友だち', link: '/friends' },
+  //     { title: 'このサイトについて', link: '/about' },
   //   ],
 
   /**
@@ -164,8 +161,8 @@ export const siteConfig = defineSiteConfig({
    * - 注意：页脚不再自动追加 RSS；需要时手动加入 `{ title: 'RSS', link: '/feed.xml' }`。
    */
   //   footerNav: [
-  //     { title: '归档', link: '/archives' },
-  //     { title: '友链', link: '/friends' },
+  //     { title: 'アーカイブ', link: '/archives' },
+  //     { title: '友だち', link: '/friends' },
   //   ],
 
   /**
@@ -178,15 +175,15 @@ export const siteConfig = defineSiteConfig({
    * - 显式配置 `items` 会整体替换默认四项，而不是追加。
    * - 注意：内部链接规则与 `nav` 相同；外链会新窗口打开。
    */
-  // bottomNav: {
-  //   enabled: true,
-  //   items: [
-  //     { link: '/', title: '日记', icon: 'i-book' },
-  //     { link: '/posts', title: '文章', icon: 'i-file' },
-  //     { link: '/friends', title: '友链', icon: 'i-link' },
-  //     { link: '/about', title: '关于', icon: 'i-user' },
-  //   ],
-  // },
+    // bottomNav: {
+    //   enabled: true,
+    //   items: [
+    //     { link: '/', title: '日記', icon: 'i-book' },
+    //     { link: '/posts', title: '記事', icon: 'i-file' },
+    //     { link: '/friends', title: '友だち', icon: 'i-link' },
+    //     { link: '/about', title: 'このサイトについて', icon: 'i-user' },
+    //   ],
+    // },
 
   /**
    * 分页数量（可选）。
@@ -206,9 +203,9 @@ export const siteConfig = defineSiteConfig({
    * - 设为 `'diary'` 时，归档页默认选中日记，且日记按钮排在文章按钮之前。
    * - 只影响归档页的类型切换，不改变条目内部的日期排序。
    */
-  // archive: {
-  //   defaultType: 'diary',
-  // },
+    // archive: {
+    //   defaultType: 'diary',
+    // },
 
   /**
    * RSS 配置（可选）。
@@ -254,33 +251,6 @@ export const siteConfig = defineSiteConfig({
     twikoo: { envId: '', region: '' },
     waline: { serverURL: '' },
     artalk: { server: '', site: '' },
-  },
-
-  /**
-   * MDX 增强配置（可选）。
-   *
-   * - `mdx.meting.api`：Meting-API 基础地址；默认 `'https://163.hyc.moe/'`，推荐自部署。
-   * - `mdx.meting.timeout`：单次请求超时时间（毫秒）；默认 `5000`。
-   * - `mdx.meting.cache`：服务端请求缓存；默认开启。
-   *   - `ttl.playlist` / `ttl.search`：短缓存，默认 1 天。
-   *   - `ttl.default`：其它类型的长缓存，默认 30 天。
-   * - 用途：MDX 里通过 `import { meting } from '@mdx'` 调用 `meting.fetchMusic()` /
-   *   `meting.player()` 时，构建期请求使用的地址、超时与缓存。
-   * - 注意：`meting.player({ client: true })` 不读这个缓存，浏览器会直接请求 API。
-   */
-  mdx: {
-    meting: {
-      api: 'https://163.hyc.moe/',
-      timeout: 5000,
-      cache: {
-        enabled: true,
-        ttl: {
-          playlist: 1 * 24 * 60 * 60 * 1000,
-          search: 1 * 24 * 60 * 60 * 1000,
-          default: 30 * 24 * 60 * 60 * 1000,
-        },
-      },
-    },
   },
 
   /**
@@ -342,5 +312,5 @@ export const siteConfig = defineSiteConfig({
    * - 可选值：`{ text, link? }[]`，默认 `[]`；可配置多条。
    * - `link` 可省略；出现时必须是 http(s) 外链或以 `/` 开头的内部链接。
    */
-  //   icp: [{ text: '示例备案号 00000000', link: 'https://beian.miit.gov.cn/' }],
+  //   icp: [{ text: 'サンプル登録番号 00000000', link: 'https://beian.miit.gov.cn/' }],
 });
