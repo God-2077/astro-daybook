@@ -1,5 +1,8 @@
 const seen = new WeakSet<HTMLButtonElement>();
 
+// execCommand 已废弃，但非安全上下文里没有 clipboard API，只能靠它兜底。
+type LegacyDocument = { execCommand?: (commandId: string) => boolean };
+
 function fallbackCopy(text: string): boolean {
   const buffer = document.createElement('textarea');
   buffer.className = 'a-copy-buffer';
@@ -9,7 +12,7 @@ function fallbackCopy(text: string): boolean {
   buffer.select();
   let ok = false;
   try {
-    ok = document.execCommand('copy');
+    ok = (document as unknown as LegacyDocument).execCommand?.('copy') ?? false;
   } catch {
     ok = false;
   }

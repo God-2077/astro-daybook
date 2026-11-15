@@ -4688,14 +4688,18 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   background: hsl(var(--card));
   overflow: hidden;
 }
-/* 视口负责裁剪和平移手势；touch-action: none 让双指缩放不被页面滚动抢走。 */
+/* 视口负责裁剪与手势；未放大时把手势交还页面（pan-y），放大后由脚本接管平移与捏合。 */
 :is(.a-prose, .a-entry-text) .a-mermaid-viewport {
   position: relative;
   overflow: hidden;
-  touch-action: none;
-  cursor: grab;
+  touch-action: pan-y;
+  cursor: default;
   user-select: none;
   -webkit-user-select: none;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-zoomed] .a-mermaid-viewport {
+  touch-action: none;
+  cursor: grab;
 }
 :is(.a-prose, .a-entry-text) .a-mermaid[data-mermaid-panning="true"] .a-mermaid-viewport { cursor: grabbing; }
 /* 图表工具条：渲染成功后由 mermaid.ts 取消 hidden。 */
@@ -4801,6 +4805,12 @@ html.is-shot .a-feedhead-art :is(path, rect, circle) {
   justify-content: center;
   width: 100%;
   min-height: 0;
+  touch-action: none;
+  cursor: grab;
+}
+:is(.a-prose, .a-entry-text) .a-mermaid:fullscreen[data-mermaid-panning="true"] .a-mermaid-viewport,
+:is(.a-prose, .a-entry-text) .a-mermaid.is-expanded[data-mermaid-panning="true"] .a-mermaid-viewport {
+  cursor: grabbing;
 }
 :is(.a-prose, .a-entry-text) .a-mermaid:fullscreen .a-mermaid-canvas,
 :is(.a-prose, .a-entry-text) .a-mermaid.is-expanded .a-mermaid-canvas {
