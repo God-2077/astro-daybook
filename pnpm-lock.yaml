@@ -69,8 +69,8 @@ importers:
         specifier: 0.35.5
         version: 0.35.5(@types/node@24.19.2)
       twikoo:
-        specifier: 1.6.44
-        version: 1.6.44
+        specifier: 2.0.17
+        version: 2.0.17
       unist-util-visit:
         specifier: 5.0.0
         version: 5.0.0
@@ -1106,6 +1106,9 @@ packages:
 
   '@shikijs/vscode-textmate@10.1.0':
     resolution: {integrity: sha512-cVBuhDQjBZaNMTwBquYfPydrUP+E3hE6oYGasx8h6ZrODIM7/r+gxLDXdd66oszbrggZHEntdE6j+5gYIVyMWQ==}
+
+  '@twikoojs/shared@2.0.17':
+    resolution: {integrity: sha512-pE3scZcxAiVrQjpDCtUlZxXax7F3FL7YJS/+epZqJX9Ja9qJWrCxl6Y2aOG7bqzmnnGDR/QNB88jrq67lYtYPQ==}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -2821,8 +2824,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  twikoo@1.6.44:
-    resolution: {integrity: sha512-Y3YfGtMelWT+1XxZS8SmGXkHZ6/26ry1ZteKKBNTYV0oA+o5/2ELUMi4ta2zYD/V0wGZGv6EXJ6HJU8GTPVh4g==}
+  twikoo@2.0.17:
+    resolution: {integrity: sha512-TX8y0jUoaIZkTUAvW6zzJoZr9/F8iWmoM/q1DqVROHtjfEqGz2FFLZ8II0yyRu92SL41fodk1Ay/L+xAU7mJhw==}
 
   typesafe-path@0.2.2:
     resolution: {integrity: sha512-OJabfkAg1WLZSqJAJ0Z6Sdt3utnbzr/jh+NAHoyWHJe8CMSy79Gm085094M9nvTPy22KzTVn5Zq5mbapCI/hPA==}
@@ -3979,6 +3982,8 @@ snapshots:
       '@types/hast': 3.0.5
 
   '@shikijs/vscode-textmate@10.1.0': {}
+
+  '@twikoojs/shared@2.0.17': {}
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -6398,7 +6403,9 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  twikoo@1.6.44: {}
+  twikoo@2.0.17:
+    dependencies:
+      '@twikoojs/shared': 2.0.17
 
   typesafe-path@0.2.2: {}
 

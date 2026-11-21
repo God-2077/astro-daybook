@@ -261,8 +261,6 @@ export const siteConfig = defineSiteConfig({
    * - `artalk.site`：Artalk 站点名，需与服务端 `site_name` 一致；省略时回退站点标题。
    * - `artalk.pageSize`：Artalk 每页评论数，默认 `20`。
    * - 注意：各后端地址为空时评论区仍会照常初始化，组件不拦截空值，配置提示交给评论系统自己。
-   * - 本地测试 Artalk demo 时，`https://artalk.qwqaq.com` 未返回 CORS 头，
-   *   需先起一个本地反向代理转发该地址，再把 `artalk.server` 临时改为 `http://127.0.0.1:8080`。
    */
   comments: {
     enabled: false,

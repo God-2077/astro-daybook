@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { unified } from '@astrojs/markdown-remark';
@@ -8,10 +10,22 @@ import { defineConfig, envField } from 'astro/config';
 import { type ContentSiteContext, loadSiteContext, type SiteContext } from './scripts/site-context';
 import { siteConfig as themeSiteConfig } from './src/config/site';
 import { createMarkdownPipeline, SHIKI_CONFIG } from './src/lib/markdown-pipeline';
+import { TWIKOO_LOCALE_BASE, twikooLocaleFile } from './src/lib/twikoo-locale';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const context = await loadSiteContext(root, themeSiteConfig);
 const src = fileURLToPath(new URL('./src', import.meta.url));
+
+// Twikoo 2.x 的 package.json exports 只暴露主入口，组件里 `twikoo/dist/twikoo.css?inline`
+// 需要绕过 exports 限制；语言分片也位于同一个 dist 目录下。
+const requireFromTheme = createRequire(import.meta.url);
+const twikooDistDir = path.dirname(requireFromTheme.resolve('twikoo'));
+const twikooLocalesDir = path.join(twikooDistDir, 'locales');
+
+// 运行时只使用 comments.twikoo.lang（缺省值由 siteConfig.lang 推导），因此只输出它需要的分片。
+const twikooLocaleFiles = [twikooLocaleFile(context.siteConfig.comments.twikoo.lang)].filter(
+  (file): file is string => file !== null,
+);
 
 function normalizeModuleId(id: string): string {
   const clean = id.split('?')[0];
@@ -85,6 +99,44 @@ function contentConfigWatchIntegration(siteContext: SiteContext): AstroIntegrati
   };
 }
 
+/**
+ * Twikoo 2.x 把非内置语言拆成运行时分片，初始化时从
+ * `${localeBaseUrl}/locales/<lang>.js` 动态加载。开发时直接从 node_modules
+ * 返回当前语言的分片，构建时只复制到 `dist/js/twikoo/locales/`。内置语言
+ * （zh-CN / en）没有分片，不创建目录；也不依赖 publicDir（内容模式下
+ * publicDir 位于内容仓库）。
+ */
+function twikooLocalesIntegration(localeFiles: string[]): AstroIntegration {
+  const urlPrefix = `/${TWIKOO_LOCALE_BASE}/locales/`;
+  const allowedFiles = new Set(localeFiles);
+
+  return {
+    name: 'daybook:twikoo-locales',
+    hooks: {
+      'astro:server:setup': ({ server }) => {
+        server.middlewares.use((req, res, next) => {
+          const pathname = req.url?.split('?')[0];
+          if (!pathname?.startsWith(urlPrefix)) return next();
+          const file = path.basename(pathname);
+          if (!/^[A-Za-z0-9-]+\.js$/.test(file) || !allowedFiles.has(file)) return next();
+          const filePath = path.join(twikooLocalesDir, file);
+          if (!fs.existsSync(filePath)) return next();
+          res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+          res.end(fs.readFileSync(filePath));
+        });
+      },
+      'astro:build:done': async ({ dir }) => {
+        if (localeFiles.length === 0) return;
+        const targetDir = path.join(fileURLToPath(dir), TWIKOO_LOCALE_BASE, 'locales');
+        await fs.promises.mkdir(targetDir, { recursive: true });
+        for (const file of localeFiles) {
+          await fs.promises.copyFile(path.join(twikooLocalesDir, file), path.join(targetDir, file));
+        }
+      },
+    },
+  };
+}
+
 const pipeline = createMarkdownPipeline(context.siteConfig.lang);
 
 const markdown: NonNullable<AstroUserConfig['markdown']> = {
@@ -119,13 +171,14 @@ export default defineConfig({
     format: 'directory',
   },
   markdown,
-  integrations: [react(), mdx(), contentConfigWatchIntegration(context)],
+  integrations: [react(), mdx(), contentConfigWatchIntegration(context), twikooLocalesIntegration(twikooLocaleFiles)],
   vite: {
     resolve: {
       alias: {
         '@': src,
         '@mdx/client': path.join(src, 'lib', 'mdx', 'client.ts'),
         '@mdx': path.join(src, 'lib', 'mdx', 'index.ts'),
+        'twikoo/dist': twikooDistDir,
       },
     },
     ...(context.mode === 'content'

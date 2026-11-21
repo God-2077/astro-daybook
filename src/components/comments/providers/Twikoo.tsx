@@ -1,18 +1,25 @@
 import { useEffect, useId, useRef } from 'react';
 import twikooStyles from 'twikoo/dist/twikoo.css?inline';
+import { TWIKOO_LOCALE_BASE } from '../../../lib/twikoo-locale';
 import type { CommentOptions } from '../Comments';
 
 interface TwikooApi {
-  init: (options: { envId: string; el: HTMLElement; path?: string; lang?: string; region?: string }) => Promise<void>;
+  init: (options: {
+    envId: string;
+    el: HTMLElement;
+    path?: string;
+    lang?: string;
+    region?: string;
+    localeBaseUrl?: string;
+  }) => Promise<void>;
 }
 
 /**
- * 按需加载本地安装的 Twikoo（`twikoo.nocss.js`，不注入样式）。
+ * 按需加载本地安装的 Twikoo。
  *
- * 使用 `nocss` 构建，样式由组件内联的 `twikoo.css` 提供：
- * CDN 版 Twikoo 会在首次加载时把样式 `<style>` 插进 `<head>`，而 ClientRouter
- * 站内跳转会重建 `<head>`，导致后续页面的评论区丢失样式。把样式跟随组件一起
- * 渲染，评论岛每次挂载都会带回完整样式。
+ * 2.x 主入口会在首次加载时把样式 `<style data-twikoo>` 插进 `<head>`；ClientRouter
+ * 站内跳转会重建 `<head>`，注入的样式随之丢失。因此组件另外用 `?inline` 引入同一份
+ * `twikoo.css` 随评论岛渲染，评论岛每次挂载都能带回完整样式。
  *
  * 模块级缓存保证整站只加载一次；失败时清空缓存，下次挂载可以重试。
  */
@@ -21,7 +28,7 @@ let twikooLoader: Promise<TwikooApi> | null = null;
 function loadTwikoo(): Promise<TwikooApi> {
   if (twikooLoader) return twikooLoader;
 
-  const loader = import('twikoo/dist/twikoo.nocss.js')
+  const loader = import('twikoo')
     .then((imported) => {
       // UMD 包在 Vite 开发模式与 Rollup 构建下的导出形态不同，这里同时兼容
       // `{ default: { init } }` 与顶层 `{ init }` 两种结果。
@@ -72,6 +79,9 @@ export default function Twikoo({ options }: { options: CommentOptions }) {
           el: container,
           path: window.location.pathname,
           lang: lang || 'zh-CN',
+          // 2.x 会按需加载非内置语言分片；这些文件由 twikooLocalesIntegration
+          // 在开发时提供、构建时复制到 dist/js/twikoo/locales。
+          localeBaseUrl: `${import.meta.env.BASE_URL}${TWIKOO_LOCALE_BASE}`,
           ...(region ? { region } : {}),
         });
       } catch {

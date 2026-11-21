@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { XMLParser } from 'fast-xml-parser';
 import { siteConfig } from '../../src/config/site';
+import { twikooLocaleFile } from '../../src/lib/twikoo-locale';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
@@ -49,6 +50,15 @@ assert.ok(exists('music/index.html'), '独立页面 /music 应生成');
 assert.ok(exists('sitemap.xml') && exists('robots.txt'), 'SEO 端点应生成');
 assert.ok(exists('feed.xml') && exists('feed-diary.xml') && exists('feed-posts.xml'), 'RSS 应生成');
 assert.ok(exists('pagefind/pagefind.js'), 'Pagefind 索引应生成');
+assert.equal(exists('twikoo/locales'), false, '旧的 Twikoo 分片路径不应再生成');
+const twikooLocale = twikooLocaleFile(siteConfig.comments.twikoo.lang);
+if (twikooLocale) {
+  assert.ok(exists(`js/twikoo/locales/${twikooLocale}`), `Twikoo 分片 ${twikooLocale} 应进入构建产物`);
+  const twikooLocales = readdirSync(path.join(dist, 'js', 'twikoo', 'locales')).filter((file) => file.endsWith('.js'));
+  assert.deepEqual(twikooLocales.sort(), [twikooLocale], 'Twikoo 只应输出当前语言的分片');
+} else {
+  assert.equal(exists('js/twikoo/locales'), false, '内置 Twikoo 语言不应输出分片');
+}
 
 assert.equal(exists('daily/2026-09-20-draft/index.html'), false, 'draft 日记不应有生产详情页');
 assert.equal(exists('post/draft-future/index.html'), false, 'draft 文章不应有生产详情页');
