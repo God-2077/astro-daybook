@@ -1,7 +1,7 @@
 import Artalk from 'artalk';
 import artalkStyles from 'artalk/Artalk.css?inline';
 import { useEffect, useId, useRef } from 'react';
-import type { CommentOptions } from '../Comments';
+import type { ProviderProps } from '../Comments';
 
 /**
  * Artalk 评论区。
@@ -10,8 +10,10 @@ import type { CommentOptions } from '../Comments';
  *   初始化时读取 `html.dark`，并用 `MutationObserver` 跟随站点的主题切换。
  * - 样式用 `?inline` 跟随组件渲染，避免 ClientRouter 重建 `<head>` 后丢失。
  * - 服务端地址为空或请求失败时由 Artalk 自己处理，组件保持静默。
+ * - `init()` 同步挂载界面，结束后调用 `onReady` 让外层收起骨架；失败时也调用，
+ *   避免骨架一直停在评论区。
  */
-export default function ArtalkComments({ options }: { options: CommentOptions }) {
+export default function ArtalkComments({ options, onReady }: ProviderProps) {
   const id = useId().replace(/:/g, '-');
   const containerRef = useRef<HTMLDivElement>(null);
   const { server, site, locale, pageSize } = options.artalk;
@@ -38,6 +40,8 @@ export default function ArtalkComments({ options }: { options: CommentOptions })
       });
     } catch {
       // 静默失败：评论依赖远端服务，失败时保持空容器即可。
+    } finally {
+      onReady?.();
     }
 
     if (!instance) return;
@@ -61,7 +65,7 @@ export default function ArtalkComments({ options }: { options: CommentOptions })
       document.removeEventListener('astro:before-swap', onBeforeSwap);
       destroy();
     };
-  }, [options.enabled, server, site, locale, pageSize]);
+  }, [options.enabled, server, site, locale, pageSize, onReady]);
 
   if (!options.enabled) return null;
   return (

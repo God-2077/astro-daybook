@@ -1,7 +1,7 @@
 import { init, type WalineInstance } from '@waline/client';
 import walineStyles from '@waline/client/style?inline';
 import { useEffect, useId, useRef } from 'react';
-import type { CommentOptions } from '../Comments';
+import type { ProviderProps } from '../Comments';
 
 /**
  * Waline 评论区。
@@ -11,8 +11,10 @@ import type { CommentOptions } from '../Comments';
  * - 样式用 `?inline` 跟随组件渲染：ClientRouter 站内跳转会重建 `<head>`，
  *   运行时插入的 `<style>` 会丢失，内联可以保证每次挂载都带上完整样式。
  * - 服务端地址为空或请求失败时由 Waline 自己处理，组件保持静默。
+ * - `init()` 同步挂载界面，结束后调用 `onReady` 让外层收起骨架；失败时也调用，
+ *   避免骨架一直停在评论区。
  */
-export default function Waline({ options }: { options: CommentOptions }) {
+export default function Waline({ options, onReady }: ProviderProps) {
   const id = useId().replace(/:/g, '-');
   const containerRef = useRef<HTMLDivElement>(null);
   const { serverURL, lang, login, pageSize } = options.waline;
@@ -36,6 +38,8 @@ export default function Waline({ options }: { options: CommentOptions }) {
       });
     } catch {
       // 静默失败：评论依赖远端服务，失败时保持空容器即可。
+    } finally {
+      onReady?.();
     }
 
     let destroyed = false;
@@ -51,7 +55,7 @@ export default function Waline({ options }: { options: CommentOptions }) {
       document.removeEventListener('astro:before-swap', onBeforeSwap);
       destroy();
     };
-  }, [options.enabled, serverURL, lang, login, pageSize]);
+  }, [options.enabled, serverURL, lang, login, pageSize, onReady]);
 
   if (!options.enabled) return null;
   return (

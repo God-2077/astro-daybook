@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from 'react';
 import twikooStyles from 'twikoo/dist/twikoo.css?inline';
 import { TWIKOO_LOCALE_BASE } from '../../../lib/twikoo-locale';
-import type { CommentOptions } from '../Comments';
+import type { ProviderProps } from '../Comments';
 
 interface TwikooApi {
   init: (options: {
@@ -55,8 +55,10 @@ function loadTwikoo(): Promise<TwikooApi> {
  * - 不检查 `envId` 是否为空：是否具备可用的 Twikoo 环境由 Twikoo 自己判断并提示，
  *   组件只负责把配置原样传入。
  * - 加载/初始化失败时静默保持空容器，不影响页面其余部分。
+ * - `onReady` 在 init 结束（无论成败）后调用：失败时也要收起骨架，避免脉冲动画
+ *   一直停在评论区。
  */
-export default function Twikoo({ options }: { options: CommentOptions }) {
+export default function Twikoo({ options, onReady }: ProviderProps) {
   const id = useId().replace(/:/g, '-');
   const containerRef = useRef<HTMLDivElement>(null);
   const { envId, region, lang } = options.twikoo;
@@ -86,6 +88,8 @@ export default function Twikoo({ options }: { options: CommentOptions }) {
         });
       } catch {
         // 静默失败：评论依赖远端服务，失败时保持空容器即可。
+      } finally {
+        if (!cancelled) onReady?.();
       }
     };
 
@@ -93,7 +97,7 @@ export default function Twikoo({ options }: { options: CommentOptions }) {
     return () => {
       cancelled = true;
     };
-  }, [options.enabled, envId, lang, region]);
+  }, [options.enabled, envId, lang, region, onReady]);
 
   if (!options.enabled) return null;
   return (

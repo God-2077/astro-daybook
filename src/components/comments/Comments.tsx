@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react';
-import { Component, lazy, Suspense, useEffect, useState } from 'react';
+import { Component, lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { CommentsConfig } from '../../types/config';
 
 /**
@@ -10,8 +10,10 @@ import type { CommentsConfig } from '../../types/config';
  */
 export type CommentOptions = CommentsConfig;
 
-interface ProviderProps {
+export interface ProviderProps {
   options: CommentOptions;
+  /** 评论系统完成首次 DOM 注入后调用；调用前评论区继续显示骨架。 */
+  onReady?: () => void;
 }
 
 /**
@@ -81,11 +83,16 @@ function CommentSkeleton() {
  *   避免 SSR 报错与 hydration mismatch。
  * - 外层常驻 `.a-comments-mount`：`client:visible` 观察的是 island 的子元素，
  *   水合前与 provider chunk 加载中渲染骨架屏，既给出加载反馈，也保证有可观察目标。
+ * - 骨架由 `ready` 控制而不是 Suspense fallback：lazy chunk 到达时 provider 还只有
+ *   空宿主，SDK 的 DOM 要等 `useEffect` 注入；提前卸载骨架会让评论区高度归零再弹开。
+ *   provider 完成首次渲染后调用 `onReady`，骨架才让位给真实内容。
  * - provider 不在白名单时返回 `null`；配置层已经输出过 warn。
  * - 站内跳转时 island 重建，各 provider 在 `useEffect` 清理函数里销毁实例。
  */
 export default function Comments({ options }: { options: CommentOptions }) {
   const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
+  const handleReady = useCallback(() => setReady(true), []);
 
   useEffect(() => {
     setMounted(true);
@@ -98,13 +105,12 @@ export default function Comments({ options }: { options: CommentOptions }) {
 
   return (
     <CommentErrorBoundary>
-      <div className="a-comments-mount" data-comments-mount>
-        {mounted ? (
-          <Suspense fallback={<CommentSkeleton />}>
-            <Provider options={options} />
+      <div className="a-comments-mount" data-comments-mount aria-busy={!ready}>
+        {!ready && <CommentSkeleton />}
+        {mounted && (
+          <Suspense fallback={null}>
+            <Provider options={options} onReady={handleReady} />
           </Suspense>
-        ) : (
-          <CommentSkeleton />
         )}
       </div>
     </CommentErrorBoundary>
