@@ -2279,6 +2279,76 @@ html.dark .a-twikoo .twikoo .tk-footer { border-top-color: hsl(var(--border)); }
 .a-twikoo .twikoo .tk-expand { font-size: 11.5px; letter-spacing: .06em; color: hsl(var(--rose)); text-decoration: underline; text-underline-offset: .18em; }
 .a-twikoo .twikoo .tk-footer a { color: inherit; text-decoration: underline; text-underline-offset: .18em; }
 
+/*
+ * 管理面板：Twikoo 固定用深色遮罩呈现管理界面，评论区表单的纸面令牌
+ * （浅色输入框、muted 前后缀、--foreground 文字）进入遮罩后会把配色打散。
+ * 这里还原成厂商的「继承色 + 半透明白」，颜色全部由 currentColor 派生，
+ * 选择器多一级 .tk-admin-container，浅色 / 深色主题下都压得住上面的令牌规则。
+ */
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input__inner {
+  border-color: color-mix(in srgb, currentColor 32%, transparent);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input--group .tk-input__inner { border-radius: 0; }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input__inner:hover { border-color: color-mix(in srgb, currentColor 45%, transparent); }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input__inner:focus { border-color: color-mix(in srgb, currentColor 72%, transparent); }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input__inner::placeholder { color: color-mix(in srgb, currentColor 55%, transparent); }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input__count { color: color-mix(in srgb, currentColor 55%, transparent); }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input.is-disabled .tk-input__inner {
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  color: color-mix(in srgb, currentColor 45%, transparent);
+}
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__prepend,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append {
+  border-color: color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+}
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__prepend { border-radius: 4px 0 0 4px; }
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append { border-radius: 0 4px 4px 0; }
+
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button {
+  border-color: color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+  color: inherit;
+}
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button:not(.is-disabled):hover,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button:not(.is-disabled):focus,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button:not(.is-disabled):active {
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+}
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button.is-disabled,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button.is-disabled:hover {
+  border-color: color-mix(in srgb, currentColor 14%, transparent);
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  color: color-mix(in srgb, currentColor 40%, transparent);
+}
+/* 登录按钮嵌在前后缀内部，保持同底，不单独浮起 */
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append .tk-button,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append .tk-button:hover,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append .tk-button:focus,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-input-group__append .tk-button:active {
+  border: 0;
+  border-radius: 0 4px 4px 0;
+  background: transparent;
+  color: inherit;
+}
+/* 保存等主按钮沿用站点玫瑰色 */
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button--primary,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button--primary:not(.is-disabled):hover,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button--primary:not(.is-disabled):focus,
+.a-twikoo .twikoo .tk-admin-container .tk-admin .tk-button--primary:not(.is-disabled):active {
+  border: 0;
+  background: hsl(var(--cmt));
+  color: hsl(var(--btn-fg));
+}
+
 /* ============ Waline ============ */
 /*
  * 厂商样式以 `[data-waline]` 与裸 `.wl-*` 选择器输出，这里统一加 `.a-waline`
