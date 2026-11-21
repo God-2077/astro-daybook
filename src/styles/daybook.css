@@ -2164,10 +2164,10 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
 .a-twikoo .twikoo .tk-comment { padding: 16px 0; border-top: 1px solid hsl(var(--border) / .75); }
 .a-twikoo .twikoo .tk-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; background: hsl(var(--muted)); }
 .a-twikoo .twikoo .tk-avatar-img { border-radius: 50%; }
-/* 表单头像：Twikoo 默认灰色人形 → 纸面印章式「K」 */
-.a-twikoo .twikoo .tk-submit .tk-avatar { display: grid; place-items: center; border: 1px solid hsl(var(--border)); background: hsl(var(--muted)); }
-.a-twikoo .twikoo .tk-submit .tk-avatar .tk-avatar-img { display: none; }
-.a-twikoo .twikoo .tk-submit .tk-avatar::after { content: "K"; font-family: var(--font-bold); font-size: 15px; line-height: 1; letter-spacing: 0; color: hsl(var(--rose)); }
+/* 表单头像：无头像时用纸面印章式「K」，输入邮箱拿到头像后显示真实头像 */
+.a-twikoo .twikoo .tk-submit .tk-avatar:not(.tk-has-avatar) { display: grid; place-items: center; border: 1px solid hsl(var(--border)); background: hsl(var(--muted)); }
+.a-twikoo .twikoo .tk-submit .tk-avatar:not(.tk-has-avatar) .tk-avatar-img { display: none; }
+.a-twikoo .twikoo .tk-submit .tk-avatar:not(.tk-has-avatar)::after { content: "K"; font-family: var(--font-bold); font-size: 15px; line-height: 1; letter-spacing: 0; color: hsl(var(--rose)); }
 .a-twikoo .twikoo .tk-nick { font-family: var(--font-bold); font-size: 14px; letter-spacing: .03em; color: hsl(var(--card-foreground)); }
 .a-twikoo .twikoo .tk-time, .a-twikoo .twikoo .tk-replies-count { font-size: 11px; letter-spacing: .06em; color: hsl(var(--muted-foreground)); }
 .a-twikoo .twikoo .tk-content { font-size: 15px; line-height: 1.85; color: hsl(var(--foreground)); }
