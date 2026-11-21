@@ -53,13 +53,34 @@ class CommentErrorBoundary extends Component<{ children: ReactNode }, CommentErr
   }
 }
 
+function CommentSkeleton() {
+  return (
+    <div className="a-comments-skeleton" aria-hidden="true">
+      <div className="a-comments-skeleton-composer">
+        <span className="a-comments-skeleton-input" />
+        <span className="a-comments-skeleton-button" />
+      </div>
+      {[0, 1].map((row) => (
+        <div className="a-comments-skeleton-row" key={row}>
+          <span className="a-comments-skeleton-avatar" />
+          <div className="a-comments-skeleton-body">
+            <span className="a-comments-skeleton-meta" />
+            <span className="a-comments-skeleton-line" />
+            <span className="a-comments-skeleton-line a-comments-skeleton-line--short" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
  * 评论区入口。
  *
  * - `mounted` 门控保证服务端与首次客户端渲染都不 import 依赖 DOM 的 SDK，
  *   避免 SSR 报错与 hydration mismatch。
- * - 外层常驻一个占位节点：`client:visible` 观察的是 island 的子元素，
- *   SSR 返回 `null` 会让它没有可观察目标，评论区永远不触发 hydration。
+ * - 外层常驻 `.a-comments-mount`：`client:visible` 观察的是 island 的子元素，
+ *   水合前与 provider chunk 加载中渲染骨架屏，既给出加载反馈，也保证有可观察目标。
  * - provider 不在白名单时返回 `null`；配置层已经输出过 warn。
  * - 站内跳转时 island 重建，各 provider 在 `useEffect` 清理函数里销毁实例。
  */
@@ -79,10 +100,12 @@ export default function Comments({ options }: { options: CommentOptions }) {
     <CommentErrorBoundary>
       <div className="a-comments-mount" data-comments-mount>
         {mounted ? (
-          <Suspense fallback={null}>
+          <Suspense fallback={<CommentSkeleton />}>
             <Provider options={options} />
           </Suspense>
-        ) : null}
+        ) : (
+          <CommentSkeleton />
+        )}
       </div>
     </CommentErrorBoundary>
   );

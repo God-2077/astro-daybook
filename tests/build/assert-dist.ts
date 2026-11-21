@@ -93,6 +93,9 @@ assert.doesNotMatch(detail, /返回文章|a-crumb/, '详情页不应有返回文
 assert.match(detail, /<a class="a-meta-type" href="\/posts">文章<\/a>/, '文章类型应链接到文章索引');
 assert.doesNotMatch(detail, /a-comments-page/, '详情页评论区应保持正文列宽度');
 assert.doesNotMatch(detail, /wl-panel|atk-main-editor/, '厂商评论样式不应进入详情页 HTML');
+if (siteConfig.comments.enabled) {
+  assert.match(detail, /class="a-comments-skeleton"/, '详情页评论区应输出加载骨架');
+}
 
 for (const page of ['friends/index.html', 'about/index.html']) {
   if (siteConfig.comments.enabled) {

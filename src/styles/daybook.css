@@ -2056,6 +2056,59 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   line-height: 1.85;
   color: hsl(var(--muted-foreground));
 }
+
+/* 加载骨架：水合前 / provider chunk 加载中，结构与输入框 + 两条评论对齐 */
+.a-comments-skeleton { display: grid; gap: 16px; margin-top: 14px; }
+.a-comments-skeleton-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+}
+.a-comments-skeleton-input,
+.a-comments-skeleton-button,
+.a-comments-skeleton-avatar,
+.a-comments-skeleton-meta,
+.a-comments-skeleton-line {
+  display: block;
+  border-radius: 2px;
+  background: hsl(var(--muted));
+  animation: a-comments-pulse 1.2s ease-in-out infinite alternate;
+}
+.a-comments-skeleton-input { flex: 1; height: 64px; }
+.a-comments-skeleton-button { flex: none; width: 64px; height: 32px; animation-delay: 80ms; }
+.a-comments-skeleton-row {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid hsl(var(--border) / .75);
+}
+.a-comments-skeleton-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.a-comments-skeleton-body { display: grid; flex: 1; gap: 8px; align-content: start; }
+.a-comments-skeleton-meta { width: 38%; height: 10px; animation-delay: 40ms; }
+.a-comments-skeleton-line { height: 9px; animation-delay: 80ms; }
+.a-comments-skeleton-line--short { width: 58%; animation-delay: 120ms; }
+@keyframes a-comments-pulse {
+  from { opacity: .4; }
+  to { opacity: .85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .a-comments-skeleton-input,
+  .a-comments-skeleton-button,
+  .a-comments-skeleton-avatar,
+  .a-comments-skeleton-meta,
+  .a-comments-skeleton-line {
+    animation: none;
+    opacity: .6;
+  }
+}
 .a-twikoo { margin-top: 14px; --cmt: var(--btn-bg); }   /* 发送按钮 = §2.5 按钮色，不新增颜色 */
 .a-twikoo .twikoo { max-width: 100%; }
 .a-twikoo .twikoo *,
