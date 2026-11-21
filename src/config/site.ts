@@ -309,10 +309,11 @@ export const siteConfig = defineSiteConfig({
    *   站内跳转（View Transitions）不会重新执行注入的 `<script>`，
    *   需要每次导航都运行请监听 `astro:page-load`。
    */
-  //   inject: {
-  //     headEnd: '<meta name="example-verify" content="..." />',
-  //     bodyEnd: '<script src="/custom.js" defer></script>',
-  //   },
+  inject: {
+    headEnd:
+      '<script defer src="https://u.ksable.top/script.js" data-website-id="1780b60d-fb65-4fcb-9a99-476453d45f96" data-domains="daybook.demo.ksable.top"></script>',
+    //   bodyEnd: '<script src="/custom.js" defer></script>',
+  },
 
   /**
    * SEO / Open Graph 配置（可选）。
