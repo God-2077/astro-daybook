@@ -2180,7 +2180,9 @@ html[data-demo="empty"] .a-pager--feed { display: none; }
   color: hsl(var(--muted-foreground));
   text-align: right;
 }
-.a-twikoo .twikoo .tk-admin-container { display: none; }
+.a-twikoo .twikoo .tk-admin-container .tk-time,
+.a-twikoo .twikoo .tk-admin-container .tk-content,
+.a-twikoo .twikoo .tk-admin-container .tk-button:not(.tk-button--primary) { color: inherit; }
 
 /* 错误 / 空态：一条安静的注脚，不是弹窗 */
 .a-twikoo .twikoo .tk-comments-error,
