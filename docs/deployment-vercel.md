@@ -139,6 +139,7 @@ export default siteConfig;
 - 平台自动识别的构建命令不会 clone 内容仓库，只会用主题仓库自带的示例内容构建：构建会成功，但站点不是你的。
 - `pnpm content:clone` 从环境变量读取 `CONTENT_REPO_URL`、`CONTENT_REPO_BRANCH`、`CONTENT_REPO_DIR`，把内容仓库克隆到目标目录（默认 `content`）。
 - `pnpm build:content` 以内容模式构建，并在末尾运行 `pagefind --site dist` 生成搜索索引；`postbuild` 不会为它触发，所以不要改成 `pnpm build`。
+- `pnpm build:content` 启动 Astro 前会自动安装内容仓库自己的依赖（读取 `<内容根>/package.json`）。这些依赖装在内容根，主题仓库的 `pnpm install` 不会处理它们；CI 构建还要求内容仓库提交 `pnpm-lock.yaml`，否则自动安装会直接失败。
 - 不要用 `pnpm install --prod`：`content:clone` 依赖 devDependencies 里的 `tsx`，`build:content` 依赖 `pagefind`，两者都在 devDependencies。
 - `pnpm content:clone` 遇到已存在的 Git 仓库会跳过且不 pull；内容更新靠第 8 节的 Deploy Hook 触发新的构建。
 
@@ -234,6 +235,8 @@ jobs:
 | clone 失败，提示认证失败或仓库不存在 | PAT 过期、被撤销、没有 Contents 读权限，或 URL 里的用户名、仓库名写错 | 重新生成 PAT，更新 `CONTENT_REPO_URL` 后重新部署；私有仓库必须带 PAT |
 | 构建日志出现「内容仓库已存在：content，跳过克隆。」，但内容没更新 | 构建目录里已有旧的 Git 仓库，`content:clone` 跳过且不 pull | 重新部署并让构建目录重新开始，或把 Build Command 改成 `rm -rf content && pnpm content:clone && pnpm build:content` |
 | 构建成功，但站点还是示例内容 | Build Command 仍是 `pnpm build` 或 `astro build` | 改成 `pnpm content:clone && pnpm build:content` 后重新部署 |
+| 构建报 `Cannot find module '@jsquash/webp'` 或 `Failed to resolve import` | 内容仓库 `package.json` 声明了依赖，但自动安装失败：`package.json` / `pnpm-lock.yaml` 未推送、lock 与清单不一致或 pnpm 安装失败 | 在内容仓库提交这两个文件；本地运行 `pnpm content:install` 复现并修复后重新部署 |
+| 构建成功，但 `/webp-converter` 页面缺失 | 文章、组件或 `package.json` 还只在本地，未 push 到内容仓库 | 提交并推送内容仓库后重新部署；Vercel 只构建远端内容 |
 | 站内搜索没有结果 | 构建命令里没有生成 Pagefind 索引，或输出目录不是 `dist` | 保持 `pnpm build:content`，Output Directory 填 `dist` |
 | 内容仓库 push 后 Vercel 没有新部署 | GitHub Actions 没有运行（Fork 未启用 workflow、分支不匹配），或 Hook 被撤销 | 看内容仓库的 Actions 与 Vercel 的 Deployments；检查 workflow 的分支与 Hook 的 Branch |
 | sitemap、RSS、OG 里还是占位域名 | 内容仓库 `config/site.ts` 的 `url` 没改 | 改完推送到内容仓库，触发重建 |

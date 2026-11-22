@@ -71,7 +71,7 @@ date: 2026-11-14 21:30:00
 
 ## 內容儲存庫（選用）
 
-預設的 `pnpm dev` 與 `pnpm build` 使用主題自帶的 `src/content/`。如果想把寫作內容獨立成 Git 儲存庫：把內容放進獨立儲存庫，在 `.env` 用 `CONTENT_REPO_URL` 指向它，再用 `pnpm content:clone` 拉取、用 `pnpm dev:content` / `pnpm build:content` 建置。官方內容儲存庫範例：<https://github.com/God-2077/astro-daybook-content/>。
+預設的 `pnpm dev` 與 `pnpm build` 使用主題自帶的 `src/content/`。如果想把寫作內容獨立成 Git 儲存庫：把內容放進獨立儲存庫，在 `.env` 用 `CONTENT_REPO_URL` 指向它，再用 `pnpm content:clone` 拉取、用 `pnpm dev:content` / `pnpm build:content` 建置。內容儲存庫如果自帶 `package.json`，`pnpm dev:content` / `pnpm build:content` / `pnpm check:content` 啟動前會自動安裝它的依賴，也可以顯式執行 `pnpm content:install`。官方內容儲存庫範例：<https://github.com/God-2077/astro-daybook-content/>。
 
 完整步驟與限制見[主題與內容分倉](./docs/dual-repo.md)。
 

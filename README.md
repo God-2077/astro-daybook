@@ -71,7 +71,7 @@ date: 2026-11-14 21:30:00
 
 ## 内容仓库（可选）
 
-默认的 `pnpm dev` 与 `pnpm build` 使用主题自带的 `src/content/`。如果想让写作内容独立成 Git 仓库：把内容放进独立仓库，在 `.env` 用 `CONTENT_REPO_URL` 指向它，再用 `pnpm content:clone` 拉取、用 `pnpm dev:content` / `pnpm build:content` 构建。官方内容仓库示例：<https://github.com/God-2077/astro-daybook-content/>。
+默认的 `pnpm dev` 与 `pnpm build` 使用主题自带的 `src/content/`。如果想让写作内容独立成 Git 仓库：把内容放进独立仓库，在 `.env` 用 `CONTENT_REPO_URL` 指向它，再用 `pnpm content:clone` 拉取、用 `pnpm dev:content` / `pnpm build:content` 构建。内容仓库如果自带 `package.json`，`pnpm dev:content` / `pnpm build:content` / `pnpm check:content` 启动前会自动安装它的依赖，也可以显式运行 `pnpm content:install`。官方内容仓库示例：<https://github.com/God-2077/astro-daybook-content/>。
 
 完整步骤与限制见[双仓库：主题与内容分离](./docs/dual-repo.md)。
 

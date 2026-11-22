@@ -240,6 +240,30 @@
 
 **验证**：终端显示内容仓库模式与目录；修改内容仓库里的内容后刷新页面能看到变化；`pnpm build:content` 产出的页面来自内容仓库。更多结构说明见[双仓库](./dual-repo.md)。
 
+### 内容仓库依赖没有安装
+
+**现象**
+
+内容模式构建失败，终端出现：
+
+```text
+Cannot find module '@jsquash/webp'
+Failed to resolve import "@jsquash/webp/encode.js" from ...
+```
+
+**原因**
+
+- 内容仓库的 `package.json` 声明了依赖，但 `<内容根>/node_modules` 没有安装；主题仓库的 `pnpm install` 不会安装内容仓库。
+- 内容仓库有依赖但缺少 `pnpm-lock.yaml`，CI 环境会在自动安装时直接失败。
+
+**解决**
+
+1. 在主题仓库根运行 `pnpm content:install`；`pnpm dev:content` / `build:content` / `check:content` 启动前也会自动安装。
+2. 仍然失败时，手动运行 `pnpm --dir "<内容根>" install --ignore-workspace`，根据 pnpm 的报错检查网络、缓存或 lockfile 与 `package.json` 是否一致。
+3. CI/部署环境还要确认内容仓库提交了 `package.json` 与 `pnpm-lock.yaml`。
+
+**验证**：终端出现 `[daybook:content] 内容仓库依赖已就绪。`；`<内容根>/node_modules` 里能看到对应依赖；重新运行 `pnpm build:content` 成功。
+
 ### 线上内容没有更新
 
 **现象**：把新内容 push 到内容仓库后重新部署，线上仍是旧内容。

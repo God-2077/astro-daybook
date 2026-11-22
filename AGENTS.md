@@ -103,6 +103,7 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`；�
 | `pnpm preview` | 预览 `dist/` |
 | `pnpm check` | `astro check`（类型、模板、内容 schema；经 `scripts/astro.mjs` 包装器） |
 | `pnpm content:clone` / `pnpm content:pull` | 按 `.env` 克隆 / 快进拉取内容仓库 |
+| `pnpm content:install` | 安装内容仓库自己的 `package.json` 依赖（`dev` / `build` / `check` 的内容模式命令也会自动执行） |
 | `pnpm lint` / `pnpm format` | Biome 检查 / 格式化 |
 | `pnpm test` | 单元断言 + 构建产物断言 |
 | `pnpm og` | 重新生成主题 `public/og-default.png` |
@@ -111,7 +112,7 @@ astro.config.ts  markdown 管线、env schema、集成、alias `@` → `src`；�
 - 包管理器只用 pnpm：不要用 npm / yarn，也不要更换 lockfile。
 - `postbuild` 依赖 `.npmrc` 里的 `enable-pre-post-scripts=true`，不要删除或覆盖。
 - 改了 `src/lib/` 的内容查询、分页、feed，或改动了页面结构时，构建后补跑 `pnpm test`。
-- 内容模式改动还要补跑 `pnpm check:content` 与 `pnpm build:content`；内容构建依赖本地内容仓库，不并入默认 `pnpm test`。
+- 内容模式改动还要补跑 `pnpm check:content` 与 `pnpm build:content`（两者启动前会自动安装内容仓库依赖）；内容构建依赖本地内容仓库，不并入默认 `pnpm test`。
 - Biome 不覆盖 `docs/`、`*.md`、`src/styles/`、`public/`，这些文件手动保持格式一致。
 
 ## 6. 安全与约束

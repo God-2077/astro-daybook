@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -22,6 +22,8 @@ function loadDotEnv() {
 
 const CONTENT_CACHE_FILES = ['data-store.json', 'content-modules.mjs', 'content-assets.mjs'];
 const contentModeFile = path.join(root, '.astro', 'daybook-content-mode');
+const CONTENT_INSTALL_COMMANDS = new Set(['dev', 'build', 'check']);
+const DISABLED_CONTENT_VALUES = new Set(['', '0', 'false', 'off', 'no']);
 
 /**
  * Astro 的 content layer 在 dev / check 下始终读写 .astro/，cacheDir 只隔离 build。
@@ -55,6 +57,35 @@ function resetContentCacheForMode(env) {
   }
   if (previous) {
     console.error('[daybook] 内容来源已切换，已清理 Astro 内容缓存');
+  }
+}
+
+function isContentRepoEnabled(value) {
+  return typeof value === 'string' && !DISABLED_CONTENT_VALUES.has(value.trim().toLowerCase());
+}
+
+/**
+ * 在 dev/build/check 启动 Astro 前安装内容仓库自己的 package.json 依赖。
+ * 主题依赖由根 pnpm install 负责；内容仓库不在 workspace，必须在这里补装，
+ * 否则 Vercel 的 Install Command 会早于 content:clone，构建时会解析不到依赖。
+ */
+function installContentDependencies(command, env) {
+  if (!CONTENT_INSTALL_COMMANDS.has(command) || !isContentRepoEnabled(env.CONTENT_REPO)) return;
+
+  const installScript = path.join(root, 'scripts', 'content-install.ts');
+  const contentRoot = path.resolve(root, env.CONTENT_REPO.trim());
+  const result = spawnSync(process.execPath, ['--import', 'tsx', installScript, '--quiet', `--content-repo=${contentRoot}`], {
+    cwd: root,
+    env,
+    stdio: 'inherit',
+    windowsHide: true,
+  });
+
+  if (result.error) {
+    fail(`安装内容仓库依赖失败：${result.error.message}`);
+  }
+  if (result.status !== 0) {
+    fail('安装内容仓库依赖失败，已停止启动 Astro。');
   }
 }
 
@@ -128,6 +159,7 @@ if (contentMode) {
 }
 
 resetContentCacheForMode(env);
+installContentDependencies(command, env);
 
 const child = spawn(process.execPath, [nodeModulesAstro, command, ...forwarded], {
   cwd: root,

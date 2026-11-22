@@ -71,7 +71,7 @@ date: 2026-11-14 21:30:00
 
 ## コンテンツリポジトリ（オプション）
 
-既定の `pnpm dev` と `pnpm build` はテーマ内の `src/content/` を使います。執筆内容を独立した Git リポジトリに置く場合は、コンテンツをそのリポジトリに置き、`.env` の `CONTENT_REPO_URL` で指定してから `pnpm content:clone` で取得し、`pnpm dev:content` / `pnpm build:content` で開発・ビルドします。公式のコンテンツリポジトリ例：<https://github.com/God-2077/astro-daybook-content/>。
+既定の `pnpm dev` と `pnpm build` はテーマ内の `src/content/` を使います。執筆内容を独立した Git リポジトリに置く場合は、コンテンツをそのリポジトリに置き、`.env` の `CONTENT_REPO_URL` で指定してから `pnpm content:clone` で取得し、`pnpm dev:content` / `pnpm build:content` で開発・ビルドします。コンテンツリポジトリに独自の `package.json` がある場合、`pnpm dev:content` / `pnpm build:content` / `pnpm check:content` は開始前にその依存関係を自動インストールします。明示的に実行するには `pnpm content:install` を使います。公式のコンテンツリポジトリ例：<https://github.com/God-2077/astro-daybook-content/>。
 
 手順と制限の全文は[テーマとコンテンツの分離](./docs/dual-repo.md)をご覧ください。
 

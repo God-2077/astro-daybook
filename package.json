@@ -26,6 +26,7 @@
     "test": "pnpm test:unit && pnpm test:build",
     "content:clone": "node --import tsx scripts/content-repo.ts clone",
     "content:pull": "node --import tsx scripts/content-repo.ts pull",
+    "content:install": "node --import tsx scripts/content-install.ts",
     "fix:termux": "node scripts/fix-termux.mjs"
   },
   "dependencies": {

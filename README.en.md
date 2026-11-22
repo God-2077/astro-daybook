@@ -71,7 +71,7 @@ See [Quick start](./docs/quick-start.md) for the full install, writing and build
 
 ## Content repository (optional)
 
-By default `pnpm dev` and `pnpm build` use the theme's own `src/content/`. To keep writing in its own Git repository, put the content there, point `CONTENT_REPO_URL` in `.env` at it, pull it with `pnpm content:clone`, and build with `pnpm dev:content` / `pnpm build:content`. Official content repository example: <https://github.com/God-2077/astro-daybook-content/>.
+By default `pnpm dev` and `pnpm build` use the theme's own `src/content/`. To keep writing in its own Git repository, put the content there, point `CONTENT_REPO_URL` in `.env` at it, pull it with `pnpm content:clone`, and build with `pnpm dev:content` / `pnpm build:content`. If the content repository has its own `package.json`, `pnpm dev:content` / `pnpm build:content` / `pnpm check:content` install its dependencies automatically before starting; you can also run `pnpm content:install` explicitly. Official content repository example: <https://github.com/God-2077/astro-daybook-content/>.
 
 See [Theme and content in separate repositories](./docs/dual-repo.md) for the full steps and limits.
 

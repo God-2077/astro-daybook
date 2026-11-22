@@ -58,6 +58,9 @@ content/                                默认目录名，可用 CONTENT_REPO_DI
 │  ├─ site.ts                           站点配置
 │  └─ links.ts                          友链配置
 ├─ tsconfig.json                        内容仓库单独做类型检查用
+├─ package.json                         可选：内容仓库自己的依赖
+├─ pnpm-lock.yaml                       可选：与 package.json 配套的锁文件
+├─ node_modules/                        可选：安装生成，已在 .gitignore 忽略
 └─ .github/workflows/deploy-vercel.yml  可选：推送内容后触发 Vercel 重建
 ```
 
@@ -67,6 +70,7 @@ content/                                默认目录名，可用 CONTENT_REPO_DI
 - `config/` 只放站点配置，不参与内容集合。
 - `cache/meting-api-data.json` 是 Meting API 的构建缓存，不属于内容；内容仓库应把 `cache/` 加进自己的 `.gitignore`。
 - `.github/workflows/deploy-vercel.yml` 是可选的部署 workflow，作用见[部署到 Vercel](./deployment-vercel.md)；本地开发不需要它。
+- 内容仓库可以自带 `package.json` / `pnpm-lock.yaml` 声明自己的依赖（例如 MDX 页面导入的组件依赖）；`dev:content` / `build:content` / `check:content` 启动前会自动安装到 `<内容根>/node_modules`，也可以手动运行 `pnpm content:install`。`node_modules/` 应保留在内容仓库的 `.gitignore` 里。
 
 ## 第一次配置
 
@@ -75,6 +79,7 @@ content/                                默认目录名，可用 CONTENT_REPO_DI
 - 已经有远端内容仓库：在主题仓库里直接 clone，目标目录必须不存在或为空。
 - 没有内容仓库：从官方内容仓库 <https://github.com/God-2077/astro-daybook-content/> 起步，或新建一个仓库，把 `daily/`、`post/`、`pages/`、`spec/`、`public/`、`config/` 放进去。
 - 不打算用 clone：手动把内容仓库目录放到主题仓库的 `content/`（或 `CONTENT_REPO_DIR` 指定的位置）也可以。
+- 内容仓库如果有 `package.json`，不需要手动安装依赖：`dev:content` / `build:content` / `check:content` 会在启动前自动执行；也可以先运行 `pnpm content:install`。
 
 **2. 配置 `.env`**
 
@@ -135,7 +140,7 @@ pnpm content:clone
 pnpm dev:content
 ```
 
-预期：终端打印 `[daybook] 内容仓库模式：content`；打开开发服务器地址（默认 `http://localhost:4321`）后看到的是内容仓库里的内容，而不是 `src/content/` 里的示例。
+首次运行会先安装内容仓库自己的依赖（如果它有 `package.json`），终端打印 `[daybook:content] 正在安装内容仓库依赖...`，然后启动 Astro。预期：终端打印 `[daybook] 内容仓库模式：content`；打开开发服务器地址（默认 `http://localhost:4321`）后看到的是内容仓库里的内容，而不是 `src/content/` 里的示例。
 
 ## 日常写作与更新
 
@@ -143,6 +148,7 @@ pnpm dev:content
 
 ```bash
 pnpm content:pull     # 拉取内容仓库更新（git pull --ff-only）
+pnpm content:install  # 安装内容仓库自己的 package.json 依赖（dev/build/check 自动执行）
 pnpm check:content    # 类型、模板与内容 schema
 pnpm build:content    # 静态构建，末尾生成 Pagefind 索引
 pnpm preview:content  # 本地预览 dist/
@@ -196,7 +202,7 @@ export default linksConfig;
 - `config/links.ts` 的 `groups` 必填，可以是空数组。
 - 示例里的 `../../src/types/config` 假设内容仓库位于主题仓库的 `content/`。内容仓库在别处时运行时仍可读取（`import type` 会被擦除），但编辑器与 `tsc` 找不到这个类型；需要独立类型检查时，把类型抽成共享包。
 - 字段写错时构建失败，错误路径显示为 `content/config/site.ts` 或 `content/config/links.ts`（随实际目录变化）。
-- 内容仓库不需要安装主题依赖。
+- 内容仓库不需要安装主题依赖；但它自己的 `package.json` 依赖会在 `dev:content` / `build:content` / `check:content` 启动前自动安装，也可以手动运行 `pnpm content:install`。
 
 类型检查：
 
@@ -256,7 +262,7 @@ pnpm dev:content --content-repo ../daybook-content
 - 内容模式必须存在 `config/site.ts` 与 `config/links.ts`，缺失时构建在配置阶段失败并提示路径。
 - `spec/about.mdx` 必须存在，缺失时报 `[daybook:content] <内容根>/spec/about.mdx`，并提示新建该文件。
 - 内容模式只读取 `<内容根>/{post,daily,pages,spec}` 与 `<内容根>/public`；`src/content/` 与主题 `public/` 不参与构建。
-- 内容仓库不是 submodule：主题仓库的 `pnpm install` 不会安装内容仓库，内容仓库也不需要安装依赖。
+- 内容仓库不是 submodule：主题仓库的 `pnpm install` 不会安装内容仓库；内容模式命令（`dev:content` / `build:content` / `check:content`）会在启动前自动安装内容仓库自己的 `package.json` 依赖，也可以手动运行 `pnpm content:install`。
 - 主题仓库的 `.gitignore` 对内容目录只忽略了根目录的 `/content/`。用别的名字做 `CONTENT_REPO_DIR` 并放在主题仓库内部时，它不会被忽略，记得自己加进 `.gitignore`，否则内容会被主题仓库的 `git status` 当成新文件。
 - 主题模式的 Meting 缓存在 `.cache/meting-api-data.json`。`.gitignore` 在 `.cache/*` 之后又写了 `!.cache/meting-api-data.json`，所以这个文件实际没有被忽略，不要提交它。内容模式的缓存在 `<内容根>/cache/meting-api-data.json`，内容仓库应把 `cache/` 加进 `.gitignore`。
 
@@ -266,7 +272,7 @@ pnpm dev:content --content-repo ../daybook-content
 2. 把 `src/content/{post,daily,pages,spec}` 里的文件按同名目录移动到内容仓库。
 3. 把主题 `public/` 里站内仍在引用的资源复制到 `<内容根>/public/`（至少 favicon、头像与 OG 图）。
 4. 把 `src/config/site.ts` 与 `src/config/links.ts` 里的实际配置值改写成内容仓库的 `config/site.ts` 与 `config/links.ts`：写普通对象加 `satisfies` 输入类型，不要复制 `defineSiteConfig(...)` / `defineLinksConfig(...)` 调用。
-5. 在主题仓库 `.env` 填 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取，或直接把目录放到 `content/`。
+5. 在主题仓库 `.env` 填 `CONTENT_REPO_URL`，用 `pnpm content:clone` 拉取，或直接把目录放到 `content/`；如果内容仓库带 `package.json`，`dev:content` / `build:content` / `check:content` 会自动安装依赖，也可以先跑 `pnpm content:install`。
 6. 运行 `pnpm og:content` 生成内容仓库的 `public/og-default.png`。
 7. 运行 `pnpm check:content` 与 `pnpm build:content`，逐页核对首页、文章、独立页面、关于页、RSS、搜索与静态资源。
 8. 确认无误后再删除 `src/content/` 里的示例内容。主题模式与内容模式是两套独立内容，删除前先确认部署仍使用 `build:content`（见[部署指南](./deployment.md)）。
@@ -281,6 +287,8 @@ pnpm dev:content --content-repo ../daybook-content
 | `目标目录非空且不是 Git 仓库：content；……` | `content/` 里有文件但不是 Git 仓库（例如手动放进去的内容） | 清空该目录、换 `CONTENT_REPO_DIR`，或把目录改为 Git 仓库 |
 | `内容仓库已存在：content，跳过克隆。` | 目标目录已经是 Git 仓库，`content:clone` 不会更新它 | 这是正常提示；更新内容用 `pnpm content:pull` |
 | `缺少 CONTENT_REPO_URL；……` | `.env` 没有配置克隆地址 | 按「第一次配置」填写 `CONTENT_REPO_URL` |
+| `Cannot find module '@jsquash/webp'` / `Failed to resolve import` | 内容仓库 `package.json` 有依赖，但 `<内容根>/node_modules` 没有安装；主题的 `pnpm install` 不会安装内容仓库 | 运行 `pnpm content:install`；`dev:content` / `build:content` / `check:content` 会自动安装；CI 还要提交 `pnpm-lock.yaml` |
+| `CI 环境检测到内容仓库依赖，但缺少 pnpm-lock.yaml` | 内容仓库有依赖但没提交 lockfile | 在内容仓库运行 `pnpm install`，提交 `pnpm-lock.yaml` 后重新构建 |
 | `SSH 地址需要配置 CONTENT_REPO_SSH_KEY；……` | 用了 SSH 地址但没有给私钥路径 | 填写 `CONTENT_REPO_SSH_KEY`，或改用带 token 的 HTTPS 地址 |
 | `内容仓库不存在：content。请先运行 pnpm content:clone。` | 对非 Git 仓库目录执行了 `content:pull` | 先 `pnpm content:clone`，或确认内容目录是 Git 仓库 |
 | `[glob-loader] specCollection contains multiple entries with the same slug: about` | 切换过模式或内容来源后，Astro 内容层缓存里混进了两套内容 | 删除 `.astro/` 与 `node_modules/.astro-content/` 后重启 |
@@ -296,14 +304,18 @@ pnpm dev:content --content-repo ../daybook-content
 - 主题的 `tests/build/assert-dist.ts` 只断言主题示例内容；内容模式的页面需要手动冒烟，或另写一份针对自己内容仓库的断言。
 - 内容仓库的 Git 历史与主题仓库完全独立，主题不会自动提交内容变更。
 - 内容模式的构建依赖本地内容仓库，不并入默认的 `pnpm test`。
+- 内容依赖自动安装只在 `dev:content` / `build:content` / `check:content` 且内容模式启用时执行；`preview:content` / `og:content` 不会安装，需要时先运行 `pnpm content:install`。
+- 安装内容仓库依赖等同于执行该仓库的包管理脚本；只对可信内容仓库启用，不要引入未知来源的 postinstall。
 - 配置注入、缓存标记与路径 helper 等实现细节见[实现取舍](./developers/reference.md)。
 
 ## 验证清单
 
 - [ ] `pnpm test:unit` 通过（包含内容路径与 Git 辅助函数的单元测试）。
 - [ ] `pnpm content:clone` 成功；目标目录已是 Git 仓库时打印跳过并以 0 退出。
+- [ ] 内容仓库有 `package.json` 时，`pnpm content:install` 成功；没有依赖时跳过，重复执行不报错。
 - [ ] `pnpm check:content` 通过。
 - [ ] `pnpm build:content` 生成 `dist/`，包含 `dist/pagefind/`、`dist/feed.xml` 等产物，以及内容仓库 `public/` 里的资源。
+- [ ] 删除 `<内容根>/node_modules` 后 `pnpm build:content` 仍会先自动安装再构建；含组件/MDX 的页面出现在 `dist/`。
 - [ ] `pnpm preview:content` 打开后，首页、文章、独立页面、关于页与搜索都正常。
 - [ ] `pnpm og:content` 写入 `<内容根>/public/og-default.png`，主题 `public/og-default.png` 没有被改动。
 - [ ] 用一个临时远端仓库验证 `content:clone` 与 `content:pull`，失败日志里没有 token 或私钥。

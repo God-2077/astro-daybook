@@ -76,6 +76,8 @@ formatInTimeZone(date, timezone, 'yyyy-MM')
 内容模式不是“把内容目录换个名字”，而是用一套注入与缓存隔离机制让页面代码无感知：
 
 - `scripts/astro.mjs` 把 `--content`、`--content=DIR`、`--content-repo DIR`、`--theme` 转成 `CONTENT_REPO` 环境变量，再启动 Astro；这个包装器是自定义参数与缓存切换唯一的入口。
+- `scripts/content-install.ts` 在 `dev` / `build` / `check` 启动 Astro 前运行：按内容根读取 `package.json` 的 dependencies/devDependencies/optionalDependencies，用 `pnpm --dir <内容根> install --ignore-workspace` 安装到内容仓库自己的 `node_modules`；没有内容仓库或没有依赖时跳过，CI 有依赖但缺 `pnpm-lock.yaml` 时失败。
+- 主题不硬编码内容仓库的依赖：`astro.config.ts` 不列具体包，Vite 按内容代码的实际 import 解析；新增依赖只改内容仓库的 `package.json` 与 lock。
 - `src/lib/content/paths.ts` 统一解析路径：`resolveContentRoot()`、`resolvePublicDir()`、`resolveMetingCacheFile()`，以及给 Astro glob 用的 `contentBase()` / `contentGlobBase()`。新增读取内容路径的代码不要写死 `src/content/` 或 `public/`。
 - `scripts/site-context.ts` 在构建配置阶段解析模式；内容模式下用 `node --import tsx` 子进程读取内容仓库的 `config/site.ts` 与 `config/links.ts`（30 秒超时、10 MB 缓冲），经私有标记 `__DAYBOOK_CONTENT_CONFIG__` 把 JSON 传回主进程，再用主题的 `defineSiteConfig()` / `defineLinksConfig()` 校验。
 - `astro.config.ts` 的 Vite 插件 `daybook:content-config` 在 `load()` 阶段把主题的 `src/config/site.ts` 与 `links.ts` 替换成解析后的内容仓库配置；页面代码继续从这两个模块导入，不需要改。
@@ -87,6 +89,7 @@ formatInTimeZone(date, timezone, 'yyyy-MM')
 - 内容仓库的 `config/*.ts` 由 Node 子进程执行，是可信代码；不适合 import 主题运行时组件，只适合纯配置对象。
 - 主题没有为内容仓库提供稳定的组件导入 API；需要引用主题组件时自行评估路径与构建边界。
 - `tests/build/assert-dist.ts` 只断言主题示例内容，内容模式的页面需要手动冒烟，或为内容仓库另写断言。
+- 内容仓库依赖安装等同于执行该仓库的包管理脚本；只对可信内容仓库启用。
 
 内容仓库的结构、克隆与日常更新见[双仓库](../dual-repo.md)，其中内容配置的写法见[内容仓库配置](../dual-repo.md#内容仓库配置)。
 

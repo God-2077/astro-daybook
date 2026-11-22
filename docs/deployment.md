@@ -68,6 +68,7 @@ PUBLIC_LIGHTGALLERY_LICENSE_KEY=LIG-xxxx
 内容模式只是把内容根与站点配置换成内容仓库，产物同样是 `dist/`。构建机需要先拿到内容仓库。
 
 - **构建环境能 clone 内容仓库**：在环境变量里提供 `CONTENT_REPO_URL`（私有仓库用带 token 的 HTTPS 地址，或 SSH 地址加 `CONTENT_REPO_SSH_KEY`），可选 `CONTENT_REPO_BRANCH`、`CONTENT_REPO_DIR`；构建命令用 `pnpm content:clone && pnpm build:content`。
+- 内容仓库如果自带 `package.json`，`pnpm build:content` 会在启动 Astro 前自动安装依赖（装在 `<内容根>/node_modules`），也可以先运行 `pnpm content:install`；CI 构建需要内容仓库提交 `pnpm-lock.yaml`。
 - **构建机上已有内容目录**：设置 `CONTENT_REPO_DIR`（默认 `content`）后运行 `pnpm build:content`。`build:content` 末尾自带 `pagefind --site dist`，不需要再加 `postbuild`。
 - `pnpm content:clone` 遇到已存在的 Git 仓库会打印「内容仓库已存在：content，跳过克隆。」并直接跳过，不校验远端、不拉取更新。构建目录里残留旧 `content/` 时内容不会更新；需要重置时，把构建命令改成 `rm -rf content && pnpm content:clone && pnpm build:content`，或换一个 `CONTENT_REPO_DIR`。
 - 内容仓库的 `config/site.ts` 里的 `url` 同样要改成真实域名；内容模式的静态资源来自 `<内容根>/public/`，主题 `public/` 不会复制进 `dist/`。
@@ -84,6 +85,7 @@ PUBLIC_LIGHTGALLERY_LICENSE_KEY=LIG-xxxx
 - [ ] `https://<你的域名>/robots.txt` 的 `Sitemap:` 行是真实域名；如果有密码页，它们的地址出现在 `Disallow:` 行。
 - [ ] 打开一个不存在的地址，看到的是 `dist/404.html`，不是托管平台的默认页。
 - [ ] 内容模式：页面渲染的是内容仓库里的内容，不是主题仓库自带的示例。
+- [ ] 内容模式：内容仓库自己的 `package.json` 依赖已安装（构建日志出现 `[daybook:content]`），含组件的页面正常。
 
 ## 放在子路径
 
@@ -104,6 +106,7 @@ Daybook 按根路径部署设计，不能直接放在子路径：
 | 页面能打开，但没有样式、字体或图片 | 只上传了 HTML，漏了 `_astro/` 与 `dist/` 根下的静态资源 | 把 `dist/` 整体重新上传 |
 | 页面链接、canonical、RSS 里都是 `https://example.com` | `siteConfig.url` 仍是占位域名 | 改成真实域名后重新构建 |
 | 内容模式构建时报缺少内容仓库配置 | 构建环境没有内容仓库，或 `CONTENT_REPO_DIR` 指错 | 先 `pnpm content:clone`，或用 `CONTENT_REPO_DIR` 指向已有的内容目录 |
+| 内容模式构建报 `Cannot find module` 或 `Failed to resolve import` | 内容仓库 `package.json` 有依赖，但构建时没有安装，或缺少 `pnpm-lock.yaml` | 运行 `pnpm content:install`，或检查 `build:content` 的自动安装日志；CI 需提交 lockfile |
 | 内容模式构建成功，站点仍是示例内容 | 构建命令没有进入内容模式（仍是 `pnpm build`） | 改用 `pnpm content:clone && pnpm build:content` |
 | 子路径下样式与链接错乱 | 站点被部署到 `https://example.com/blog/` | 改回根路径部署，见[放在子路径](#放在子路径) |
 | 访问不存在的地址看到平台默认页 | 托管没有配置自定义 404 页面 | 把 `dist/404.html` 设为自定义 404 |
