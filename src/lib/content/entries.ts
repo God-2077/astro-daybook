@@ -4,6 +4,7 @@ import type { AnyEntry, ContentCollection, DailyData, DailyEntry, HideFrom, Post
 import { ContentError, ProjectError } from '../errors';
 import { parseContentDate } from './date';
 import { contentFormat } from './format';
+import { pageUrl } from './page-url';
 import { contentBase, relativePathForCollection } from './paths';
 import { readRawFrontmatter } from './raw';
 
@@ -189,7 +190,7 @@ let allEntriesPromise: Promise<AnyEntry[]> | undefined;
 export function getAllEntries(): Promise<AnyEntry[]> {
   allEntriesPromise ??= (async () => {
     const entries = [...(await loadCollection('daily')), ...(await loadCollection('post'))];
-    validateEntries(entries);
+    await validateEntries(entries);
     return entries;
   })();
   return allEntriesPromise;
@@ -279,7 +280,7 @@ export async function collectTaxonomy(
     .sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
-function validateEntries(entries: AnyEntry[]): void {
+async function validateEntries(entries: AnyEntry[]): Promise<void> {
   const byUrl = new Map<string, AnyEntry>();
   const byLowerTaxonomy = new Map<string, string>();
 
@@ -319,10 +320,14 @@ function validateEntries(entries: AnyEntry[]): void {
     }
   }
 
-  validateNavLinks(entries, byUrl);
+  const pageUrls = new Set(
+    (await getCollection('pagesCollection')).filter((page) => !page.data.draft || isDev()).map((page) => pageUrl(page.id)),
+  );
+
+  validateNavLinks(entries, byUrl, pageUrls);
 }
 
-function validateNavLinks(entries: AnyEntry[], byUrl: Map<string, AnyEntry>): void {
+function validateNavLinks(entries: AnyEntry[], byUrl: Map<string, AnyEntry>, pageUrls: Set<string>): void {
   const taxonomyRoutes = new Set<string>();
   for (const entry of entries) {
     if (entry.collection !== 'post') continue;
@@ -331,7 +336,7 @@ function validateNavLinks(entries: AnyEntry[], byUrl: Map<string, AnyEntry>): vo
   }
 
   const routeExists = (link: string): boolean => {
-    if (FIXED_ROUTES.has(link) || byUrl.has(link) || taxonomyRoutes.has(link)) return true;
+    if (FIXED_ROUTES.has(link) || byUrl.has(link) || taxonomyRoutes.has(link) || pageUrls.has(link)) return true;
     if (/^\/page\/\d+$/.test(link) || /^\/posts\/page\/\d+$/.test(link)) return true;
     return false;
   };

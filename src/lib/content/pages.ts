@@ -2,17 +2,11 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 import { ContentError } from '../errors';
 import { FIXED_ROUTES, getAllEntries, RESERVED_PREFIXES } from './entries';
+import { pageUrl } from './page-url';
 
 export type PageEntry = CollectionEntry<'pagesCollection'>;
 
-/**
- * 独立页面的 URL 是集合 id（相对 src/content/pages 的文件名，含子目录）。
- *
- * 不把 index 重写为父路径：content/pages/notes/index.mdx 对应 /notes/index。
- */
-export function pageUrl(id: string): string {
-  return `/${id.replace(/^\/+|\/+$/g, '')}`;
-}
+export { pageUrl };
 
 let pagesPromise: Promise<PageEntry[]> | undefined;
 

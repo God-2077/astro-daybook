@@ -252,7 +252,7 @@ keywords: [静态博客, Pagefind]
 - 页面由 `src/pages/[...page].astro` 渲染并自动套独立页面外壳；`title` 必填，`date`、`updated`、`description`、`draft`、`hideFrom`、`comments` 可选。
 - 不接受 `slug`、`permalink`、`pin`、`password`、`layout`，写了会在构建时报 strict schema 错误。
 - 独立页面不参与首页、文章列表、归档、分类/标签与 RSS；默认进入 sitemap 与站内搜索。`hideFrom` 里只有 `search`（不建索引）与 `sitemap`（noindex 且不收录）对它有效，`draft` 同样生效。
-- 不要把独立页面写进 `siteConfig.nav`、`footerNav` 或 `bottomNav`：构建期导航校验只认固定路由、日记/文章 URL、分类/标签与分页，独立页面会报「导航链接 /music 没有对应路由」。要从正文或关于页链接它。
+- 独立页面的 URL 可以写进 `siteConfig.nav`、`footerNav` 或 `bottomNav`；构建期导航校验会识别固定路由、日记/文章 URL、分类/标签、分页与独立页面。草稿独立页面只在 `pnpm dev` 下算存在，生产构建写进导航会报「没有对应路由」。
 - 仓库示例：`src/content/pages/music.mdx`（音乐页）。
 - 关于页正文不是独立页面：`src/content/spec/about.mdx` 由 `/about` 读取，不需要 frontmatter，缺失会让构建失败。
 

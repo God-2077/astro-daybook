@@ -54,13 +54,13 @@ links.ts ──defineLinksConfig()──▶ parse ──▶ resolve（groups 必
 | --- | --- | --- | --- |
 | 字段名、类型、枚举、必填 | `parse`（Zod strict） | `[daybook:config]` | `Unrecognized key: "foo"` |
 | URL、时区、`since` 范围、分页、`rss.limit`、taxonomy slug | `validate` | `[daybook:config]` | `timezone 不是有效的 IANA 时区` |
-| 导航内链是否有对应路由 | 内容层 `entries.ts` | `[daybook:project]` | `导航链接 /music（音乐）没有对应路由` |
+| 导航内链是否有对应路由 | 内容层 `entries.ts` | `[daybook:project]` | `导航链接 /missing（示例）没有对应路由` |
 | 分类/标签名能否生成 URL | 内容层 `entries.ts` | `[daybook:content]` | 名称含 `/`、`?`、`#` |
 | 内容 URL、permalink、独立页面路由冲突 | 内容层 `entries.ts` / `pages.ts` | `[daybook:content]` | 与固定路由或另一篇内容相同 |
 | `about.mdx` 缺失、MDX + `password` | 内容层 | `[daybook:content]` | 见 [写作指引](../../docs/writing.md) |
 | Markdown 指令形态、属性、ID 白名单 | `src/lib/markdown-*.ts` | `[daybook:markdown]` | 见 [Markdown 增强](../../docs/markdown.md) |
 
-因此配置层不做路由存在性检查；导航内链在构建期由内容层统一校验，独立页面不在白名单里。
+因此配置层不做路由存在性检查；导航内链在构建期由内容层统一校验，包含独立页面 URL。
 
 ## 导航配置怎么写
 
@@ -91,7 +91,7 @@ nav: [
 - 外链必须以 `http://` 或 `https://` 开头，且不能带查询参数或 hash。
 - `footerNav` 只接受一级链接 `{ title, link }[]`，规则同上；省略时按 `lang` 使用内置的归档、友链与 RSS 三项；显式配置后不会被翻译，也不会自动追加 RSS。
 - 移动端底部导航默认首页、文章、友链、关于四项；用 `bottomNav.enabled` 控制显示，`bottomNav.items` 整体替换入口。标题优先取 `bottomNav.items[].title`，其次取 `nav` 中对应路径的一级链接或分组标题（`navLabelFor`，见 `src/lib/nav.ts`），未配置时回退到当前语言的内置文案。
-- 内链是否存在对应路由由构建期内容层检查（`nav`、`footerNav`、`bottomNav.items` 都检查），配置层只校验格式。检查范围是固定路由、日记/文章 URL、分类/标签页与分页；独立页面（`pages/` 集合，例如 `/music`）不在其中，写进导航会报 `[daybook:project] 导航链接 /music 没有对应路由`，只能从正文或关于页链接它。
+- 内链是否存在对应路由由构建期内容层检查（`nav`、`footerNav`、`bottomNav.items` 都检查），配置层只校验格式。检查范围是固定路由、日记/文章 URL、分类/标签页、分页与独立页面（`pages/` 集合，例如 `/music`）；草稿独立页面只在开发环境算存在。
 
 ## 底部导航与归档默认类型
 
