@@ -309,7 +309,7 @@ export const siteConfig = defineSiteConfig({
    */
   inject: {
     headEnd:
-      '<script defer src="https://u.ksable.top/script.js" data-website-id="1780b60d-fb65-4fcb-9a99-476453d45f96" data-domains="daybook.demo.ksable.top"></script>',
+      '<script async src="https://u.ksable.top/script.js" data-website-id="1780b60d-fb65-4fcb-9a99-476453d45f96" data-domains="daybook.demo.ksable.top"></script>',
     //   bodyEnd: '<script src="/custom.js" defer></script>',
   },
 
