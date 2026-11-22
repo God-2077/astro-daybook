@@ -21,7 +21,6 @@ interface ArcItem {
 
 const articles = await entriesForSurface('archive', 'post');
 const diaries = await entriesForSurface('archive', 'daily');
-const all = [...articles, ...diaries];
 const timeZone = siteConfig.timezone;
 const diaryLabel = siteConfig.labels.diary;
 const now = zonedParts(new Date(), timeZone);
@@ -51,11 +50,17 @@ function toItems(entries: AnyEntry[]): ArcItem[] {
 const articleItems = toItems(articles);
 const diaryItems = toItems(diaries);
 
-const contentYears = all.map((entry) => zonedParts(entry.data.date, timeZone).year);
-const minYear = Math.min(siteConfig.since, now.year, ...contentYears);
-const maxYear = Math.max(now.year, ...contentYears);
-const years = Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index);
-const yearRange = minYear === maxYear ? `${minYear}` : `${minYear}–${maxYear}`;
+function yearRangeFor(items: ArcItem[]): { years: number[]; range: string } {
+  const contentYears = items.map((item) => item.year);
+  const minYear = Math.min(now.year, ...contentYears);
+  const maxYear = Math.max(now.year, ...contentYears);
+  const years = Array.from({ length: maxYear - minYear + 1 }, (_, index) => maxYear - index);
+  const range = minYear === maxYear ? `${minYear}` : `${minYear}–${maxYear}`;
+  return { years, range };
+}
+
+const articleRange = yearRangeFor(articleItems);
+const diaryRange = yearRangeFor(diaryItems);
 
 const defaultMode = siteConfig.archive.defaultType;
 const archiveModes = defaultMode === 'diary' ? (['diary', 'articles'] as const) : (['articles', 'diary'] as const);
@@ -65,19 +70,19 @@ const archiveTabs = {
     total: articleItems.length,
     unit: t('archive.statUnit'),
     noun: t('archive.statNounPosts'),
-    range: yearRange,
+    range: articleRange.range,
   },
   diary: {
     label: diaryLabel,
     total: diaryItems.length,
     unit: t('archive.statUnit'),
     noun: t('archive.statNounDiary', { diary: diaryLabel }),
-    range: yearRange,
+    range: diaryRange.range,
   },
 } as const;
 const defaultTab = archiveTabs[defaultMode];
 
-function heatFor(items: ArcItem[]): Record<string, number[]> {
+function heatFor(items: ArcItem[], years: number[]): Record<string, number[]> {
   const counts: Record<string, number[]> = {};
   for (const year of years) counts[String(year)] = Array.from({ length: 12 }, () => 0);
   for (const item of items) {
@@ -88,11 +93,10 @@ function heatFor(items: ArcItem[]): Record<string, number[]> {
 }
 
 const heat = {
-  years,
   current: { year: now.year, month: now.month },
   counts: {
-    articles: heatFor(articleItems),
-    diary: heatFor(diaryItems),
+    articles: { years: articleRange.years, counts: heatFor(articleItems, articleRange.years) },
+    diary: { years: diaryRange.years, counts: heatFor(diaryItems, diaryRange.years) },
   },
 };
 

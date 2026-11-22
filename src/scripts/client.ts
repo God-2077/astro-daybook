@@ -421,9 +421,8 @@ function buildLockedToc(): void {
 }
 
 interface HeatData {
-  years: number[];
   current: { year: number; month: number };
-  counts: Record<'articles' | 'diary', Record<string, number[]>>;
+  counts: Record<'articles' | 'diary', { years: number[]; counts: Record<string, number[]> }>;
 }
 
 function renderHeat(mode: 'articles' | 'diary'): void {
@@ -443,8 +442,9 @@ function renderHeat(mode: 'articles' | 'diary'): void {
   for (const month of months) html += `<span>${month}</span>`;
   html += '</div>';
 
-  for (const year of data.years) {
-    const row = data.counts[mode]?.[String(year)] ?? [];
+  const modeData = data.counts[mode];
+  for (const year of modeData?.years ?? []) {
+    const row = modeData?.counts?.[String(year)] ?? [];
     const scale = mode === 'diary' ? diaryScale(row) : null;
     html += `<div class="a-heat-row" data-year="${year}">`;
     html += `<span class="a-heat-year">${year}</span>`;
