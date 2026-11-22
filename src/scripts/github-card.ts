@@ -64,13 +64,13 @@ async function requestRepo(repo: string): Promise<GithubRepo> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), 8000);
   try {
-    const response = await fetch('https://api.github.com/repos/' + repo, {
+    const response = await fetch(`https://api.github.com/repos/${repo}`, {
       headers: { Accept: 'application/vnd.github+json' },
       signal: controller.signal,
       credentials: 'omit',
       referrerPolicy: 'no-referrer',
     });
-    if (!response.ok) throw new Error('GitHub API ' + response.status);
+    if (!response.ok) throw new Error(`GitHub API ${response.status}`);
     const data = normalizeRepo(await response.json());
     if (!data) throw new Error('GitHub API returned an invalid payload');
     writeCache(repo, data);

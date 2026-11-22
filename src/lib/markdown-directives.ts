@@ -75,11 +75,11 @@ function attr(node: MutableDirective, name: string): string | undefined {
 }
 
 function fail(file: VFile, node: MutableDirective, message: string): never {
-  return file.fail('[daybook:markdown] ' + message, node.position);
+  return file.fail(`[daybook:markdown] ${message}`, node.position);
 }
 
 function warn(file: VFile, node: MutableDirective, message: string): void {
-  file.message('[daybook:markdown] ' + message, node.position);
+  file.message(`[daybook:markdown] ${message}`, node.position);
 }
 
 function iconSvg(name: string, className = 'a-ico'): string {
@@ -96,11 +96,11 @@ function htmlAttrs(entries: Record<string, string | number | boolean | undefined
   let output = '';
   for (const [key, value] of Object.entries(entries)) {
     if (value === true) {
-      output += ' ' + key;
+      output += ` ${key}`;
       continue;
     }
     if (value === false || value === undefined) continue;
-    output += ' ' + key + '="' + escapeHtml(String(value)) + '"';
+    output += ` ${key}="${escapeHtml(String(value))}"`;
   }
   return output;
 }
@@ -184,7 +184,7 @@ function labelParagraph(
 }
 
 function wrongLevel(file: VFile, node: MutableDirective, expected: string): never {
-  return fail(file, node, node.name + ' 是 ' + expected + ' 指令，请调整冒号数量。');
+  return fail(file, node, `${node.name} 是 ${expected} 指令，请调整冒号数量。`);
 }
 
 function setAlert(node: MutableDirective, lang: SiteLang): void {
@@ -197,7 +197,7 @@ function setAlert(node: MutableDirective, lang: SiteLang): void {
   node.data = {
     ...(node.data ?? {}),
     hName: 'blockquote',
-    hProperties: { className: ['a-md-alert', 'a-md-alert--' + type] },
+    hProperties: { className: ['a-md-alert', `a-md-alert--${type}`] },
   };
 }
 
@@ -217,7 +217,7 @@ function parseBoolean(node: MutableDirective, file: VFile, name: string): boolea
   if (value === undefined) return false;
   if (value === 'true') return true;
   if (value === 'false') return false;
-  return fail(file, node, name + ' 只接受 true 或 false。');
+  return fail(file, node, `${name} 只接受 true 或 false。`);
 }
 
 function musicFromYaml(node: MutableDirective, file: VFile, tr: Translator): void {
@@ -241,7 +241,7 @@ function musicFromYaml(node: MutableDirective, file: VFile, tr: Translator): voi
     parsed = parseYaml(lines.join('\n'));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    fail(file, node, ':::music 的 YAML 解析失败：' + message);
+    fail(file, node, `:::music 的 YAML 解析失败：${message}`);
   }
   if (!Array.isArray(parsed)) fail(file, node, ':::music 必须包含 YAML 列表。');
 
@@ -250,7 +250,7 @@ function musicFromYaml(node: MutableDirective, file: VFile, tr: Translator): voi
     tracks = normalizePlaylist(parsed as unknown as MusicTrack[]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    fail(file, node, ':::music ' + message.replace('[daybook:music] ', ''));
+    fail(file, node, `:::music ${message.replace('[daybook:music] ', '')}`);
   }
 
   try {
@@ -267,7 +267,7 @@ function githubCard(node: MutableDirective, file: VFile, tr: Translator): void {
   if (!GITHUB_REPO.test(repo)) fail(file, node, '::github 的 repo 必须是 owner/repo。');
 
   const [owner, name] = repo.split('/');
-  const href = 'https://github.com/' + repo;
+  const href = `https://github.com/${repo}`;
   const label = tr('markdown.githubView', { repo });
   const fallback = tr('markdown.githubFallback');
   const stars = tr('markdown.githubStars');
@@ -334,7 +334,7 @@ function githubCard(node: MutableDirective, file: VFile, tr: Translator): void {
 
 function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provider: 'youtube' | 'bilibili'): void {
   const id = attr(node, 'id');
-  if (!id) fail(file, node, '::' + provider + ' 需要 id。');
+  if (!id) fail(file, node, `::${provider} 需要 id。`);
   if (provider === 'youtube' && !YOUTUBE_ID.test(id)) {
     fail(file, node, '::youtube 的 id 不合法。');
   }
@@ -344,13 +344,13 @@ function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provide
 
   const autoloadValue = attr(node, 'autoload');
   if (autoloadValue !== undefined && autoloadValue !== 'true' && autoloadValue !== 'false') {
-    fail(file, node, '::' + provider + ' 的 autoload 只接受 true 或 false。');
+    fail(file, node, `::${provider} 的 autoload 只接受 true 或 false。`);
   }
   const autoload = autoloadValue !== 'false';
 
   const label = provider === 'youtube' ? tr('markdown.youtubeLabel') : tr('markdown.bilibiliLabel');
   const play = provider === 'youtube' ? tr('markdown.youtubePlay') : tr('markdown.bilibiliPlay');
-  const href = provider === 'youtube' ? 'https://www.youtube.com/watch?v=' + id : 'https://www.bilibili.com/video/' + id;
+  const href = provider === 'youtube' ? `https://www.youtube.com/watch?v=${id}` : `https://www.bilibili.com/video/${id}`;
 
   const poster =
     provider === 'youtube'
@@ -359,7 +359,7 @@ function videoEmbed(node: MutableDirective, file: VFile, tr: Translator, provide
         '/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
       : '';
 
-  const extra = provider === 'bilibili' ? '<span class="a-md-embed-id">' + escapeHtml(id) + '</span>' : '';
+  const extra = provider === 'bilibili' ? `<span class="a-md-embed-id">${escapeHtml(id)}</span>` : '';
 
   const facade =
     '<a' +
@@ -439,7 +439,7 @@ function thematicBreak(node: MutableDirective): void {
   const classes = ['a-md-hr', ...raw.split(/\s+/).filter(Boolean)]
     .filter((value, index, list) => list.indexOf(value) === index)
     .filter((value) => /^[A-Za-z_][A-Za-z0-9_-]*$/.test(value));
-  setHtmlNode(node, '<hr' + htmlAttrs({ class: classes.join(' ') }) + '>');
+  setHtmlNode(node, `<hr${htmlAttrs({ class: classes.join(' ') })}>`);
 }
 
 function findNestedTimeline(nodes: RootContent[]): MutableDirective | undefined {
@@ -465,9 +465,9 @@ function timelineDate(value: string, file: VFile, node: MutableDirective): { iso
   const day = Number(match[3]);
   const parsed = new Date(Date.UTC(year, month - 1, day));
   if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) {
-    fail(file, node, ':::event 的 date 不是有效日期：' + value + '。');
+    fail(file, node, `:::event 的 date 不是有效日期：${value}。`);
   }
-  return { iso: value, label: match[2] + '.' + match[3], year: match[1] };
+  return { iso: value, label: `${match[2]}.${match[3]}`, year: match[1] };
 }
 
 function setTimeline(node: MutableDirective, file: VFile): void {
@@ -498,7 +498,7 @@ function setTimeline(node: MutableDirective, file: VFile): void {
       fail(file, event, '::::timeline 不能嵌套。');
     }
     if (event.name !== 'event') {
-      fail(file, event, '::::timeline 里只能放 :::event，不能放 :::' + event.name + '。');
+      fail(file, event, `::::timeline 里只能放 :::event，不能放 :::${event.name}。`);
     }
 
     const { label: eventLabel, body: eventBody } = containerParts(event);
@@ -507,7 +507,7 @@ function setTimeline(node: MutableDirective, file: VFile): void {
     }
     const unknown = Object.keys(event.attributes ?? {}).filter((name) => name !== 'date' && name !== 'title');
     if (unknown.length > 0) {
-      fail(file, event, ':::event 不支持属性 ' + unknown.join('、') + '，只接受 date 与 title。');
+      fail(file, event, `:::event 不支持属性 ${unknown.join('、')}，只接受 date 与 title。`);
     }
     const value = attr(event, 'date');
     if (!value) fail(file, event, ':::event 缺少 date 属性。');
@@ -619,7 +619,7 @@ function handleContainer(
     case 'event':
       return fail(file, node, ':::event 只能放在 ::::timeline 里。');
     default:
-      warn(file, node, '未知容器指令 :::' + node.name + '，已按普通内容输出。');
+      warn(file, node, `未知容器指令 :::${node.name}，已按普通内容输出。`);
       return replaceWithChildren(node, parent, index);
   }
 }
@@ -651,7 +651,7 @@ function handleLeaf(
       thematicBreak(node);
       return;
     default:
-      warn(file, node, '未知叶子指令 ::' + node.name + '，已忽略。');
+      warn(file, node, `未知叶子指令 ::${node.name}，已忽略。`);
       return replaceWithChildren(node, parent, index);
   }
 }
@@ -669,7 +669,7 @@ function handleText(
     case 'underline':
     case 'ins': {
       const type = attr(node, 'type') ?? 'line';
-      if (!UNDERLINE_TYPES.has(type)) fail(file, node, ':' + node.name + ' 的 type 只能是 line、wavy、dot、dashed 或 double。');
+      if (!UNDERLINE_TYPES.has(type)) fail(file, node, `:${node.name} 的 type 只能是 line、wavy、dot、dashed 或 double。`);
       setInlineNode(node, node.name === 'ins' ? 'ins' : 'u', 'a-md-underline', { dataType: type });
       return;
     }
@@ -689,7 +689,7 @@ function handleText(
       return;
     }
     default:
-      warn(file, node, '未知文本指令 :' + node.name + '，已按普通内容输出。');
+      warn(file, node, `未知文本指令 :${node.name}，已按普通内容输出。`);
       return replaceWithChildren(node, parent, index);
   }
 }

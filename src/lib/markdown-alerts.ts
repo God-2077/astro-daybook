@@ -76,7 +76,7 @@ function decorate(node: Blockquote, type: AlertType, lang: SiteLang): void {
     : typeof existing === 'string'
       ? existing.split(/\s+/).filter(Boolean)
       : [];
-  const className = [...new Set([...classList, 'a-md-alert', 'a-md-alert--' + type])];
+  const className = [...new Set([...classList, 'a-md-alert', `a-md-alert--${type}`])];
 
   node.data = {
     ...(node.data ?? {}),
